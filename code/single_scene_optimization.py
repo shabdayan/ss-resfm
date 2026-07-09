@@ -33,6 +33,8 @@ import loss_functions
 from datetime import datetime
 import fcntl
 import time
+import torch.nn as nn
+import torch.nn.init as init
 
 
 def initialize_fabric(seed=None, use_progressive=False):
@@ -95,7 +97,7 @@ def train_single_model(conf, device, phase, stage=1, architecture_type="esfm_out
     use_progressive = conf.get_bool('model.use_progressive', default=False)
     fabric = initialize_fabric(seed=seed, use_progressive=use_progressive)  
   
- scene_data = SceneData.create_scene_data(conf, phase, stage=stage)
+    scene_data = SceneData.create_scene_data(conf, phase, stage=stage)
     
     # Debug output for stage verification
     if stage == 2:

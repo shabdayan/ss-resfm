@@ -718,7 +718,7 @@ block_combo="${BLOCK_COMBINATIONS//,/_}"
 if [ "$STAGE" = "1" ]; then
     AGGREGATED_DIR="${REPO_ROOT}/results/aggregated/num_epochs_${num_epochs}_eval${eval_intervals}/stage${STAGE}/${ARCHITECTURE_TYPE}/block_num_block_size_${block_combo}/progressive_${PROGRESSIVE_MODE}/${LOSS_FUNCTION}/with_outliers/lr${LR_SAFE}"
     mkdir -p "${AGGREGATED_DIR}"
-    if [ "$LOSS_FUNCTION" = "CombinedLoss" ]; then
+    if [ "$LOSS_FUNCTION" = "CombinedLoss" ] || [ "$LOSS_FUNCTION" = "AdaptiveConfidenceWeightedOutliersLoss" ]; then
         AGGREGATED_FILE="${AGGREGATED_DIR}/Aggregated_across_jobs_${num_epochs}epochs_eval${eval_intervals}_${ARCHITECTURE_TYPE}_block_num_block_size_${block_combo}_${LOSS_FUNCTION}_progressive_${PROGRESSIVE_MODE}_reproj${REPROJ_LOSS_WEIGHT_SAFE}_class${CLASSIFICATION_LOSS_WEIGHT_SAFE}_lr${LR_SAFE}_early_stopping_${EARLY_STOPPING_PATIENCE}_${OUTLIER_MODE}_outliers_${TIMESTAMP}.xlsx"
     else
         AGGREGATED_FILE="${AGGREGATED_DIR}/Aggregated_across_jobs_${num_epochs}epochs_eval${eval_intervals}_lr${LR_SAFE}_${ARCHITECTURE_TYPE}_block_num_block_size_${block_combo}_${LOSS_FUNCTION}_progressive_${PROGRESSIVE_MODE}_lr${LR_SAFE}_early_stopping_${EARLY_STOPPING_PATIENCE}_${OUTLIER_MODE}_outliers_${TIMESTAMP}.xlsx"
@@ -727,7 +727,7 @@ if [ "$STAGE" = "1" ]; then
 elif [ "$STAGE" = "2" ]; then
     AGGREGATED_DIR="${REPO_ROOT}/results/aggregated/num_epochs_${num_epochs}_eval${eval_intervals}/stage${STAGE}/${ARCHITECTURE_TYPE}/block_num_block_size_${block_combo}/${WEIGHT_METHOD_DIR}/progressive_${PROGRESSIVE_MODE}/${LOSS_FUNCTION}/with_outliers/lr${LR_SAFE}"
     mkdir -p "${AGGREGATED_DIR}"
-    if [ "$LOSS_FUNCTION" = "CombinedLoss" ]; then
+    if [ "$LOSS_FUNCTION" = "CombinedLoss" ] || [ "$LOSS_FUNCTION" = "AdaptiveConfidenceWeightedOutliersLoss" ]; then
         AGGREGATED_FILE="${AGGREGATED_DIR}/Aggregated_across_jobs_${num_epochs}epochs_eval${eval_intervals}_lr${LR_SAFE}_${ARCHITECTURE_TYPE}_block_num_block_size_${block_combo}_${WEIGHT_METHOD_DIR}_${LOSS_FUNCTION}_progressive_${PROGRESSIVE_MODE}_reproj${REPROJ_LOSS_WEIGHT_SAFE}_class${CLASSIFICATION_LOSS_WEIGHT_SAFE}_lr${LR_SAFE}_early_stopping_${EARLY_STOPPING_PATIENCE}_${TIMESTAMP}.xlsx"
     else
         AGGREGATED_FILE="${AGGREGATED_DIR}/Aggregated_across_jobs_${num_epochs}epochs_eval${eval_intervals}_lr${LR_SAFE}_${ARCHITECTURE_TYPE}_block_num_block_size_${block_combo}_${WEIGHT_METHOD_DIR}_${LOSS_FUNCTION}_progressive_${PROGRESSIVE_MODE}_lr${LR_SAFE}_early_stopping_${EARLY_STOPPING_PATIENCE}_${TIMESTAMP}.xlsx"
@@ -872,11 +872,15 @@ generate_config_file() {
     
     # Format BA_ONLY_LAST_EVAL for Python (capitalize first letter)
     local ba_only_last_eval_formatted="False"
+    local run_ba_formatted="True"  # Default: run BA
+    
     if [ -n "$BA_ONLY_LAST_EVAL" ]; then
         if [ "$BA_ONLY_LAST_EVAL" = "true" ]; then
             ba_only_last_eval_formatted="True"
+            run_ba_formatted="True"  # Run BA, but only on last eval
         else
             ba_only_last_eval_formatted="False"
+            run_ba_formatted="False"  # Don't run BA at all
         fi
     fi
     
@@ -980,7 +984,7 @@ generate_config_file() {
     local config_stage="${stage}"
     local output_mode=1
     # if [ "$LOSS_FUNCTION" = "adaptive_confidence_loss" ] || [ "$LOSS_FUNCTION" = "adaptive_confidence_combined_loss" ]; then
-    if [ "$LOSS_FUNCTION" = "CombinedLoss" ]; then
+    if [ "$LOSS_FUNCTION" = "CombinedLoss" ] || [ "$LOSS_FUNCTION" = "AdaptiveConfidenceWeightedOutliersLoss" ]; then
         output_mode=3
     fi
 
@@ -1035,7 +1039,7 @@ train
 EOF
 
     # Add loss weights to train section for CombinedLoss
-    if [ "$LOSS_FUNCTION" = "CombinedLoss" ]; then
+    if [ "$LOSS_FUNCTION" = "CombinedLoss" ] || [ "$LOSS_FUNCTION" = "AdaptiveConfidenceWeightedOutliersLoss" ]; then
         cat >> "$output_file" << EOF
     reproj_loss_weight = ${REPROJ_LOSS_WEIGHT}
     classification_loss_weight = ${CLASSIFICATION_LOSS_WEIGHT}
@@ -1092,7 +1096,7 @@ EOF
     cat >> "$output_file" << EOF
 ba
 {
-    run_ba = True
+    run_ba = ${run_ba_formatted}
     repeat = True
     triangulation = False
     only_last_eval = ${ba_only_last_eval_formatted}
@@ -1909,6 +1913,4 @@ echo ""
 echo "Monitor all jobs with:"
 echo "  bjobs | grep ${epochs_text}_${WEIGHT_METHOD}"
 echo "  bjobs | grep ${STAGE}"
-echo "############################################################"
-
-
+echo "############################################################"# #!/bin/bash
