@@ -38,6 +38,17 @@ OUTPUT_MODES_TYPES = {
 
 }
 
+def conf_snapshot(conf):
+    # Checkpoints must carry the conf they were trained with (needed by the
+    # test-time fine-tune stage). conf may hold non-serializable values (e.g. a
+    # Phases enum under 'phase'), so never let the snapshot break a save.
+    try:
+        from pyhocon import HOCONConverter
+        return HOCONConverter.convert(conf, 'hocon')
+    except Exception as e:
+        print(f"Warning: could not snapshot conf into checkpoint: {e}")
+        return None
+
 def epoch_evaluation(data_loader, model, conf, epoch, phase, save_predictions=False, bundle_adjustment=True, plot=False):
     metrics_list = []
     errors = None
@@ -289,7 +300,12 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
         print(f'Starting a logger at {path_utils.path_to_wandb_logs(conf, phase, scan=None)}')
 
     # === Tracking Best Metrics ===
-    best_validation_metric = math.inf if phase in [Phases.FINE_TUNE, Phases.OPTIMIZATION] else -math.inf
+    # FINE_TUNE/OPTIMIZATION always minimize; TRAINING historically maximized (RESfM's
+    # "Accuracy"), so geometric validation metrics (e.g. our_repro) need
+    # train.validation_metric_higher_is_better = False in the conf.
+    minimize_metric = phase in [Phases.FINE_TUNE, Phases.OPTIMIZATION] or \
+        not conf.get_bool('train.validation_metric_higher_is_better', default=True)
+    best_validation_metric = math.inf if minimize_metric else -math.inf
     best_epoch = 0
     converge_time = -1
     best_model = copy.deepcopy(model) 
@@ -350,6 +366,7 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
                     # save_metrics_excel(conf, phase=Phases.OPTIMIZATION, df=validation_metrics, epoch=epoch, append=False)
                     general_utils.write_results(conf, validation_metrics, file_name="OPTIMIZATION_over_epochs", append=True)
                 if phase is Phases.TRAINING:
+                    print(validation_metrics.to_string(), flush=True)
                     save_metrics_excel(conf, phase=Phases.VALIDATION, df=validation_metrics, epoch=epoch, append=False)
                     general_utils.write_results(conf, validation_metrics, file_name="Validation_over_epochs", append=True)
                 elif phase is Phases.FINE_TUNE:
@@ -379,6 +396,7 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
                     'epoch': epoch,
                     'model_state_dict': current_model.state_dict(),
                     'optimizer_state_dict': optimizer.state_dict(),
+                    'conf': conf_snapshot(conf),
                 }, path)
 
                 
@@ -386,9 +404,9 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
                 if isinstance(validation_metric, list) and len(validation_metric) > 1:
                     raise ValueError(f"validation_metric has more than one item in it: {validation_metric} perhaps in future will support this")
                 elif isinstance(validation_metric, list) and len(validation_metric) == 1:
-                    is_better = (metric[0] < best_validation_metric) if phase in [Phases.FINE_TUNE, Phases.OPTIMIZATION] else (metric[0] > best_validation_metric)
+                    is_better = (metric[0] < best_validation_metric) if minimize_metric else (metric[0] > best_validation_metric)
                 else:
-                    is_better = (metric < best_validation_metric) if phase in [Phases.FINE_TUNE, Phases.OPTIMIZATION] else (metric > best_validation_metric)
+                    is_better = (metric < best_validation_metric) if minimize_metric else (metric > best_validation_metric)
                 
 
                 if is_better:
@@ -409,6 +427,7 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
                         'epoch': epoch,
                         'model_state_dict': best_model.state_dict(),
                         'optimizer_state_dict': optimizer.state_dict(),
+                        'conf': conf_snapshot(conf),
                     }, path)
                     print(f'Updated best validation metric: {best_validation_metric} time so far: {converge_time}')
                     # Reset early stopping counter since we found improvement

@@ -194,7 +194,11 @@ class CombinedLoss(nn.Module):
         # Loss weights (your existing code)
         self.alpha = conf.get_float('loss.reproj_loss_weight', default=1.0)
         self.beta = conf.get_float('loss.classification_loss_weight', default=0.3)
-        
+
+        # CSV logging grows a DataFrame every forward pass; multi-scene training
+        # (many scenes x many epochs) must be able to turn it off.
+        self.enable_csv_logging = conf.get_bool('loss.enable_csv_logging', default=True)
+
         # ============================================
         # NEW: CSV LOGGING SETUP
         # ============================================
@@ -263,17 +267,18 @@ class CombinedLoss(nn.Module):
         # ============================================
         # NEW: LOG TO CSV
         # ============================================
-        self._log_to_dataframe(
-            epoch=epoch,
-            esfm_loss_raw=ESFMLoss.item(),
-            classification_loss_raw=classificationLoss.item(),
-            total_loss=loss.item()
-        )
-        
-        # Save CSV periodically
-        if epoch is not None and epoch != self.last_saved_epoch and epoch % self.save_frequency == 0:
-            self._save_to_csv()
-            self.last_saved_epoch = epoch
+        if self.enable_csv_logging:
+            self._log_to_dataframe(
+                epoch=epoch,
+                esfm_loss_raw=ESFMLoss.item(),
+                classification_loss_raw=classificationLoss.item(),
+                total_loss=loss.item()
+            )
+
+            # Save CSV periodically
+            if epoch is not None and epoch != self.last_saved_epoch and epoch % self.save_frequency == 0:
+                self._save_to_csv()
+                self.last_saved_epoch = epoch
 
         return loss
     
@@ -370,6 +375,8 @@ class CombinedLoss(nn.Module):
         - Display average contribution percentages
         - Print final few iterations as table for review
         """
+        if not self.enable_csv_logging:
+            return
         print("\n" + "="*80)
         print("FINALIZING COMBINED LOSS TRACKING")
         print("="*80)
@@ -528,6 +535,38 @@ class AdaptiveConfidenceWeightedOutliersLoss(nn.Module):
         # Optional: Warmup (gradually increase supervision)
         if epoch is not None and epoch < self.warmup_epochs:
             loss = loss * (epoch / self.warmup_epochs)
-        
+
+        return loss
+
+
+class CombinedLossSupervised(nn.Module):
+    """
+    RESfM's ORIGINAL supervised combined loss (outlier-weighted reprojection +
+    GT-label balanced BCE), ported from resfm-main-orig/code/loss_functions.py.
+    Kept under a distinct name because in this repo `CombinedLoss` denotes the
+    unsupervised U-RESfM loss. Signature matches this repo's train.py call
+    (the original also received an unused pred_weights_M argument).
+    """
+    def __init__(self, conf):
+        super().__init__()
+        self.outliers_loss = OutliersLoss(conf)
+        self.weighted_ESFM_loss = ESFMLoss_weighted(conf)
+        self.alpha = conf.get_float('loss.reproj_loss_weight')
+        self.beta = conf.get_float('loss.classification_loss_weight')
+
+    def forward(self, pred_cam, pred_outliers, data, epoch=None):
+        classification_loss = torch.tensor([0.0], device=pred_outliers.device)
+        reproj_loss = torch.tensor([0.0], device=pred_outliers.device)
+
+        # Reprojection loss (geometric loss)
+        if self.alpha:
+            reproj_loss = self.weighted_ESFM_loss(pred_cam, pred_outliers, data)
+
+        # Outlier classification loss (uses GT labels in data.outlier_indices)
+        if self.beta:
+            classification_loss = self.outliers_loss(pred_outliers, data)
+
+        loss = self.alpha * reproj_loss + self.beta * classification_loss
+
         return loss
 
