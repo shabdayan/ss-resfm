@@ -9,10 +9,12 @@
 
 set -e
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
-EVAL_ROOT="${REPO_ROOT}/results/multiscene/resfm_repro"
+# Override with REPRO_EVAL_ROOT / REPRO_PYTHON to run in a different environment
+# (e.g. .venv38-resfm, which matches upstream RESfM's environment.yaml pins).
+EVAL_ROOT="${REPRO_EVAL_ROOT:-${REPO_ROOT}/results/multiscene/resfm_repro}"
 TEMPLATE="${REPO_ROOT}/confs/resfm_repro_eval.conf.template"
 CONF_DIR="${REPO_ROOT}/confs/resfm_repro_generated"
-PY="${REPO_ROOT}/../.venv/bin/python"
+PY="${REPRO_PYTHON:-${REPO_ROOT}/../.venv/bin/python}"
 CKPT="${REPO_ROOT}/pretrained/pretrained_model.pt"
 
 QUEUE="waic-short"
