@@ -45,7 +45,9 @@ for SCAN in $SCENES; do
         -e "s|__RESULTS_PATH__|${RESULTS_PATH}|g" \
         "${TEMPLATE}" > "${CONF}"
 
-    CMD="cd ${REPO_ROOT}; ${PY} single_scene_optimization.py \
+    # TORCHDYNAMO_DISABLE=1 makes u-resfm's torch.compile a no-op: upstream RESfM
+    # ran eager, and torch 2.0.1's inductor crashes on this model (index_put assert).
+    CMD="cd ${REPO_ROOT}; TORCHDYNAMO_DISABLE=1 ${PY} single_scene_optimization.py \
         --conf ${CONF} \
         --scan ${SCAN} \
         --stage 1 \
