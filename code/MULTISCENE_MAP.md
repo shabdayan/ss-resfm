@@ -2,6 +2,11 @@
 
 Phase A deliverable for `claude specs/SPEC_multi_scene.md`. Reference for the original
 pipeline: sibling checkout `../../resfm-main-orig/code/` (RESfM as released).
+Verified 2026-07-09 against the official repo github.com/FadiKhatib/resfm:
+`resfm-main-orig` matches it verbatim except the debug scene-list override in
+`RESFM_Learning.conf` (commented out upstream — the canonical run trains the 27
+scenes for 20000 epochs), local import-path fixes, and two comment lines. A full
+compliance audit of u-resfm vs upstream is at the bottom of this file.
 
 ## 1. Where is the multi-scene path?
 
@@ -203,3 +208,46 @@ because it never existed here.
   (only affects evaluating near-untrained models); the toy conf sets
   `ba.run_ba = False`, the 27-scene conf evaluates with BA only after training
   (`ba.only_last_eval = True`), matching RESfM's own protocol.
+
+## Compliance audit vs github.com/FadiKhatib/resfm (2026-07-09)
+
+Faithful (identical or semantically equivalent to upstream):
+
+- `datasets/ScenesDataSet.py` — identical except our import fix (`from utils import
+  dataset_utils`); upstream's `import dataset_utils` is broken in this layout and is
+  the same bug we fixed.
+- `utils/dataset_utils.py`, `utils/metrics_utils.py` — byte-identical.
+- `datasets/SceneData.py` — upstream + the u-resfm stage-2 reprojection-error
+  plumbing only; inactive at the defaults the multi-scene path uses.
+- `loss_functions.py` — `ESFMLoss`, `ESFMLoss_weighted`, `GT_Loss_Outliers`,
+  `OutliersLoss`, `GTLoss` identical modulo comments. Upstream's supervised
+  `CombinedLoss` is preserved as `CombinedLossSupervised`, identical except renames,
+  float literals, and dropping the `pred_weights_M` argument that upstream computes
+  in `epoch_train` but its loss never reads.
+- `multiple_scenes_learning.py` — mirrors upstream block-for-block (same
+  set/loader construction, `fabric.barrier()`, same `train.train` call and
+  Train_Stats/Validation/Test/myTest writes, same fine-tune fan-out), with the
+  documented adaptations: fabric built via `initialize_fabric` instead of at module
+  level, model construction with `phase` + Kaiming init (u-resfm convention),
+  `train.num_epochs` key, fan-out gated by `train.fine_tune_after_training`.
+- `train.py` multi-scene semantics — per-scene loss summed per batch, single
+  optimizer step, all_reduce/all_gather, Mean-row metric selection (upstream
+  `.sum(axis=1).values.item()` vs our `.mean(axis=0)` + single-metric assert —
+  identical for one metric), `is_better` identical when
+  `validation_metric_higher_is_better` is unset, checkpoint dict is a superset
+  (added `conf`), FINE_TUNE loss via `loss.func_tuning` as upstream.
+- `confs/multiscene_uresfm.conf` protocol keys match the canonical
+  `RESFM_Learning.conf`: 27/4 scene split, batch_size 4, min/max_sample_size
+  0.1/0.2, 20000 epochs, eval 500, `ba.only_last_eval = True`.
+
+Known deliberate divergences (u-resfm design):
+
+- Unsupervised `CombinedLoss` replaces the supervised objective; model is the Deep
+  variant; validation metric is `our_repro` (lower-better via conf key) instead of
+  GT-label `Accuracy`; lr 1e-4 vs upstream 1e-3.
+- u-resfm's `epoch_evaluation` no longer merges `OutliersMetrics` into validation
+  metrics (upstream did — that is how `Accuracy` validation worked) and no longer
+  saves predicted outliers at evaluation (upstream `dataset_utils.save_outliers`) —
+  the latter is the input the FINE_TUNE outlier-pruning expects; flagged as the TTT
+  task's gap. Upstream also attaches scene statistics to final-eval metrics; u-resfm
+  dropped that (reporting-only).

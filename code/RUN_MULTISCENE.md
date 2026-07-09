@@ -106,6 +106,27 @@ Everything is rooted at the conf's `results_path`
 - `code/` — snapshot of the source tree (`log_code`).
 - `wandb/` — wandb run files.
 
+## The real MegaDepth test set (reconstructed from the paper)
+
+`RESFM_Learning.conf` only carries a placeholder `test_set = ["5015"]`. The actual
+evaluation protocol (resfm.pdf p.6) tests on Group-1 scenes (<1000 images) plus
+condensed 300-image subsamples of Group-2 scenes (>1000 images). The scene lists,
+reconstructed from Table 1 (p.8; identical in Table 9, p.18):
+
+- **Group 1** (13 rows above the table's middle rule):
+  `0238, 0060, 0197, 0094, 0265, 0083, 0076, 0185, 0048, 0024, 0223, 5016, 0046`
+- **Group 2, 300-image subsamples** (23 rows below the rule):
+  `0099, 1001, 0231, 0411, 0377, 0102, 0147, 0148, 0446, 0022, 0327, 0015, 0455,
+  0496, 1589, 0012, 0104, 0019, 0063, 0130, 0080, 0240, 0007`
+
+Caveat: the paper's text says "14 scenes" from Group 1 but the table has 13 above the
+rule. If 14 is right, the most plausible 14th is `0099` (299 images — could naturally
+be a Group-1 scene; every other below-rule row is also ≈300 because of subsampling).
+The Group-2 block is sorted by outlier fraction either way, so the table cannot
+disambiguate. All 36 scenes exist in `datasets/megadepth/` (the Group-2 npz files here
+are already the ~300-image subsamples, without a `_300` suffix), and none overlap the
+27 training scenes or the validation scenes.
+
 ## TTT compatibility (R4 — confirmed, not implemented)
 
 The per-test-scene fine-tune stage is `single_scene_optimization.py:train_single_model`
