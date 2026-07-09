@@ -13,12 +13,10 @@
 #   Group 2 (300-image subsamples): 0099 1001 0231 0411 0377 0102 0147 0148 0446
 #     0022 0327 0015 0455 0496 1589 0012 0104 0019 0063 0130 0080 0240 0007
 #
-# ⚠️ KNOWN GAP (documented in MULTISCENE_MAP.md / RUN_MULTISCENE.md): with
-# train.output_mode = 3, Euclidean.get_raw_data in FINE_TUNE wants PREDICTED
-# outliers saved by a prior TEST evaluation (path_to_outliers(..., TEST, scan)),
-# which this repo's epoch_evaluation no longer writes. Until the TTT task restores
-# that save, either fix the save or set output_mode = 1 below to fine-tune without
-# outlier pruning.
+# With train.output_mode = 3, the FINE_TUNE flow follows upstream RESfM: a TEST
+# evaluation with the loaded checkpoint first saves predicted outliers
+# (restored in train.py/single_scene_optimization.py), which the fine-tune data
+# load prunes before optimizing.
 
 exp_name = uresfm_eval___SCAN__
 results_path = "__RESULTS_PATH__"

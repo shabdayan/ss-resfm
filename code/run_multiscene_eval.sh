@@ -12,27 +12,30 @@
 # Usage:
 #   ./run_multiscene_eval.sh [--queue waic-short] [--scans "0238,0060"] [--dry_run]
 #
-# ⚠️ With output_mode=3 in the template, the FINE_TUNE data loader expects
-# predicted outliers saved by a prior TEST evaluation — not produced yet (see
-# RUN_MULTISCENE.md "TTT compatibility"). Run this only after that gap is fixed,
-# or set output_mode=1 in the template to fine-tune without outlier pruning.
+# The FINE_TUNE flow follows upstream RESfM: a TEST evaluation with the loaded
+# checkpoint first saves predicted outliers, which the fine-tune data load prunes
+# (restored in train.py / single_scene_optimization.py).
 
 set -e
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
 TRAIN_RESULTS="${REPO_ROOT}/results/multiscene/uresfm_27scenes"
-EVAL_ROOT="${REPO_ROOT}/results/multiscene/uresfm_27scenes_eval"
+# Override with EVAL_ROOT_OVERRIDE / EVAL_PYTHON to run in a different environment
+# (e.g. .venv38-resfm, the upstream-matched env used for training).
+EVAL_ROOT="${EVAL_ROOT_OVERRIDE:-${REPO_ROOT}/results/multiscene/uresfm_27scenes_eval}"
 TEMPLATE="${REPO_ROOT}/confs/multiscene_uresfm_eval.conf.template"
 CONF_DIR="${REPO_ROOT}/confs/multiscene_eval_generated"
-PY="${REPO_ROOT}/../.venv/bin/python"
+PY="${EVAL_PYTHON:-${REPO_ROOT}/../.venv/bin/python}"
 
 QUEUE="waic-short"
 DRY_RUN=false
+SEED=20  # paper/RESfM-code default; use --seed N for the multi-seed median protocol
 SCENES="0238 0060 0197 0094 0265 0083 0076 0185 0048 0024 0223 5016 0046 0099 1001 0231 0411 0377 0102 0147 0148 0446 0022 0327 0015 0455 0496 1589 0012 0104 0019 0063 0130 0080 0240 0007"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
         --queue) QUEUE="$2"; shift 2;;
         --scans) SCENES="${2//,/ }"; shift 2;;
+        --seed) SEED="$2"; shift 2;;
         --dry_run) DRY_RUN=true; shift;;
         *) echo "Unknown option $1"; exit 1;;
     esac
@@ -47,18 +50,22 @@ if [ -z "$CKPT" ]; then
 fi
 echo "Using multi-scene checkpoint: ${CKPT}"
 
+if [ "$SEED" != "20" ]; then EVAL_ROOT="${EVAL_ROOT}_seed${SEED}"; fi
+
 mkdir -p "${CONF_DIR}" "${EVAL_ROOT}" "${REPO_ROOT}/lsf_output/multiscene_eval"
 
 for SCAN in $SCENES; do
-    CONF="${CONF_DIR}/${SCAN}.conf"
+    CONF="${CONF_DIR}/${SCAN}_seed${SEED}.conf"
     RESULTS_PATH="${EVAL_ROOT}/${SCAN}_ba"
     sed -e "s|__SCAN__|${SCAN}|g" \
         -e "s|__RESULTS_PATH__|${RESULTS_PATH}|g" \
         -e "s|__PRETRAINED__|${CKPT}|g" \
+        -e "s|random_seed = 20|random_seed = ${SEED}|" \
         "${TEMPLATE}" > "${CONF}"
     echo "Generated ${CONF}"
 
-    CMD="cd ${REPO_ROOT}; ${PY} single_scene_optimization.py \
+    # TORCHDYNAMO_DISABLE=1: torch 2.0.1's inductor crashes on this model's compile
+    CMD="cd ${REPO_ROOT}; TORCHDYNAMO_DISABLE=1 ${PY} single_scene_optimization.py \
         --conf ${CONF} \
         --scan ${SCAN} \
         --stage 1 \
@@ -72,9 +79,9 @@ for SCAN in $SCENES; do
         echo "DRY RUN: ${CMD}"
     else
         bsub -q "${QUEUE}" \
-            -J "ueval_${SCAN}" \
-            -oo "${REPO_ROOT}/lsf_output/multiscene_eval/${SCAN}_%J.out" \
-            -eo "${REPO_ROOT}/lsf_output/multiscene_eval/${SCAN}_%J.err" \
+            -J "ueval_s${SEED}_${SCAN}" \
+            -oo "${REPO_ROOT}/lsf_output/multiscene_eval/${SCAN}_s${SEED}_%J.out" \
+            -eo "${REPO_ROOT}/lsf_output/multiscene_eval/${SCAN}_s${SEED}_%J.err" \
             -gpu "num=1:j_exclusive=yes:gmem=40G" \
             -R "rusage[mem=50000]" \
             "${CMD}"

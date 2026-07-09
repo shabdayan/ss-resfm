@@ -19,6 +19,7 @@ CKPT="${REPO_ROOT}/pretrained/pretrained_model.pt"
 
 QUEUE="waic-short"
 DRY_RUN=false
+SEED=20  # paper/RESfM-code default; use --seed N for the multi-seed median protocol
 # The 36 Table-1 test scenes (13 Group-1 + 23 Group-2 subsamples; RUN_MULTISCENE.md)
 SCENES="0238 0060 0197 0094 0265 0083 0076 0185 0048 0024 0223 5016 0046 0099 1001 0231 0411 0377 0102 0147 0148 0446 0022 0327 0015 0455 0496 1589 0012 0104 0019 0063 0130 0080 0240 0007"
 
@@ -26,6 +27,7 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --queue) QUEUE="$2"; shift 2;;
         --scans) SCENES="${2//,/ }"; shift 2;;
+        --seed) SEED="$2"; shift 2;;
         --dry_run) DRY_RUN=true; shift;;
         *) echo "Unknown option $1"; exit 1;;
     esac
@@ -36,13 +38,16 @@ if [ ! -f "$CKPT" ]; then
     exit 1
 fi
 
+if [ "$SEED" != "20" ]; then EVAL_ROOT="${EVAL_ROOT}_seed${SEED}"; fi
+
 mkdir -p "${CONF_DIR}" "${EVAL_ROOT}" "${REPO_ROOT}/lsf_output/resfm_repro"
 
 for SCAN in $SCENES; do
-    CONF="${CONF_DIR}/${SCAN}.conf"
+    CONF="${CONF_DIR}/${SCAN}_seed${SEED}.conf"
     RESULTS_PATH="${EVAL_ROOT}/${SCAN}_ba"
     sed -e "s|__SCAN__|${SCAN}|g" \
         -e "s|__RESULTS_PATH__|${RESULTS_PATH}|g" \
+        -e "s|random_seed = 20|random_seed = ${SEED}|" \
         "${TEMPLATE}" > "${CONF}"
 
     # TORCHDYNAMO_DISABLE=1 makes u-resfm's torch.compile a no-op: upstream RESfM
@@ -61,9 +66,9 @@ for SCAN in $SCENES; do
         echo "DRY RUN: ${CMD}"
     else
         bsub -q "${QUEUE}" \
-            -J "repro_${SCAN}" \
-            -oo "${REPO_ROOT}/lsf_output/resfm_repro/${SCAN}_%J.out" \
-            -eo "${REPO_ROOT}/lsf_output/resfm_repro/${SCAN}_%J.err" \
+            -J "repro_s${SEED}_${SCAN}" \
+            -oo "${REPO_ROOT}/lsf_output/resfm_repro/${SCAN}_s${SEED}_%J.out" \
+            -eo "${REPO_ROOT}/lsf_output/resfm_repro/${SCAN}_s${SEED}_%J.err" \
             -gpu "num=1:j_exclusive=yes:gmem=40G" \
             -R "rusage[mem=50000]" \
             "${CMD}"
