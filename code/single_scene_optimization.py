@@ -95,8 +95,24 @@ def train_single_model(conf, device, phase, stage=1, architecture_type="esfm_out
 
     seed = conf.get_int('random_seed', default=None)
     use_progressive = conf.get_bool('model.use_progressive', default=False)
-    fabric = initialize_fabric(seed=seed, use_progressive=use_progressive)  
-  
+    fabric = initialize_fabric(seed=seed, use_progressive=use_progressive)
+
+    # Restored from upstream RESfM: before fine-tuning with output_mode 3, run a
+    # TEST evaluation with the pretrained model so its predicted outliers get saved
+    # (epoch_evaluation -> save_outliers); the FINE_TUNE data load below prunes the
+    # tracks with that file (Euclidean.get_raw_data).
+    if phase is Phases.FINE_TUNE and conf.get_int('train.output_mode', default=3) == 3:
+        print("Run test before fine-tuning")
+        test_model_class = general_utils.get_class("models." + conf.get_string("model.type"))
+        test_model = test_model_class(conf, Phases.TEST).to(device)
+        test_scene_data = SceneData.create_scene_data(conf, Phases.TEST, stage=stage)
+        test_dataset = ScenesDataSet.ScenesDataSet([test_scene_data], return_all=True)
+        test_loader = torch.utils.data.DataLoader(test_dataset, collate_fn=ScenesDataSet.collate_fn)
+        _, _, test_errors = train.test(conf, test_model, Phases.TEST, train_data=None, validation_data=None, test_data=test_loader, fabric=fabric, run_ba=False)
+        print(test_errors.to_string(), flush=True)
+        test_errors = test_errors.drop(['Mean'])
+        general_utils.write_results(conf, test_errors, file_name="myTest_fineTuning", phase=phase, append=True)
+
     scene_data = SceneData.create_scene_data(conf, phase, stage=stage)
     
     # Debug output for stage verification

@@ -1,0 +1,82 @@
+# RESfM paper-reproduction TEMPLATE: evaluate the OFFICIAL pretrained multi-scene
+# checkpoint (pretrained/pretrained_model.pt, Dropbox link in the RESfM README,
+# best epoch 18500) on a test scene with the official protocol:
+#   1. TEST evaluation with the pretrained model -> saves predicted outliers
+#   2. FINE_TUNE ~1K epochs on outlier-pruned tracks with ESFMLoss (model mode 1)
+#   3. Final evaluation with robust BA -> Nr / Rot / Trans as in paper Table 1
+# Protocol values mirror upstream confs/RESFM_Learning.conf.
+#
+# Do not run directly — run_resfm_repro.sh substitutes __SCAN__/__RESULTS_PATH__
+# per scene and submits one job per scene.
+
+exp_name = resfm_repro___SCAN__
+results_path = "__RESULTS_PATH__"
+pretrainedPath = "/home/projects/bagon/ortalda/MVG/final-project/u-resfm/code/pretrained/pretrained_model.pt"
+num_iter = 1
+random_seed = 20
+num_jobs = 1
+num_gpus = 1
+general
+{
+    stage = "3"
+}
+dataset
+{
+    dataset = "megadepth"
+    use_gt = False
+    calibrated = True
+    remove_outliers_gt = False
+
+    scan = "__SCAN__"
+}
+model
+{
+    # RESfM original architecture — must match the official checkpoint
+    type = "SetOfSet.SetOfSetOutliersNet"
+    num_features = 256
+    num_blocks = 1
+    block_size = 3
+    use_skip = False
+    multires = 0
+    use_progressive = False
+}
+train
+{
+    # RESFM_Learning.conf fine-tune stage: optimization_lr / _num_of_epochs / _eval_intervals
+    lr = 5e-3
+    num_epochs = 1001
+    scheduler_milestone = [10000]
+    gamma = 0.9
+    eval_intervals = 250
+    early_stopping_patience = 0
+    output_mode = 3  # triggers predicted-outlier pruning at FINE_TUNE data load
+    validation_metric = ["our_repro"]
+    validation_metric_higher_is_better = False
+    validation_metric_fine_tuning = ["our_repro"]
+}
+loss
+{
+    func = CombinedLossSupervised   # not used at fine-tune; recorded for completeness
+    func_tuning = ESFMLoss          # the loss the fine-tune stage actually uses
+
+    reproj_loss_weight = 1.0
+    classification_loss_weight = 0.1
+
+    # upstream RESFM_Learning.conf value (single-scene u-resfm confs use 1e-4)
+    infinity_pts_margin = 1e-3
+    normalize_grad = True
+    hinge_loss = True
+    hinge_loss_weight = 1
+}
+test
+{
+    outliers_threshold = 0.6
+}
+ba
+{
+    run_ba = True
+    repeat = True
+    triangulation = False
+    only_last_eval = True
+    filter_outliers = 5.0  # upstream RESFM_Learning.conf value
+}

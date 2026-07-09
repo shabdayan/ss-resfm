@@ -127,6 +127,29 @@ disambiguate. All 36 scenes exist in `datasets/megadepth/` (the Group-2 npz file
 are already the ~300-image subsamples, without a `_300` suffix), and none overlap the
 27 training scenes or the validation scenes.
 
+## Evaluation over the 36 test scenes
+
+`run_multiscene_eval.sh` fans out the RESfM per-test-scene evaluation (1K-epoch
+fine-tune + BA) over all 36 reconstructed test scenes: it finds the latest best
+checkpoint under `results/multiscene/uresfm_27scenes/models/`, generates one conf
+per scene from `confs/multiscene_uresfm_eval.conf.template` (own `results_path`
+per scene — sharing one would mix per-scene fine-tune checkpoints in `models/`;
+the multi-scene checkpoint is injected via `pretrainedPath`, which the FINE_TUNE
+initial load honors while the stage's own saves/loads stay per-scene), and
+submits one LSF job per scene via `single_scene_optimization.py --phase FINE_TUNE`.
+
+```bash
+./run_multiscene_eval.sh                 # all 36 scenes on waic-short
+./run_multiscene_eval.sh --scans 0238,5016 --queue waic-risk
+./run_multiscene_eval.sh --dry_run       # print commands only
+```
+
+Results land in `results/multiscene/uresfm_27scenes_eval/<scan>_ba/`, aggregated
+into `Aggregated_eval_results.xlsx`. The TTT experiment is this same script after
+setting `loss.func_tuning = CombinedLoss` in the template. ⚠️ Blocked until the
+predicted-outliers gap below is fixed (or set `train.output_mode = 1` in the
+template to fine-tune without outlier pruning).
+
 ## TTT compatibility (R4 — confirmed, not implemented)
 
 The per-test-scene fine-tune stage is `single_scene_optimization.py:train_single_model`

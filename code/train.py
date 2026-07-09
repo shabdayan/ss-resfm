@@ -79,9 +79,17 @@ def epoch_evaluation(data_loader, model, conf, epoch, phase, save_predictions=Fa
                 else:
                     outputs = {}
 
+                # Restored from upstream RESfM: package predicted outliers so the
+                # test evaluation can save them — the FINE_TUNE stage prunes tracks
+                # with this file (Euclidean.get_raw_data, output_mode == 3).
+                if pred_outliers is not None:
+                    outliersOutputs = evaluation.prepare_outliers_predictions(curr_data, pred_outliers, conf)
+
                 metrics_list.append(metrics)
 
                 if save_predictions:
+                    if pred_outliers is not None:
+                        dataset_utils.save_outliers(outliersOutputs, conf, curr_epoch=epoch, phase=phase)
                     if errors is not None:
                         errors.update(errors_per_cam)
                         if phase != Phases.TEST and plot:
