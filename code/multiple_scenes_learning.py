@@ -29,7 +29,8 @@ from utils import general_utils
 from utils.Phases import Phases
 from datasets.ScenesDataSet import ScenesDataSet, collate_fn
 from datasets import SceneData
-from single_scene_optimization import initialize_fabric, init_weights_kaiming, train_single_model
+from lightning.fabric import Fabric
+from single_scene_optimization import init_weights_kaiming, train_single_model
 import train
 import copy
 
@@ -40,8 +41,17 @@ def main():
     general_utils.log_code(conf)  # Log code to the experiment folder
 
     seed = conf.get_int('random_seed', default=None)
-    use_progressive = conf.get_bool('model.use_progressive', default=False)
-    fabric = initialize_fabric(seed=seed, use_progressive=use_progressive)
+    # Unlike the single-scene fabric (static_graph=True), multi-scene training must
+    # tolerate a variable graph: the adaptive unsupervised loss skips its
+    # classification term when a scene has too few confident samples, so parameter
+    # participation changes between iterations (torch>=2.0 DDP errors on this with
+    # static_graph). Upstream RESfM used plain "ddp" here too.
+    from lightning.fabric.strategies import DDPStrategy
+    fabric = Fabric(accelerator="cuda", devices="auto",
+                    strategy=DDPStrategy(find_unused_parameters=True, static_graph=False))
+    if seed is not None:
+        fabric.seed_everything(seed)
+    fabric.launch()
 
     # Get configuration
     min_sample_size = conf.get_float('dataset.min_sample_size')
