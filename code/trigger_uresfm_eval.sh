@@ -22,7 +22,7 @@ if [ "$EPOCH" -ge "$TARGET_EPOCH" ]; then
     echo "TRIGGER: training complete (best checkpoint ${CKPT}); fanning out 36-scene evaluation."
     # Seed 20 = paper-protocol run; seeds 21-24 complete the 5-seed median protocol.
     for SEED in 20 21 22 23 24; do
-        EVAL_PYTHON="$PY" "${REPO_ROOT}/run_multiscene_eval.sh" --queue waic-short --seed "$SEED"
+        EVAL_PYTHON="$PY" "${REPO_ROOT}/run_multiscene_eval.sh" --queue waic-risk --seed "$SEED"
     done
     exit 0
 fi
@@ -44,7 +44,7 @@ if [ -z "$NEWID" ]; then
     echo "TRIGGER: failed to resubmit training — giving up."
     exit 1
 fi
-bsub -q waic-short -J uresfm_eval_trigger -w "ended(${NEWID})" \
+bsub -q waic-risk -gpu "num=1:j_exclusive=yes:gmem=80G" -J uresfm_eval_trigger -w "ended(${NEWID})" \
     -oo "${REPO_ROOT}/lsf_output/multiscene/eval_trigger_%J.out" \
     -eo "${REPO_ROOT}/lsf_output/multiscene/eval_trigger_%J.err" \
     "bash ${REPO_ROOT}/trigger_uresfm_eval.sh $((RETRY_COUNT+1))"

@@ -10,7 +10,7 @@
 # checkpoint is injected via the conf's pretrainedPath.
 #
 # Usage:
-#   ./run_multiscene_eval.sh [--queue waic-short] [--scans "0238,0060"] [--dry_run]
+#   ./run_multiscene_eval.sh [--queue waic-risk] [--scans "0238,0060"] [--dry_run]
 #
 # The FINE_TUNE flow follows upstream RESfM: a TEST evaluation with the loaded
 # checkpoint first saves predicted outliers, which the fine-tune data load prunes
@@ -26,7 +26,7 @@ TEMPLATE="${REPO_ROOT}/confs/multiscene_uresfm_eval.conf.template"
 CONF_DIR="${REPO_ROOT}/confs/multiscene_eval_generated"
 PY="${EVAL_PYTHON:-${REPO_ROOT}/../.venv/bin/python}"
 
-QUEUE="waic-short"
+QUEUE="waic-risk"
 DRY_RUN=false
 SEED=20  # paper/RESfM-code default; use --seed N for the multi-seed median protocol
 SCENES="0238 0060 0197 0094 0265 0083 0076 0185 0048 0024 0223 5016 0046 0099 1001 0231 0411 0377 0102 0147 0148 0446 0022 0327 0015 0455 0496 1589 0012 0104 0019 0063 0130 0080 0240 0007"
@@ -82,7 +82,7 @@ for SCAN in $SCENES; do
             -J "ueval_s${SEED}_${SCAN}" \
             -oo "${REPO_ROOT}/lsf_output/multiscene_eval/${SCAN}_s${SEED}_%J.out" \
             -eo "${REPO_ROOT}/lsf_output/multiscene_eval/${SCAN}_s${SEED}_%J.err" \
-            -gpu "num=1:j_exclusive=yes:gmem=40G" \
+            -gpu "num=1:j_exclusive=yes:gmem=80G" \
             -R "rusage[mem=50000]" \
             "${CMD}"
     fi

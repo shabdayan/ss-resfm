@@ -5,7 +5,7 @@
 # --phase FINE_TUNE. See confs/resfm_repro_eval.conf.template.
 #
 # Usage:
-#   ./run_resfm_repro.sh [--queue waic-short] [--scans "0238,5016"] [--dry_run]
+#   ./run_resfm_repro.sh [--queue waic-risk] [--scans "0238,5016"] [--dry_run]
 
 set -e
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -17,7 +17,7 @@ CONF_DIR="${REPO_ROOT}/confs/resfm_repro_generated"
 PY="${REPRO_PYTHON:-${REPO_ROOT}/../.venv/bin/python}"
 CKPT="${REPO_ROOT}/pretrained/pretrained_model.pt"
 
-QUEUE="waic-short"
+QUEUE="waic-risk"
 DRY_RUN=false
 SEED=20  # paper/RESfM-code default; use --seed N for the multi-seed median protocol
 # The 36 Table-1 test scenes (13 Group-1 + 23 Group-2 subsamples; RUN_MULTISCENE.md)
@@ -69,7 +69,7 @@ for SCAN in $SCENES; do
             -J "repro_s${SEED}_${SCAN}" \
             -oo "${REPO_ROOT}/lsf_output/resfm_repro/${SCAN}_s${SEED}_%J.out" \
             -eo "${REPO_ROOT}/lsf_output/resfm_repro/${SCAN}_s${SEED}_%J.err" \
-            -gpu "num=1:j_exclusive=yes:gmem=40G" \
+            -gpu "num=1:j_exclusive=yes:gmem=80G" \
             -R "rusage[mem=50000]" \
             "${CMD}"
     fi

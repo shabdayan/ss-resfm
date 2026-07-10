@@ -14,7 +14,9 @@ training scenes each epoch, validates per-scene on the validation set at
 
 | Conf | Purpose |
 |---|---|
-| `confs/multiscene_uresfm.conf` | The real run: 27 MegaDepth training scenes, unsupervised `CombinedLoss` |
+| `confs/multiscene_uresfm.conf` | Canonical 27-scene training conf (unsupervised `CombinedLoss`, lr 1e-4, `resume = true`) |
+| `confs/multiscene_uresfm_lr1e4.conf` | The ACTIVE training run's conf (same as canonical; separate results tree `uresfm_27scenes_lr1e4/`). The paper's lr 1e-3 suits its shallow 1x3 model and plateaued on the Deep 2x3 — record in `uresfm_27scenes/` |
+| `confs/multiscene_uresfm_eval.conf.template` | Per-test-scene fine-tune evaluation template (used by `run_multiscene_eval.sh`) |
 | `confs/multiscene_uresfm_toy.conf` | 2-scene / 2-epoch smoke test (acceptance #2); `ba.run_ba = False` because BA on a near-untrained model can produce an empty reconstruction and crash |
 | `confs/multiscene_resfm_supervised.conf` | Supervised sanity run via `CombinedLossSupervised` (acceptance #3) |
 
@@ -39,6 +41,12 @@ Conf keys that make a run "U-RESfM multi-scene" (vs. the single-scene confs):
   the later TTT experiment changes only this key (to `CombinedLoss`).
 - `train.fine_tune_after_training = False` — the post-training per-test-scene
   fine-tune fan-out stays off (separate TTT task).
+- `resume = true` — on relaunch, training resumes from the latest `models_all/`
+  checkpoint (scheduler + best-metric state included); safe on a fresh start.
+  Preemption on waic-risk is handled automatically by `trigger_uresfm_eval.sh`,
+  a babysitter submitted with `bsub -w "ended(<train job>)"` that resumes
+  training until the best checkpoint reaches epoch >= 19000, then fans out the
+  36-scene x 5-seed evaluation.
 
 ## Launch (LSF / Fabric)
 
@@ -47,11 +55,11 @@ Toy smoke test (single GPU, interactive-queue friendly):
 ```bash
 cd /home/projects/bagon/ortalda/MVG/final-project/u-resfm/code
 mkdir -p lsf_output/multiscene
-bsub -q waic-short \
+bsub -q waic-risk \
   -J uresfm_ms_toy \
   -oo lsf_output/multiscene/toy_%J.out \
   -eo lsf_output/multiscene/toy_%J.err \
-  -gpu "num=1:j_exclusive=yes:gmem=40G" \
+  -gpu "num=1:j_exclusive=yes:gmem=80G" \
   -R "rusage[mem=50000]" \
   "cd /home/projects/bagon/ortalda/MVG/final-project/u-resfm/code; \
    uv run multiple_scenes_learning.py \
@@ -66,7 +74,7 @@ The 27-scene training run:
 ```bash
 cd /home/projects/bagon/ortalda/MVG/final-project/u-resfm/code
 mkdir -p lsf_output/multiscene
-bsub -q waic-long \
+bsub -q waic-risk \
   -J uresfm_ms_27 \
   -oo lsf_output/multiscene/uresfm27_%J.out \
   -eo lsf_output/multiscene/uresfm27_%J.err \
@@ -96,8 +104,9 @@ Everything is rooted at the conf's `results_path`
 (e.g. `code/results/multiscene/uresfm_27scenes/`):
 
 - `models/Model_Ep<E>.pt` — best checkpoints (`models_all/` = every eval).
-  Checkpoints contain `epoch`, `model_state_dict`, `optimizer_state_dict`, and a
-  `conf` HOCON snapshot (added for TTT compatibility, R4).
+  Checkpoints contain `epoch`, `model_state_dict`, `optimizer_state_dict`,
+  `scheduler_state_dict`, `best_validation_metric`/`best_epoch` (resume support),
+  and a `conf` HOCON snapshot (TTT compatibility, R4).
 - `Validation_over_epochs.xlsx` — per-scene + Mean validation metrics per eval; the
   same table is printed to the job log each eval.
 - `Train_Stats.xlsx`, `Validation.xlsx`, `Test.xlsx`, `myTest.xlsx` — final
@@ -131,7 +140,7 @@ are already the ~300-image subsamples, without a `_300` suffix), and none overla
 
 `run_multiscene_eval.sh` fans out the RESfM per-test-scene evaluation (1K-epoch
 fine-tune + BA) over all 36 reconstructed test scenes: it finds the latest best
-checkpoint under `results/multiscene/uresfm_27scenes/models/`, generates one conf
+checkpoint under `results/multiscene/uresfm_27scenes_lr1e4/models/`, generates one conf
 per scene from `confs/multiscene_uresfm_eval.conf.template` (own `results_path`
 per scene — sharing one would mix per-scene fine-tune checkpoints in `models/`;
 the multi-scene checkpoint is injected via `pretrainedPath`, which the FINE_TUNE
@@ -139,16 +148,20 @@ initial load honors while the stage's own saves/loads stay per-scene), and
 submits one LSF job per scene via `single_scene_optimization.py --phase FINE_TUNE`.
 
 ```bash
-./run_multiscene_eval.sh                 # all 36 scenes on waic-short
-./run_multiscene_eval.sh --scans 0238,5016 --queue waic-risk
+./run_multiscene_eval.sh                 # all 36 scenes on waic-risk (default queue)
+./run_multiscene_eval.sh --scans 0238,5016 --seed 21   # per-seed rerun
 ./run_multiscene_eval.sh --dry_run       # print commands only
 ```
 
-Results land in `results/multiscene/uresfm_27scenes_eval/<scan>_ba/`, aggregated
-into `Aggregated_eval_results.xlsx`. The TTT experiment is this same script after
-setting `loss.func_tuning = CombinedLoss` in the template. ⚠️ Blocked until the
-predicted-outliers gap below is fixed (or set `train.output_mode = 1` in the
-template to fine-tune without outlier pruning).
+Results land in `results/multiscene/uresfm_27scenes_lr1e4_eval[_seed<S>]/<scan>_ba/`.
+Multi-seed protocol: seed 20 is the paper-protocol run (canonical directory);
+`--seed 21..24` complete the 5-seed median. Aggregate with
+`aggregate_seed_results.py --root_base <eval_root> --results_file
+Results_FINE_TUNE_stage_1_esfm_outliers_deep.xlsx`. The FINE_TUNE flow follows
+upstream RESfM: a TEST evaluation with the loaded checkpoint saves predicted
+outliers, which the fine-tune data load prunes (the previously documented gap
+was fixed for the paper reproduction). The TTT experiment is this same script
+after setting `loss.func_tuning = CombinedLoss` in the template.
 
 ## TTT compatibility (R4 — confirmed, not implemented)
 
@@ -160,9 +173,8 @@ with `--phase FINE_TUNE`: it loads the best TRAINING checkpoint from
 experiment is therefore: same conf + `loss.func_tuning = CombinedLoss`, run the
 fine-tune stage per test scene against the multi-scene `results_path`.
 
-⚠️ Known gap for the TTT task (pre-existing, out of scope here): with
-`output_mode = 3`, `Euclidean.get_raw_data` in FINE_TUNE wants *predicted outliers*
-from `<results_path>/TEST/<scan>/outliers_results/Final_outliers.npz`, but this repo's
-`epoch_evaluation` no longer saves them (the original RESfM one did, via
-`dataset_utils.save_outliers`). The TTT task must either restore that save in the test
-evaluation or feed the fine-tune stage differently.
+The predicted-outliers gap once documented here is FIXED: `epoch_evaluation` saves
+predicted outliers again (restored from upstream), and `train_single_model` runs the
+upstream "test before fine-tuning" step that produces them, so the `output_mode = 3`
+fine-tune flow works end-to-end (used by both the paper reproduction and the U-RESfM
+evaluation).
