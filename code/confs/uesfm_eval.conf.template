@@ -76,7 +76,7 @@ train
 }
 loss
 {
-    func = CombinedLoss
+    func = ESFMLoss              # informational: FINE_TUNE reads only func_tuning below
     # Fine-tune loss (this stage USES func_tuning): RESfM protocol = plain
     # reprojection. The TTT experiment changes only this key to CombinedLoss.
     func_tuning = ESFMLoss

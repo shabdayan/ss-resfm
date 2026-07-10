@@ -187,9 +187,13 @@ class CombinedLoss(nn.Module):
     def __init__(self, conf):
         super().__init__()
         
-        # Initialize loss components (your existing code)
+        # Loss components. Per the report's definition (sec. 2.2.2):
+        #   Adaptive Confidence Weighted Outlier Loss = alpha * ESFM Loss + beta * Classification Loss
+        # The geometric term is the PLAIN (unweighted) ESFM reprojection loss; the
+        # outlier scores never weight it during training. The detector trains only
+        # via the confident-pseudo-label BCE, and its scores are used at test time.
         self.outliers_loss = AdaptiveConfidenceWeightedOutliersLoss(conf)
-        self.weighted_ESFM_loss = ESFMLoss_weighted(conf)
+        self.esfm_loss = ESFMLoss(conf)
         
         # Loss weights (your existing code)
         self.alpha = conf.get_float('loss.reproj_loss_weight', default=1.0)
@@ -253,9 +257,9 @@ class CombinedLoss(nn.Module):
         classificationLoss = torch.tensor([0.0], device=pred_outliers.device, dtype=torch.float32)
         ESFMLoss = torch.tensor([0.0], device=pred_outliers.device, dtype=torch.float32)
 
-        # Compute Reprojection loss (geometric loss) - your existing code
+        # Compute Reprojection loss (geometric loss) - plain ESFM loss per the formula
         if self.alpha:
-            ESFMLoss = self.weighted_ESFM_loss(pred_cam, pred_outliers, data)
+            ESFMLoss = self.esfm_loss(pred_cam, data)
 
         # Compute Outlier classification loss - your existing code
         if self.beta:
