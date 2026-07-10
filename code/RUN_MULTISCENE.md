@@ -1,5 +1,18 @@
 # RUN_MULTISCENE — Launching U-RESfM multi-scene training
 
+> **U-ESFM update (2026-07-10).** The method was renamed **U-ESFM** and the multi-scene
+> protocol revised to match the project report: Stage-1 training with the plain
+> unsupervised reprojection loss (`confs/multiscene_uesfm_stage1.conf`, output_mode=1),
+> then per-test-scene evaluation that prunes outliers by **MAD statistics on the stage-1
+> model's reprojection errors** (`confs/uesfm_eval.conf.template`,
+> `test.outlier_source = "mad"`) before the 1K fine-tune + robust BA. The babysitter is
+> `trigger_uesfm_eval.sh`. The learned-classifier variant ("U-RESfM", `CombinedLoss`
+> confs below) is shelved: at multi-scene scale its classifier collapses to
+> all-outliers, zeroing the camera gradient — records in
+> `results/multiscene/uresfm_27scenes*`. Sections below describe the original wiring
+> and remain accurate for it.
+
+
 Companion to `MULTISCENE_MAP.md` (discovery) and `claude specs/SPEC_multi_scene.md`.
 
 ## What runs

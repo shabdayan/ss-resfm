@@ -18,7 +18,7 @@
 # (restored in train.py/single_scene_optimization.py), which the fine-tune data
 # load prunes before optimizing.
 
-exp_name = uresfm_eval___SCAN__
+exp_name = uesfm_eval___SCAN__
 results_path = "__RESULTS_PATH__"
 pretrainedPath = "__PRETRAINED__"
 num_iter = 1
@@ -65,7 +65,11 @@ train
     gamma = 0.9
     eval_intervals = 250
     early_stopping_patience = 0
-    output_mode = 3  # see gap note above; 1 = fine-tune without outlier pruning
+    # output_mode=3 here only arms the prune-at-FINE_TUNE path in the data loader
+    # and the test-before-fine-tune step; with test.outlier_source = "mad" below,
+    # the saved outliers come from reprojection-error statistics, NOT the (untrained)
+    # classifier head, and the fine-tune itself runs in mode 1 (cameras/points only).
+    output_mode = 3
     validation_metric = ["our_repro"]
     validation_metric_higher_is_better = False
     validation_metric_fine_tuning = ["our_repro"]
@@ -96,6 +100,9 @@ loss
 test
 {
     outliers_threshold = 0.6
+    # U-ESFM: statistical outlier identification at test time (label-free)
+    outlier_source = "mad"
+    mad_alpha = 2.0  # delta=2, the report's best MAD setting
 }
 ba
 {

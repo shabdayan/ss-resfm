@@ -11,7 +11,7 @@
 
 exp_name = resfm_repro___SCAN__
 results_path = "__RESULTS_PATH__"
-pretrainedPath = "/home/projects/bagon/ortalda/MVG/final-project/u-resfm/code/pretrained/pretrained_model.pt"
+pretrainedPath = "/home/projects/bagon/ortalda/MVG/final-project/u-esfm/code/pretrained/pretrained_model.pt"
 num_iter = 1
 random_seed = 20
 num_jobs = 1

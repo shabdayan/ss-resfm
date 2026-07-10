@@ -1,10 +1,10 @@
 #!/bin/bash
-# Per-test-scene evaluation of the U-RESfM multi-scene model (RESfM protocol:
+# Per-test-scene evaluation of the U-ESFM multi-scene (Stage-1) model (RESfM protocol:
 # per-scene ~1K-epoch fine-tune + BA evaluation) over the 36 reconstructed
 # MegaDepth test scenes (see RUN_MULTISCENE.md).
 #
 # For each scene this generates a conf from
-# confs/multiscene_uresfm_eval.conf.template (own results_path per scene — a
+# confs/uesfm_eval.conf.template (own results_path per scene — a
 # shared one would mix per-scene fine-tune checkpoints) and submits one LSF job
 # running single_scene_optimization.py --phase FINE_TUNE. The multi-scene best
 # checkpoint is injected via the conf's pretrainedPath.
@@ -18,11 +18,11 @@
 
 set -e
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
-TRAIN_RESULTS="${REPO_ROOT}/results/multiscene/uresfm_27scenes_lr1e4"
+TRAIN_RESULTS="${REPO_ROOT}/results/multiscene/uesfm_27scenes_stage1"
 # Override with EVAL_ROOT_OVERRIDE / EVAL_PYTHON to run in a different environment
 # (e.g. .venv38-resfm, the upstream-matched env used for training).
-EVAL_ROOT="${EVAL_ROOT_OVERRIDE:-${REPO_ROOT}/results/multiscene/uresfm_27scenes_lr1e4_eval}"
-TEMPLATE="${REPO_ROOT}/confs/multiscene_uresfm_eval.conf.template"
+EVAL_ROOT="${EVAL_ROOT_OVERRIDE:-${REPO_ROOT}/results/multiscene/uesfm_stage1_eval}"
+TEMPLATE="${REPO_ROOT}/confs/uesfm_eval.conf.template"
 CONF_DIR="${REPO_ROOT}/confs/multiscene_eval_generated"
 PY="${EVAL_PYTHON:-${REPO_ROOT}/../.venv/bin/python}"
 

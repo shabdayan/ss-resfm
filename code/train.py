@@ -88,7 +88,27 @@ def epoch_evaluation(data_loader, model, conf, epoch, phase, save_predictions=Fa
                 metrics_list.append(metrics)
 
                 if save_predictions:
-                    if pred_outliers is not None:
+                    if conf.get_string('test.outlier_source', default='') == 'mad' \
+                            and pred_cam is not None and phase is Phases.TEST:
+                        # U-ESFM: outliers come from per-scene reprojection-error
+                        # statistics (MAD), not a learned classifier. Save a binary
+                        # mask in the same file/format the FINE_TUNE pruning step
+                        # consumes (Euclidean.get_raw_data), so the rest of the
+                        # RESfM evaluation protocol runs unchanged.
+                        from datasets.Euclidean import detect_outliers_statistical
+                        from utils import geo_utils
+                        rep = geo_utils.reprojection_error_with_points(
+                            outputs['Ps'], outputs['pts3D_pred'].T, outputs['xs'])
+                        valid = ~np.isnan(rep)
+                        flags = detect_outliers_statistical(
+                            torch.from_numpy(rep[valid]).float(), weight_method='mad',
+                            alpha=conf.get_float('test.mad_alpha', default=2.0))
+                        mask = np.zeros(rep.shape, dtype=np.float32)
+                        mask[valid] = flags.numpy()
+                        dataset_utils.save_outliers(
+                            {'scan_name': curr_data.scan_name, 'outliers_pred': mask},
+                            conf, curr_epoch=epoch, phase=phase)
+                    elif pred_outliers is not None:
                         dataset_utils.save_outliers(outliersOutputs, conf, curr_epoch=epoch, phase=phase)
                     if errors is not None:
                         errors.update(errors_per_cam)
