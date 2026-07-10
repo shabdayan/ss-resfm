@@ -18,10 +18,10 @@
 
 set -e
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
-TRAIN_RESULTS="${REPO_ROOT}/results/multiscene/uresfm_27scenes"
+TRAIN_RESULTS="${REPO_ROOT}/results/multiscene/uresfm_27scenes_lr1e4"
 # Override with EVAL_ROOT_OVERRIDE / EVAL_PYTHON to run in a different environment
 # (e.g. .venv38-resfm, the upstream-matched env used for training).
-EVAL_ROOT="${EVAL_ROOT_OVERRIDE:-${REPO_ROOT}/results/multiscene/uresfm_27scenes_eval}"
+EVAL_ROOT="${EVAL_ROOT_OVERRIDE:-${REPO_ROOT}/results/multiscene/uresfm_27scenes_lr1e4_eval}"
 TEMPLATE="${REPO_ROOT}/confs/multiscene_uresfm_eval.conf.template"
 CONF_DIR="${REPO_ROOT}/confs/multiscene_eval_generated"
 PY="${EVAL_PYTHON:-${REPO_ROOT}/../.venv/bin/python}"

@@ -239,6 +239,8 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
 
 
     # === Resume Training (Optional) ===
+    resumed_best_metric = None
+    resumed_best_epoch = None
     try:
         if conf['resume']:
             if phase is Phases.OPTIMIZATION:
@@ -281,9 +283,16 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
             
             model.load_state_dict(state_dict)
             optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            # Newer checkpoints also carry scheduler + best-metric state so a
+            # preempted run resumes with the right LR schedule and does not let a
+            # worse post-resume model shadow the earlier best.
+            if 'scheduler_state_dict' in checkpoint:
+                scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+            resumed_best_metric = checkpoint.get('best_validation_metric', None)
+            resumed_best_epoch = checkpoint.get('best_epoch', None)
             print("The model is resuming from checkpoint:", path)
-    except:
-        pass
+    except Exception as e:
+        print(f"Resume requested but starting fresh ({e})")
 
 
     # === Setup Fabric and Dataloaders ===
@@ -315,6 +324,9 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
         not conf.get_bool('train.validation_metric_higher_is_better', default=True)
     best_validation_metric = math.inf if minimize_metric else -math.inf
     best_epoch = 0
+    if resumed_best_metric is not None:
+        best_validation_metric = resumed_best_metric
+        best_epoch = resumed_best_epoch if resumed_best_epoch is not None else 0
     converge_time = -1
     best_model = copy.deepcopy(model) 
     begin_time = time()
@@ -404,6 +416,9 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
                     'epoch': epoch,
                     'model_state_dict': current_model.state_dict(),
                     'optimizer_state_dict': optimizer.state_dict(),
+                    'scheduler_state_dict': scheduler.state_dict(),
+                    'best_validation_metric': best_validation_metric,
+                    'best_epoch': best_epoch,
                     'conf': conf_snapshot(conf),
                 }, path)
 
@@ -435,6 +450,9 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
                         'epoch': epoch,
                         'model_state_dict': best_model.state_dict(),
                         'optimizer_state_dict': optimizer.state_dict(),
+                        'scheduler_state_dict': scheduler.state_dict(),
+                        'best_validation_metric': best_validation_metric,
+                        'best_epoch': best_epoch,
                         'conf': conf_snapshot(conf),
                     }, path)
                     print(f'Updated best validation metric: {best_validation_metric} time so far: {converge_time}')

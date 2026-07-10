@@ -497,7 +497,13 @@ def init_exp(default_phase):
     # # Load checkpoint model for finetuning
     # conf['pretrainedPath'] = opt.pretrainedPath
 
-    # conf['resume'] = opt.resume
+    # Resume: CLI --resume overrides; else the conf file's `resume` key; else off.
+    # With resume on and no checkpoint yet, training starts fresh (train.py falls
+    # through), so `resume = true` in a conf is safe for preemptible-queue runs.
+    if opt.resume is not None:
+        conf['resume'] = opt.resume
+    elif 'resume' not in conf:
+        conf['resume'] = False
     conf["resuming_epoch"] = 0
 
     # if phase is Phases.FINE_TUNE:
