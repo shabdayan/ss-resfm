@@ -61,7 +61,9 @@ class SparseMat:
             mean = sum_result / cam_per_pts_typed
             
             # Set mean to 0 for points with no cameras
-            mean[(self.cam_per_pts == 0).squeeze(), :] = 0
+            # (torch.where instead of masked assignment: torch 2.0.1's deterministic
+            # index_put asserts when broadcasting a scalar into a multi-row bool mask)
+            mean = torch.where((self.cam_per_pts == 0).reshape(-1, 1), torch.zeros_like(mean), mean)
             return mean
         else:
             # Sum along points (dim=1)
@@ -74,7 +76,8 @@ class SparseMat:
             mean = sum_result / pts_per_cam_typed
             
             # Set mean to 0 for cameras with no points
-            mean[(self.pts_per_cam == 0).squeeze(), :] = 0
+            # (see note above about torch 2.0.1 deterministic index_put)
+            mean = torch.where((self.pts_per_cam == 0).reshape(-1, 1), torch.zeros_like(mean), mean)
             return mean
 
     def to(self, device, **kwargs):
