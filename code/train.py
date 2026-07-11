@@ -409,12 +409,23 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
         import time as _time
         with_ba = conf.get_bool('ba.run_ba', default=True) and step in (min(snapshot_epochs), max(snapshot_epochs))
         t0 = _time.time()
-        snap_df, _ = epoch_evaluation(train_data, model, conf, step if step > 0 else None, phase,
-                                      save_predictions=False, bundle_adjustment=with_ba)
-        row = {'step': step, 'ba_mode': 'post_ba' if with_ba else 'pre_ba',
+        # A snapshot is instrumentation: it must never kill the TTT run itself
+        # (seen: BA dropping one 3D point -> reshape crash in compute_errors on
+        # scene 0099). Record the failure as its own row and keep training.
+        try:
+            snap_df, _ = epoch_evaluation(train_data, model, conf, step if step > 0 else None, phase,
+                                          save_predictions=False, bundle_adjustment=with_ba)
+            snap_error = None
+        except Exception as e:
+            snap_df = None
+            snap_error = f'{type(e).__name__}: {e}'
+            print(f"[snapshot] step {step} evaluation FAILED ({snap_error}); continuing TTT", flush=True)
+        row = {'step': step, 'ba_mode': ('post_ba' if with_ba else 'pre_ba') if snap_error is None else 'eval_failed',
                'eval_seconds': round(_time.time() - t0, 2),
                'mean_ttt_step_seconds': round(sum(ttt_step_times) / max(len(ttt_step_times), 1), 3),
                'total_ttt_seconds': round(sum(ttt_step_times), 1)}
+        if snap_error is not None:
+            row['error'] = snap_error[:300]
         try:
             row.update({k: float(v) for k, v in snap_df.loc['Mean'].items()})
         except Exception:
