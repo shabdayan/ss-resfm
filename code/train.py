@@ -475,6 +475,12 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
         if fabric.global_rank == 0:
             wandb.log({"training loss": mean_train_loss}, step=epoch)
             wandb.log({"LR": scheduler.get_last_lr()[-1]}, step=epoch)
+            # R2 collapse check: per-epoch adaptive-loss diagnostics (mean predicted
+            # outlier fraction + current percentile thresholds; last scene of the
+            # epoch). The fraction should track scene contamination, never drift to 1.
+            adaptive_stats = getattr(getattr(loss_func, 'outliers_loss', None), 'last_stats', None)
+            if adaptive_stats:
+                wandb.log(adaptive_stats, step=epoch)
             if conf.get_int('train.output_mode', default=3) != 1:
                 train_metrics_means = CalcMeanBatchMetrics(train_metrics, phase)
                 wandb.log(train_metrics_means, step=epoch)
