@@ -535,6 +535,15 @@ class AdaptiveConfidenceWeightedOutliersLoss(nn.Module):
             pred_outliers.squeeze()[confident_mask],
             pseudo_labels[confident_mask]
         )
+
+        # Diagnostics for the TTT collapse-check figure (SPEC_cvpr_experiments R2.2)
+        with torch.no_grad():
+            self.last_stats = {
+                'pred_outlier_frac': float((pred_outliers.squeeze() > 0.5).float().mean()),
+                'low_threshold': float(low_threshold),
+                'high_threshold': float(high_threshold),
+                'confident_frac': float(confident_mask.float().mean()),
+            }
         
         # Optional: Warmup (gradually increase supervision)
         if epoch is not None and epoch < self.warmup_epochs:

@@ -38,6 +38,17 @@ OUTPUT_MODES_TYPES = {
 
 }
 
+def checkpoint_provenance(conf, phase, epoch):
+    # Traceability (SPEC_cvpr_experiments R2.4): never let a provenance failure
+    # break a checkpoint save.
+    try:
+        from utils.experiment_guard import provenance
+        return provenance(conf, phase=phase, extra={'epoch': epoch})
+    except Exception as e:
+        print(f"Warning: could not record checkpoint provenance: {e}")
+        return None
+
+
 def conf_snapshot(conf):
     # Checkpoints must carry the conf they were trained with (needed by the
     # test-time fine-tune stage). conf may hold non-serializable values (e.g. a
@@ -62,22 +73,34 @@ def epoch_evaluation(data_loader, model, conf, epoch, phase, save_predictions=Fa
             for curr_data in batch_data:
                 n +=1
                 # Get predictions
+                if torch.cuda.is_available():
+                    torch.cuda.reset_peak_memory_stats()  # R16: per-scene peak memory
                 begin_time = time()
                 pred_cam, pred_outliers = model(curr_data)
+                inference_seconds = time() - begin_time
 
                 # Eval results
                 metrics = {}
                 metrics['Scene'] = curr_data.scan_name
-                
+
                 if pred_cam is not None:
                     # print('line 66 in train.py pred cam is not none')
                     outputs = evaluation.prepare_predictions(curr_data, pred_cam, conf, bundle_adjustment, phase, curr_epoch=epoch)
                     
                     errors, errors_per_cam, outputs = evaluation.compute_errors(outputs, conf, bundle_adjustment, compute_rep_errs=True)
                     metrics.update(errors)
-            
+
                 else:
                     outputs = {}
+
+                # R16 uniform timing/resources — numeric-only columns so
+                # organize_errors' Mean row stays valid; they flow into every
+                # results file (Results_*.xlsx, ttt_snapshots.csv) unchanged.
+                metrics['inference_seconds'] = round(inference_seconds, 4)
+                metrics['ba_seconds'] = outputs.get('ba_seconds', float('nan'))
+                metrics['peak_gpu_mem_gb'] = round(
+                    torch.cuda.max_memory_allocated() / 2 ** 30, 3) if torch.cuda.is_available() else float('nan')
+                metrics['param_count'] = sum(p.numel() for p in model.parameters())
 
                 # Restored from upstream RESfM: package predicted outliers so the
                 # test evaluation can save them — the FINE_TUNE stage prunes tracks
@@ -268,6 +291,11 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
             elif phase is Phases.TRAINING:
                 path, epoch = path_utils.path_to_model_resume_learning(conf)
             checkpoint = torch.load(path)
+            if phase is Phases.TRAINING:
+                # Leakage guard: multi-scene training must never resume from
+                # weights produced by a run on a test scene (e.g. a TTT snapshot).
+                from utils.experiment_guard import assert_checkpoint_provenance_clean
+                assert_checkpoint_provenance_clean(checkpoint, path, context='multi-scene training resume')
             conf["resuming_epoch"] = checkpoint['epoch']
             if checkpoint['epoch'] >= num_epochs:
                 sys.exit()
@@ -312,6 +340,9 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
             resumed_best_epoch = checkpoint.get('best_epoch', None)
             print("The model is resuming from checkpoint:", path)
     except Exception as e:
+        from utils.experiment_guard import LeakageError
+        if isinstance(e, LeakageError):
+            raise  # leakage must fail loudly, never degrade to a fresh start
         print(f"Resume requested but starting fresh ({e})")
 
 
@@ -354,13 +385,79 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
     epochs_without_improvement = 0  # Counter for early stopping
     early_stop_triggered = False  # Flag to indicate if early stopping was triggered
 
+    # R16: record hardware once per run, next to the results (measured values in
+    # the CSVs must be attributable to the machine that produced them).
+    if fabric.global_rank == 0:
+        try:
+            import json
+            with open(os.path.join(conf.get_string('results_path'), 'hardware.json'), 'w') as f:
+                json.dump({'gpu': torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'cpu',
+                           'torch': torch.__version__,
+                           'param_count': sum(p.numel() for p in model.parameters())}, f, indent=1)
+        except Exception as e:
+            print(f"Warning: could not record hardware info: {e}")
+
+    # === TTT step-count snapshots (SPEC_cvpr_experiments R2) ===
+    # Only active when train.snapshot_epochs is set; snapshot 0 = frozen inference.
+    # Pre-BA metrics at every snapshot; full robust-BA eval only at the first and
+    # last snapshot (mode recorded per row).
+    snapshot_epochs = [int(e) for e in conf.get_list('train.snapshot_epochs', default=[])]
+    snapshot_rows = []
+    ttt_step_times = []
+
+    def take_snapshot(step):
+        import time as _time
+        with_ba = conf.get_bool('ba.run_ba', default=True) and step in (min(snapshot_epochs), max(snapshot_epochs))
+        t0 = _time.time()
+        snap_df, _ = epoch_evaluation(train_data, model, conf, step if step > 0 else None, phase,
+                                      save_predictions=False, bundle_adjustment=with_ba)
+        row = {'step': step, 'ba_mode': 'post_ba' if with_ba else 'pre_ba',
+               'eval_seconds': round(_time.time() - t0, 2),
+               'mean_ttt_step_seconds': round(sum(ttt_step_times) / max(len(ttt_step_times), 1), 3),
+               'total_ttt_seconds': round(sum(ttt_step_times), 1)}
+        try:
+            row.update({k: float(v) for k, v in snap_df.loc['Mean'].items()})
+        except Exception:
+            pass
+        stats_src = getattr(loss_func, 'outliers_loss', loss_func)
+        row.update(getattr(stats_src, 'last_stats', {}) or {})
+        prov = checkpoint_provenance(conf, phase, step) or {}
+        row.update({'loss_variant': conf.get_string('loss.func_tuning', default=conf.get_string('loss.func', default='')),
+                    'scan': conf.get_string('dataset.scan', default=''), 'git': prov.get('git', '')})
+        snapshot_rows.append(row)
+        import pandas as _pd
+        _pd.DataFrame(snapshot_rows).to_csv(
+            os.path.join(conf.get_string('results_path'), 'ttt_snapshots.csv'), index=False)
+        # R7.4: snapshot checkpoints carry provenance (base checkpoint id, scene,
+        # step count, loss variant) so a TTT-adapted weight can never silently
+        # seed another run (experiment_guard rejects it on load).
+        snap_dir = os.path.join(conf.get_string('results_path'), 'models')
+        os.makedirs(snap_dir, exist_ok=True)
+        torch.save({'step': step, 'model_state_dict': model.state_dict(),
+                    'conf': conf_snapshot(conf),
+                    'provenance': {**prov, 'ttt_step': step, 'loss_variant': row['loss_variant']}},
+                   os.path.join(snap_dir, f'ttt_snapshot_step{step}.pt'))
+        print(f"[snapshot] step {step}: {row.get('our_repro', 'n/a')} px ({row['ba_mode']})", flush=True)
+
+    if snapshot_epochs and 0 in snapshot_epochs and fabric.global_rank == 0:
+        take_snapshot(0)
+
     # === Training Loop ===
     counter = 0
     
     for epoch in range(conf["resuming_epoch"] + 1, num_epochs):
         ba_during_training = not conf.get_bool('ba.only_last_eval') and conf.get_bool('ba.run_ba', default=True)
 
+        import time as _time
+        _t_step = _time.time()
         mean_train_loss, train_losses, train_metrics = epoch_train(conf, train_data, model, loss_func, optimizer, scheduler, epoch, phase=phase, fabric=fabric)
+        if snapshot_epochs:
+            ttt_step_times.append(_time.time() - _t_step)
+            # epoch 0 is excluded: step 0 = FROZEN inference, taken once before
+            # the loop; the in-loop epoch-0 model has already had one optimizer
+            # step and must not overwrite the frozen row.
+            if epoch in snapshot_epochs and epoch > 0 and fabric.global_rank == 0:
+                take_snapshot(epoch)
         mean_train_loss = fabric.all_reduce(mean_train_loss, reduce_op="mean")
         train_metrics = fabric.all_gather(train_metrics)
 
@@ -440,6 +537,7 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
                     'best_validation_metric': best_validation_metric,
                     'best_epoch': best_epoch,
                     'conf': conf_snapshot(conf),
+                    'provenance': checkpoint_provenance(conf, phase, epoch),
                 }, path)
 
                 
@@ -474,6 +572,7 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
                         'best_validation_metric': best_validation_metric,
                         'best_epoch': best_epoch,
                         'conf': conf_snapshot(conf),
+                        'provenance': checkpoint_provenance(conf, phase, epoch),
                     }, path)
                     print(f'Updated best validation metric: {best_validation_metric} time so far: {converge_time}')
                     # Reset early stopping counter since we found improvement

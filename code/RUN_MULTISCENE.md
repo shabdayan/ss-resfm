@@ -191,3 +191,53 @@ predicted outliers again (restored from upstream), and `train_single_model` runs
 upstream "test before fine-tuning" step that produces them, so the `output_mode = 3`
 fine-tune flow works end-to-end (used by both the paper reproduction and the U-RESfM
 evaluation).
+
+## Stage 2 (SPEC_uesfm_combined) — TTT, sweeps, ablations, table assembly
+
+**TTT runner (§2.A R6-R7)** — per-test-scene fine-tune from the multi-scene
+checkpoint with step-count snapshots at {0,10,100,1000} (0 = frozen inference;
+pre-BA metrics at every snapshot, full robust-BA eval at first+last; collapse-check
+stats and per-step wall-clock in `ttt_snapshots.csv`; snapshot checkpoints carry
+provenance and are rejected by the leakage guard if reused as a base):
+
+```bash
+./run_ttt.sh --ttt_loss comb          # full U-ESFM loss (our TTT)
+./run_ttt.sh --ttt_loss reproj_only   # RESfM-style control; from RESfM's released
+                                      # .pth this IS the "RESfM (reproduced)" row
+# options: --scans "0223,5016" --checkpoint <pt> --steps "0,10,100,1000" --seed N --dry_run
+python ttt_aggregate.py --seed 20     # -> ttt_table2_seed20.csv + ttt_step_curve_seed20.csv
+```
+
+**Ablation grid (§2.C R11)** — 2x2 architecture x loss, four confs, no code edits:
+`multiscene_uesfm_stage1.conf` (deep x reproj), `multiscene_uesfm_adaptive.conf`
+(deep x adaptive), `multiscene_uesfm_shallow_reproj.conf`,
+`multiscene_uesfm_shallow_adaptive.conf` — launch each exactly like the stage-1
+training run (same `multiple_scenes_learning.py` command, swap `--conf`).
+
+**Loss-component sweeps (§2.C R12):**
+
+```bash
+./run_sweeps.sh --sweep percentiles|warmup|beta|mad_alpha|removal_threshold
+python sweep_aggregate.py --sweep <name>   # -> tidy sweep_<name>_seed<S>.csv
+```
+
+`removal_threshold` switches outlier removal to classifier scores (RESfM Appendix B
+grid) and therefore needs a checkpoint with a trained outlier head (adaptive arm);
+`mad_alpha` is the analogous knob of the active MAD path.
+
+**Table assembly (§2.D R13/R14)** — published numbers live in
+`data/published/resfm_table1.csv` (transcribed once from resfm.pdf Table 1, verified
+against the independent transcription in `compare_repro_to_paper.py`):
+
+```bash
+python assemble_table1.py   # ours + RESfM(reproduced) + published rows, `source` column
+```
+
+**Leakage guard (acceptance 12)** — `utils/experiment_guard.py`:
+`assert_not_training_scene` fires at every FINE_TUNE entry;
+`assert_checkpoint_provenance_clean` rejects any base/resume checkpoint whose
+provenance includes a test scene (raises `LeakageError`, never swallowed).
+
+**Timing/resources (§2.E R16)** — every evaluation row now carries
+`inference_seconds`, `ba_seconds`, `peak_gpu_mem_gb`, `param_count`; each run writes
+`hardware.json` (GPU model, torch version) next to its results.

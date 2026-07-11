@@ -97,8 +97,11 @@ def prepare_predictions(data, pred_cam, conf, bundle_adjustment, phase, curr_epo
         if bundle_adjustment:
             repeat = conf.get_bool('ba.repeat')
             triangulation = conf.get_bool('ba.triangulation')
-            # Run bundle adjustment
+            # Run bundle adjustment (timed per scene — R16 runtime instrumentation)
+            from time import time as _time
+            _ba_start = _time()
             ba_results_dict = ba_functions.euc_ba(conf, xs, Rs=Rs_pred, ts=ts_pred, Ks=np.linalg.inv(Ns), Xs_our=pts3D_pred.T, M=M, Ps=None, Ns=Ns, repeat=repeat, triangulation=triangulation, filtering_thr=conf.get_float('ba.filter_outliers', default=4.0), M_original=data.M_original.cpu().numpy(), images_path=images_path, img_list=data.img_list, curr_epoch=curr_epoch)
+            outputs['ba_seconds'] = round(_time() - _ba_start, 2)
 
             for name, ba_result in ba_results_dict.items():
                 name = "_" + name

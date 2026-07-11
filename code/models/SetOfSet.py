@@ -209,7 +209,10 @@ class DeepSetOfSetOutliersNet(BaseNet):
         
         # Set training mode based on phase
         if phase is Phases.FINE_TUNE:
-            self.mode = 1  # Fine-tune mode: only train camera and points heads
+            # Default 1 = RESfM-style fine-tune (cameras/points only). U-RESfM TTT
+            # (SPEC_cvpr_experiments R1) sets train.fine_tune_output_mode = 3 so the
+            # outlier head stays active and the full unsupervised loss can adapt it.
+            self.mode = conf.get_int('train.fine_tune_output_mode', default=1)
         else:
             self.mode = conf.get_int('train.output_mode', default=3)  # Default: train all heads
         
@@ -327,7 +330,7 @@ class SetOfSetOutliersNet(BaseNet):
         self.n_net = get_linear_layers([num_feats] * 2 + [n_d_out], final_layer=True, batchnorm=False)
         self.outlier_net = get_linear_layers([num_feats] * 2 + [1], final_layer=True, batchnorm=False)
         if phase is Phases.FINE_TUNE:
-            self.mode = 1
+            self.mode = conf.get_int('train.fine_tune_output_mode', default=1)
         else:
             self.mode = conf.get_int('train.output_mode', default=3)
 

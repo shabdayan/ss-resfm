@@ -97,6 +97,11 @@ def train_single_model(conf, device, phase, stage=1, architecture_type="esfm_out
     use_progressive = conf.get_bool('model.use_progressive', default=False)
     fabric = initialize_fabric(seed=seed, use_progressive=use_progressive)
 
+    # Paper ground rule: the 27 multi-scene training scenes must never be evaluated.
+    if phase is Phases.FINE_TUNE:
+        from utils.experiment_guard import assert_not_training_scene
+        assert_not_training_scene(conf.get_string('dataset.scan'), context='FINE_TUNE evaluation entry')
+
     # Restored from upstream RESfM: before fine-tuning with output_mode 3, run a
     # TEST evaluation with the pretrained model so its predicted outliers get saved
     # (epoch_evaluation -> save_outliers); the FINE_TUNE data load below prunes the
@@ -155,7 +160,11 @@ def train_single_model(conf, device, phase, stage=1, architecture_type="esfm_out
     if phase is Phases.FINE_TUNE:
         path = path_utils.path_to_model(conf, Phases.TRAINING, epoch=None, best=True)
         checkpoint = torch.load(path)
-        
+        # Leakage guard: the fine-tune base must be a clean TRAINING checkpoint —
+        # never weights from a prior run on a test scene (e.g. a TTT snapshot).
+        from utils.experiment_guard import assert_checkpoint_provenance_clean
+        assert_checkpoint_provenance_clean(checkpoint, path, context='FINE_TUNE base checkpoint')
+
         # Handle _orig_mod prefix mismatch between checkpoint and current model
         state_dict = checkpoint['model_state_dict']
         model_keys = set(model.state_dict().keys())
