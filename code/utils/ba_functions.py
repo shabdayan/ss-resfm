@@ -83,8 +83,7 @@ def euc_ba(conf, xs, Rs, ts, Ks, Xs_our=None, M=None, Ps=None, Ns=None, repeat=T
     # reconstruction.extract_colors_for_all_images(images_path)
     # reconstruction.write_text(path_utils.path_to_reconstructions(conf, conf.phase, name='00'))
     xs_original = geo_utils.M_to_xs(M_original)
-    new_Rs, new_ts, new_Ps, Ks, new_Xs = pycolmap_to_batch_matrix(reconstruction)
-    # new_Rs, new_ts, new_Ps, Ks, new_Xs = pycolmap_to_batch_matrix(reconstruction, original_num_points=xs.shape[1])
+    new_Rs, new_ts, new_Ps, Ks, new_Xs = pycolmap_to_batch_matrix(reconstruction, original_num_points=xs.shape[1])
     reconstructions_list.append(create_ba_results(M, new_Ps, new_Rs, new_ts, new_Xs, xs, np.arange(len(Rs))))
     if repeat:
 

@@ -72,12 +72,18 @@ def prepare_ba_options():
 
 
 
-def pycolmap_to_batch_matrix(reconstruction):
+def pycolmap_to_batch_matrix(reconstruction, original_num_points=None):
     """
     Convert a PyCOLMAP Reconstruction object back to batched camera matrices and 3D points.
 
     Args:
         reconstruction (pycolmap.Reconstruction): The COLMAP reconstruction object.
+        original_num_points (int, optional): Number of points the caller's xs/M
+            has. BA can delete 3D points; if the highest-id point is deleted,
+            max(point3D_ids()) shrinks and the returned array no longer matches
+            the caller's xs — a shape crash in compute_errors (seen on scene
+            0099). Passing the original count keeps the length; deleted points
+            stay zeros, exactly as mid-array deletions always did.
 
     Returns:
         Rs (np.ndarray): [N, 3, 3] Rotation matrices.
@@ -89,7 +95,7 @@ def pycolmap_to_batch_matrix(reconstruction):
 
     num_images = len(reconstruction.images)
     max_point_id = max(reconstruction.point3D_ids())
-    points3D = np.zeros((max_point_id, 3))
+    points3D = np.zeros((original_num_points or max_point_id, 3))
 
     # Extract 3D points (COLMAP uses 1-based point3D IDs)
     for point3D_id, point in reconstruction.points3D.items():
@@ -315,8 +321,7 @@ def process_camera_indices_and_bundle_adjustment(
     reconstruction.write_text(save_path)
 
     # Step 6: Extract updated parameters from the reconstructionç
-    Rs, ts, Ps, Ks, Xs = pycolmap_to_batch_matrix(reconstruction)
-    # Rs, ts, Ps, Ks, Xs = pycolmap_to_batch_matrix(reconstruction, original_num_points=xs.shape[1])
+    Rs, ts, Ps, Ks, Xs = pycolmap_to_batch_matrix(reconstruction, original_num_points=xs.shape[1])
 
 
     # Step 7: Package results
