@@ -58,8 +58,13 @@ def log_code(conf):
 
 def save_camera_mat(conf, save_cam_dict, scan, phase, epoch=None):
     path_cameras = path_to_cameras(conf, phase, epoch=epoch, scan=scan)
-    # np.savez(path_cameras, **save_cam_dict)# for npz file
-    savemat(path_cameras + ".mat", save_cam_dict) #for matlab file
+    np.savez(path_cameras, **save_cam_dict)  # npz consumed by evaluate_single_scene.py
+    try:
+        savemat(path_cameras + ".mat", save_cam_dict)  # for matlab file
+    except Exception as e:
+        # some outputs entries (object arrays, None) are not matlab-serializable;
+        # the npz above is the authoritative artifact
+        print(f"savemat skipped for {scan}: {e}")
 
 def save_outliers_mat(conf, save_cam_dict, scan, phase, epoch=None):
     path_outliers = path_to_outliers(conf, phase, epoch=epoch, scan=scan)

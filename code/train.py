@@ -111,6 +111,12 @@ def epoch_evaluation(data_loader, model, conf, epoch, phase, save_predictions=Fa
                 metrics_list.append(metrics)
 
                 if save_predictions:
+                    # Restored from upstream ESFM/RESfM: persist the FINAL predicted
+                    # cameras (epoch is None = best model) so the shared single-scene
+                    # evaluator (evaluate_single_scene.py) can recompute harmonized
+                    # metrics from raw outputs. Intermediate epochs are not saved.
+                    if pred_cam is not None and epoch is None:
+                        dataset_utils.save_cameras(outputs, conf, curr_epoch=epoch, phase=phase)
                     if conf.get_string('test.outlier_source', default='') == 'mad' \
                             and pred_cam is not None and phase is Phases.TEST:
                         # U-ESFM: outliers come from per-scene reprojection-error

@@ -3,7 +3,10 @@ Single scene optimization script
 """
 import os
 os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
-os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+# Default kept at '1' (historical behavior) but now overridable: the single-scene
+# benchmark sets CUDA_LAUNCH_BLOCKING=0 so the U-ESFM arm is timed with the same
+# async CUDA launches as the ESFM baseline (approved 2026-07-12).
+os.environ.setdefault('CUDA_LAUNCH_BLOCKING', '1')
 os.environ['PYTHONHASHSEED'] = '0'
 # Suppress CUDA graphs warning for incompatible operations
 os.environ['TORCH_LOGS'] = '-dynamo'
@@ -249,8 +252,13 @@ def train_single_model(conf, device, phase, stage=1, architecture_type="esfm_out
     'best_epoch': 'Best Epoch'
     })
     
-    train_res_aggregare_across_jobs = train_res[['Trans', 'Rot', 'Nr', 'Convergence Time', 'Best Epoch']]
-    train_res_aggregare_across_jobs['Convergence Time'] =  train_res_aggregare_across_jobs['Convergence Time'].astype(int)
+    # BA columns (Trans/Rot/Nr) only exist when ba.run_ba = true; keep whatever is
+    # available so no-BA runs (single-scene benchmark) don't crash here.
+    agg_cols = [c for c in ['Trans', 'Rot', 'Nr', 'Convergence Time', 'Best Epoch']
+                if c in train_res.columns]
+    train_res_aggregare_across_jobs = train_res[agg_cols]
+    if 'Convergence Time' in train_res_aggregare_across_jobs.columns:
+        train_res_aggregare_across_jobs['Convergence Time'] =  train_res_aggregare_across_jobs['Convergence Time'].astype(int)
 
 
     # Add configuration columns to the aggregated results
@@ -291,10 +299,13 @@ def train_single_model(conf, device, phase, stage=1, architecture_type="esfm_out
         # File doesn't exist, create it
         train_res_aggregare_across_jobs.to_excel(results_aggregation_file_name, index=True)
        
-    # Additional functionality for first stage: generate and save reprojection errors 
-    if stage == 1:    
-        train.test(conf, model, Phases.OPTIMIZATION, 
-                                train_data=None, validation_data=None, 
+    # Additional functionality for first stage: generate and save reprojection errors
+    # train.extract_reproj_errors (default true = original behavior) lets the
+    # single-scene benchmark skip this extra test+BA pass, which is only needed as
+    # input for a stage-2 run and would otherwise pollute wall-clock timing.
+    if stage == 1 and conf.get_bool('train.extract_reproj_errors', default=True):
+        train.test(conf, model, Phases.OPTIMIZATION,
+                                train_data=None, validation_data=None,
                                 test_data=scene_loader, fabric=fabric, run_ba=True)
         print("reprojection error extraction completed for first stage")
     
