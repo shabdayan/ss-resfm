@@ -31,6 +31,10 @@ datasets/
 | Strecha castle-P19 | B | same | castle_dense_{images,cameras,p,bounding}.tar.gz | — | see per-file table | 2026-07-12 |
 | Strecha castle-P30 | B | same | castle_dense_large_{images,cameras,p,bounding}.tar.gz | — | see per-file table | 2026-07-12 |
 | Strecha entry-P10 | B | same | castle_entry_dense_{images,cameras,p,bounding}.tar.gz | — | see per-file table | 2026-07-12 |
+| Olsson/ESfM Euclidean (39 scene tracks, extracted to code/datasets/Euclidean/) | A (preprocessed) | ESfM release (source URL not recorded by the downloading session; wget.log empty) | olsson_download/esfm_datasets.zip | 8,105,428,411 | 799402d5a3d08aad103c1f2fc5cdd8daeaf2eef6edfb60b7ee252d4b738f1719 | 2026-07-12 |
+
+Per-file sha256 for all 39 Euclidean npz: see `MANIFEST_euclidean_sha256.txt`
+(downloaded/verified by a parallel session, recorded here for completeness).
 
 BlendedMVS_combined.zip sha256:
 `5e57c624895c6e3ebeb2546f34d194ff23a1e4057ce44e93b5f5486f2777cb13`

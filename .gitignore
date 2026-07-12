@@ -53,3 +53,5 @@ code/confs/
 Thumbs.db
 # Raw cross-dataset downloads (~93 GB; inventory in datasets/MANIFEST.md)
 datasets/raw/
+# Olsson/ESfM Euclidean download (8.1 GB zip; sha256 in datasets/MANIFEST_euclidean_sha256.txt)
+datasets/olsson_download/
