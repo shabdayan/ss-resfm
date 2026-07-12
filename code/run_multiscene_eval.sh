@@ -12,6 +12,12 @@
 # Usage:
 #   ./run_multiscene_eval.sh [--queue waic-risk] [--scans "0238,0060"] [--dry_run]
 #
+# Per-arm evaluation (completed multi-scene arms; see RUN_MULTISCENE.md):
+#   --template <conf.template>   eval conf template (model block must match the arm)
+#   --train_results <dir>        arm's training results dir (best checkpoint source)
+#   --eval_root <dir>            where per-scene eval results land
+#   --arch <name>                architecture_type tag for the Results_*.xlsx naming
+#
 # The FINE_TUNE flow follows upstream RESfM: a TEST evaluation with the loaded
 # checkpoint first saves predicted outliers, which the fine-tune data load prunes
 # (restored in train.py / single_scene_optimization.py).
@@ -29,6 +35,7 @@ PY="${EVAL_PYTHON:-${REPO_ROOT}/../.venv/bin/python}"
 QUEUE="waic-risk"
 DRY_RUN=false
 SEED=20  # paper/RESfM-code default; use --seed N for the multi-seed median protocol
+ARCH="esfm_outliers_deep"
 SCENES="0238 0060 0197 0094 0265 0083 0076 0185 0048 0024 0223 5016 0046 0099 1001 0231 0411 0377 0102 0147 0148 0446 0022 0327 0015 0455 0496 1589 0012 0104 0019 0063 0130 0080 0240 0007"
 
 while [[ $# -gt 0 ]]; do
@@ -36,6 +43,10 @@ while [[ $# -gt 0 ]]; do
         --queue) QUEUE="$2"; shift 2;;
         --scans) SCENES="${2//,/ }"; shift 2;;
         --seed) SEED="$2"; shift 2;;
+        --template) TEMPLATE="$2"; shift 2;;
+        --train_results) TRAIN_RESULTS="$2"; shift 2;;
+        --eval_root) EVAL_ROOT="$2"; shift 2;;
+        --arch) ARCH="$2"; shift 2;;
         --dry_run) DRY_RUN=true; shift;;
         *) echo "Unknown option $1"; exit 1;;
     esac
@@ -55,7 +66,8 @@ if [ "$SEED" != "20" ]; then EVAL_ROOT="${EVAL_ROOT}_seed${SEED}"; fi
 mkdir -p "${CONF_DIR}" "${EVAL_ROOT}" "${REPO_ROOT}/lsf_output/multiscene_eval"
 
 for SCAN in $SCENES; do
-    CONF="${CONF_DIR}/${SCAN}_seed${SEED}.conf"
+    # Conf name carries the eval root so concurrent per-arm fan-outs don't collide
+    CONF="${CONF_DIR}/$(basename ${EVAL_ROOT})_${SCAN}_seed${SEED}.conf"
     RESULTS_PATH="${EVAL_ROOT}/${SCAN}_ba"
     sed -e "s|__SCAN__|${SCAN}|g" \
         -e "s|__RESULTS_PATH__|${RESULTS_PATH}|g" \
@@ -69,7 +81,7 @@ for SCAN in $SCENES; do
         --conf ${CONF} \
         --scan ${SCAN} \
         --stage 1 \
-        --architecture_type esfm_outliers_deep \
+        --architecture_type ${ARCH} \
         --phase FINE_TUNE \
         --exp_version multiscene_eval \
         --results_aggregation_file ${EVAL_ROOT}/Aggregated_eval_results.xlsx \

@@ -1,0 +1,103 @@
+# Per-test-scene evaluation TEMPLATE for the DSOS 2x3 adaptive multi-scene arm
+# (DeepSetOfSetOutliersNet 2x3 trained with the unsupervised adaptive CombinedLoss).
+# Protocol: load checkpoint -> TEST eval saves LEARNED-classifier outliers ->
+# prune at test.outliers_threshold -> ~1K-epoch reprojection-only fine-tune ->
+# robust BA (RESfM protocol). Differs from uesfm_eval.conf.template ONLY in the
+# outlier source (trained classifier, not MAD) and dropout (matches training).
+# Do not run directly: substitute __SCAN__/__RESULTS_PATH__/__PRETRAINED__.
+
+exp_name = uesfm_eval___SCAN__
+results_path = "__RESULTS_PATH__"
+pretrainedPath = "__PRETRAINED__"
+num_iter = 1
+random_seed = 20
+num_jobs = 1
+num_gpus = 1
+general
+{
+    stage = "3"
+}
+dataset
+{
+    dataset = "megadepth"
+    use_gt = False
+    calibrated = True
+    remove_outliers_gt = False
+
+    scan = "__SCAN__"
+
+    # Full test set (informational here; used by fan-out paths that read test_set)
+    test_set = ["0238", "0060", "0197", "0094", "0265", "0083", "0076", "0185", "0048", "0024", "0223", "5016", "0046", "0099", "1001", "0231", "0411", "0377", "0102", "0147", "0148", "0446", "0022", "0327", "0015", "0455", "0496", "1589", "0012", "0104", "0019", "0063", "0130", "0080", "0240", "0007"]
+    scans_list = ["0238", "0060", "0197", "0094", "0265", "0083", "0076", "0185", "0048", "0024", "0223", "5016", "0046", "0099", "1001", "0231", "0411", "0377", "0102", "0147", "0148", "0446", "0022", "0327", "0015", "0455", "0496", "1589", "0012", "0104", "0019", "0063", "0130", "0080", "0240", "0007"]
+}
+model
+{
+    # Must match the DSOS 2x3 adaptive training arm
+    # (multiscene_uesfm_dsos_2x3_adaptive.conf), incl. its depth-formula dropout.
+    type = "SetOfSet.DeepSetOfSetOutliersNet"
+    num_features = 256
+    num_blocks = 2
+    block_size = 3
+    use_skip = False
+    multires = 0
+    use_progressive = False
+    use_layer_norm = True
+    use_residual = True
+    dropout_rate = 0.069
+}
+train
+{
+    # RESfM's per-test-scene fine-tune stage: ~1K epochs, eval every 250, lr 5e-3
+    lr = 5e-3
+    num_epochs = 1001
+    scheduler_milestone = [10000]
+    gamma = 0.9
+    eval_intervals = 250
+    early_stopping_patience = 0
+    # output_mode=3 arms the prune-at-FINE_TUNE path and the test-before-fine-tune
+    # step; the saved outliers come from the TRAINED classifier head (this arm
+    # trained it), and the fine-tune itself runs in mode 1 (cameras/points only).
+    output_mode = 3
+    validation_metric = ["our_repro"]
+    validation_metric_higher_is_better = False
+    validation_metric_fine_tuning = ["our_repro"]
+}
+loss
+{
+    func = ESFMLoss              # informational: FINE_TUNE reads only func_tuning below
+    # Fine-tune loss (this stage USES func_tuning): RESfM protocol = plain
+    # reprojection. The TTT experiment changes only this key to CombinedLoss.
+    func_tuning = ESFMLoss
+
+    reproj_loss_weight = 1.0
+    classification_loss_weight = 0.3
+
+    infinity_pts_margin = 1e-4
+    normalize_grad = True
+    hinge_loss = True
+    hinge_loss_weight = 1
+
+    inlier_percentile = 20.0
+    outlier_percentile = 80.0
+    min_confident_samples = 10
+    min_threshold_separation = 0.0  # 0.5 is pixel-scale; normalized errors are ~0.01-0.2 (see fe55bf0)
+    warmup_epochs = 10
+
+    enable_csv_logging = False
+}
+test
+{
+    outliers_threshold = 0.6
+    # Adaptive arms trained the outlier head: remove outliers with the LEARNED
+    # classifier scores at RESfM's threshold (outliers_threshold above), not MAD.
+    # (For a MAD-removal comparison run, use uesfm_eval.conf.template instead.)
+    outlier_source = ""
+}
+ba
+{
+    run_ba = True
+    repeat = True
+    triangulation = False
+    only_last_eval = True
+    filter_outliers = 5.0  # RESfM paper/conf value (multi-scene protocol)
+}

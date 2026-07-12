@@ -241,3 +241,34 @@ provenance includes a test scene (raises `LeakageError`, never swallowed).
 **Timing/resources (§2.E R16)** — every evaluation row now carries
 `inference_seconds`, `ba_seconds`, `peak_gpu_mem_gb`, `param_count`; each run writes
 `hardware.json` (GPU model, torch version) next to its results.
+
+## Evaluating the architecture-sweep arms (completed multi-scene runs)
+
+The adaptive arms trained the outlier head, so their eval templates use the
+LEARNED classifier for outlier removal (RESfM's 0.6 threshold), not the MAD
+path — `confs/sos_adaptive_eval.conf.template` (SOS 1x3, serves both lr arms)
+and `confs/dsos_2x3_adaptive_eval.conf.template` (Deep 2x3, dropout matched to
+training). Launch one fan-out per completed arm:
+
+```bash
+EVAL_PYTHON=../.venv38-resfm/bin/python ./run_multiscene_eval.sh \
+  --template confs/sos_adaptive_eval.conf.template \
+  --train_results results/multiscene/uesfm_27scenes_sos_adaptive_1gpu_any80g \
+  --eval_root results/multiscene/sos_adaptive_lr1e3_eval --arch esfm_outliers
+
+EVAL_PYTHON=../.venv38-resfm/bin/python ./run_multiscene_eval.sh \
+  --template confs/sos_adaptive_eval.conf.template \
+  --train_results results/multiscene/uesfm_27scenes_sos_adaptive_lr1e4 \
+  --eval_root results/multiscene/sos_adaptive_lr1e4_eval --arch esfm_outliers
+
+EVAL_PYTHON=../.venv38-resfm/bin/python ./run_multiscene_eval.sh \
+  --template confs/dsos_2x3_adaptive_eval.conf.template \
+  --train_results results/multiscene/uesfm_27scenes_dsos_2x3_adaptive \
+  --eval_root results/multiscene/dsos_2x3_adaptive_eval --arch esfm_outliers_deep
+```
+
+Aggregate each with `aggregate_seed_results.py --root_base <eval_root>
+--results_file Results_FINE_TUNE_stage_1_<arch>.xlsx`; merge into the paper
+table via `assemble_table1.py`. Before spending eval GPU time, sanity-check the
+arm's wandb `pred_outlier_frac` curve (collapse check) — a head that collapsed
+to all-outliers will prune everything at the 0.6 threshold.
