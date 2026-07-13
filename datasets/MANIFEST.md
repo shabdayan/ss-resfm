@@ -105,6 +105,44 @@ Each scene: `blended_images/`, `cams/` (per-view `*_cam.txt` with extrinsic + in
 the real GT poses), `rendered_depth_maps/`. Downloaded from the GitHub release (stable
 alternative to the OneDrive links), passed full `unzip -t` before extraction.
 
+## Built point tracks (2026-07-13, code/build_tracks/, our provenance — R13)
+
+npz scene files for the pipeline at `code/datasets/{strecha,blendedmvs,1dsfm}/`,
+built per RESfM Appendix C (details + caveats: `code/build_tracks/BUILD_TRACKS.md`).
+All 23 files pass `verify_npz.py` (schema, Ns=K^-1, GT-inlier reprojection
+mean 0.29-1.59 px, p99 <= 4.5 px). "paper" columns = RESfM Tables 2-4.
+
+| scene | cams (paper) | tracks | outliers% (paper) |
+|---|---|---|---|
+| strecha/entry-P10 | 10 (10) | 4736 | 2.7 (4.8) |
+| strecha/fountain-P11 | 11 (11) | 4545 | 0.7 (1.4) |
+| strecha/Herz-Jesu-P8 | 8 (8) | 2418 | 0.7 (1.8) |
+| strecha/Herz-Jesu-P25 | 25 (25) | 6544 | 2.6 (2.8) |
+| blendedmvs/58c4bb4f... = scene0 | 75 (75) | 21572 | 0.5 (2.0) |
+| blendedmvs/5acf8ca0... = scene1 | 51 (51) | 20143 | 1.1 (1.4) |
+| blendedmvs/5a48ba95... = scene2 | 33 (33) | 4875 | 1.5 (2.2) |
+| blendedmvs/5b950c71... = scene3 | 66 (66) | 4437 | 9.2 (8.8) |
+| 1dsfm/Alamo | 577 (573) | 104508 | 29.2 (32.6) |
+| 1dsfm/Ellis_Island | 227 (227) | 36596 | 56.3 (25.1) |
+| 1dsfm/Madrid_Metropolis | 341 (333) | 54287 | 29.1 (39.4) |
+| 1dsfm/Montreal_Notre_Dame | 450 (448) | 120246 | 36.3 (31.7) |
+| 1dsfm/Notre_Dame | 553 (549) | 220861 | 48.1 (35.6) |
+| 1dsfm/NYC_Library | 332 (330) | 63327 | 53.8 (33.6) |
+| 1dsfm/Piazza_del_Popolo | 338 (336) | 31061 | 42.1 (33.1) |
+| 1dsfm/Tower_of_London | 472 (467) | 130070 | 41.6 (27.0) |
+| 1dsfm/Vienna_Cathedral | 836 (824) | 234106 | 51.5 (31.4) |
+| 1dsfm/Yorkminster | 437 (432) | 120940 | 45.3 (29.0) |
+
+Notes:
+- BlendedMVS scene0-3 are anonymized in the paper; identification is by exact
+  camera-count match + closest outlier fraction (scene1/scene3 are unambiguous;
+  scene0's alternative 75-cam candidate had 6.1%, scene2's 33-cam alternative
+  0.7%). The other 5 candidate npz are also kept in code/datasets/blendedmvs/.
+- 1DSfM camera counts track the paper within ~1%; outlier fractions are higher
+  than theirs on average — expected: our tracks come from the released
+  tracks.txt with gt_bundle as labeling reference, theirs from their own SIFT
+  run with COLMAP GT. gt_bundle per-scene self-consistency: 0.63-1.19 px median.
+
 ## Failures
 None. All four datasets obtained; every archive passed integrity checks.
 
