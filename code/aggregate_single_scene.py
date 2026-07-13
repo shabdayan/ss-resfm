@@ -378,7 +378,8 @@ def main():
                  seeds_desc, bold_methods=bold_methods)
     write_repro(df, args.results_root, os.path.join(args.results_root, 'REPRO.md'))
 
-    # ---------- short analysis ----------
+    # ---------- short analysis (experimental methods only, not the paper column) ----------
+    methods = sorted(df['method'].unique())
     print('Wrote: summary.csv, summary_table.md, summary_table.tex, REPRO.md '
           'under {}\n'.format(args.results_root))
     if len(methods) == 2:
