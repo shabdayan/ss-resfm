@@ -52,9 +52,16 @@ datasets are "RESfM (retrained/evaluated on our tracks)".
   Labeling follows Appendix C most literally: initial inlier = the (image,
   keypoint) appears in a gt_bundle point's view list (bundler membership
   standing in for COLMAP membership), clean tracks triangulated under GT,
-  then the 4 px relabel over all observed keypoints. The coords-vs-bundle
-  pixel convention (pixel = (px + x_b, py - y_b)) is asserted at runtime on
-  ~2000 shared observations (DELTA_TOL = 2 px).
+  then the 4 px relabel over all observed keypoints.
+  Indexing quirk (cost a debugging round): gt_bundle camera blocks are
+  global (one per list.txt image) but its point view lists index into the
+  valid (focal>0) camera list — Notre_Dame masks this (all cameras valid),
+  Alamo doesn't (761/2915). The builder remaps and asserts per scene that
+  gt_bundle's own points project onto the referenced coords.txt keys
+  (< 4 px median; Alamo 0.67 px / 97.9% < 4 px). View-list (x,y) positions
+  are unusable for this check — several scenes store them as all zeros.
+  Cameras are further restricted to images present in coords.txt, and
+  zero-observation camera rows are dropped from the final npz.
   NOTE: RESfM instead ran COLMAP on the (Flickr) images to get 1DSfM GT; our
   GT is the dataset's own gt_bundle reference — a second provenance difference
   on top of R13.
