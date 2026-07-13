@@ -462,9 +462,15 @@ def dlt_triangulation(Ps, xs, visible_points):
 			A[3 * j + 2, 4 + j] = -1
 
 		if num_cam_show > 40:
-			[U, S, V_H] = da.linalg.svd(
-				da.from_array(A))  # in python svd returns V conjugate! so we need the last row and not column
-			X[i] = pflat(V_H[-1, :4].compute().reshape([-1, 1])).squeeze()
+			# Same guard as the small-system branch below: LAPACK SVD can fail to
+			# converge on ill-conditioned early-epoch systems (seen on Pantheon
+			# Paris in the ESFM arm of the single-scene benchmark); skip the point.
+			try:
+				[U, S, V_H] = da.linalg.svd(
+					da.from_array(A))  # in python svd returns V conjugate! so we need the last row and not column
+				X[i] = pflat(V_H[-1, :4].compute().reshape([-1, 1])).squeeze()
+			except np.linalg.LinAlgError:
+				pass
 		else:
 			try:
 				[U, S, V_H] = np.linalg.svd(A)  # in python svd returns V conjugate! so we need the last row and not column

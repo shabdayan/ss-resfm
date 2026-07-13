@@ -200,12 +200,18 @@ def main():
         if 'best_epoch' in nat:
             rec['best_epoch'] = nat['best_epoch']
 
-        # Native-vs-harmonized cross-check (alignment-convention guard).
+        # Native-vs-harmonized cross-check (alignment-convention guard). The
+        # relative check is paired with an absolute floor: on near-zero errors
+        # (e.g. 0.02 deg) float32-vs-float64 alignment noise easily exceeds 5%
+        # relatively while being physically meaningless — a real convention
+        # mismatch produces differences far above these floors.
+        abs_floor = {'rot_err_deg': 0.05, 'pos_err': 0.02, 'reproj_err_px': 0.1}
         for native_key, harm_key in (('Rs_mean', 'rot_err_deg'), ('ts_mean', 'pos_err'),
                                      ('our_repro', 'reproj_err_px')):
             if native_key in nat:
                 d = rel_diff(nat[native_key], rec[harm_key])
-                if d is not None and d > args.flag_threshold:
+                if (d is not None and d > args.flag_threshold
+                        and abs(nat[native_key] - rec[harm_key]) > abs_floor[harm_key]):
                     flag = ('{} seed{} {}: {} native={:.4f} vs harmonized={:.4f} '
                             '({:.1f}% apart)').format(method, seed, scene, harm_key,
                                                       nat[native_key], rec[harm_key], 100 * d)
