@@ -30,7 +30,7 @@ from utils.Phases import Phases
 from datasets.ScenesDataSet import ScenesDataSet, collate_fn
 from datasets import SceneData
 from lightning.fabric import Fabric
-from single_scene_optimization import init_weights_kaiming, train_single_model
+from single_scene_optimization import apply_kaiming_if_deep, train_single_model
 import train
 import copy
 
@@ -70,7 +70,7 @@ def main():
         else:
             raise ValueError(f'Unknown model type: {model_type}')
 
-        model.apply(init_weights_kaiming)
+        apply_kaiming_if_deep(model, conf)
 
         print(f'Number of parameters: {sum([x.numel() for x in model.parameters()])}')
         print(f'Number of trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}')

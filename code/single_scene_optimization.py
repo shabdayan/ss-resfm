@@ -81,6 +81,21 @@ def init_weights_kaiming(module):
         init.zeros_(module.bias)
 
 
+def apply_kaiming_if_deep(model, conf):
+    """Kaiming init is one of the DEEP-architecture measures (report §2.1);
+    original ESFM/RESfM (1 block x 3 layers) trains from PyTorch's default
+    init. Gate on total depth so shallow arms stay faithful to the baselines.
+    (FINE_TUNE loads a checkpoint right after, so this only affects fresh
+    training runs.)"""
+    total_layers = (conf.get_int('model.num_blocks', default=1)
+                    * conf.get_int('model.block_size', default=3))
+    if total_layers > 3:
+        model.apply(init_weights_kaiming)
+        print(f"✓ Kaiming initialization applied (deep model: {total_layers} layers)")
+    else:
+        print(f"– Default PyTorch initialization (shallow model: {total_layers} layers; Kaiming is deep-only)")
+
+
             
 def train_single_model(conf, device, phase, stage=1, architecture_type="esfm_outliers", results_aggregation_file_name=None):
     """
@@ -147,9 +162,8 @@ def train_single_model(conf, device, phase, stage=1, architecture_type="esfm_out
         print(f'Unknown model type: {model_type}')
         print(f'Expected one of: SetOfSet.SetOfSetNet, SetOfSet.DeepSetOfSetNet, SetOfSet.SetOfSetOutliersNet, SetOfSet.DeepSetOfSetOutliersNet')  
 
-    # Apply weight initialization to all modules
-    model.apply(init_weights_kaiming)
-    print(f"✓ Applied Xavier initialization to all Linear layers")
+    # Weight initialization: Kaiming for deep architectures only (report §2.1)
+    apply_kaiming_if_deep(model, conf)
     # ============================================================================
 
     
@@ -443,8 +457,8 @@ def loss_normalization(conf, device, phase, num_samples=100):
         print(f'Unknown model type: {model_type}')
         return None, None
     
-    # Apply initialization
-    model.apply(init_weights_kaiming)
+    # Apply initialization (Kaiming for deep architectures only)
+    apply_kaiming_if_deep(model, conf)
     model.eval()
     
     # Load the full scene data once
