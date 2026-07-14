@@ -18,12 +18,14 @@ SEEDS="0,1,2"
 EPOCHS=100000
 EVAL_INTERVALS=5000
 SCENES=""            # empty = all 36 Olsson scenes
+METHODS="esfm,uesfm"
 DRY_RUN=false
 SMOKE=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
         --smoke) SMOKE=true; shift ;;
+        --methods) METHODS="$2"; shift 2 ;;
         --scenes) SCENES="$2"; shift 2 ;;
         --seeds) SEEDS="$2"; shift 2 ;;
         --epochs) EPOCHS="$2"; shift 2 ;;
@@ -55,7 +57,7 @@ mkdir -p "${REPO_ROOT}/lsf_output/single_scene"
 IFS=',' read -ra SCENE_ARR <<< "$SCENES"
 for SCENE in "${SCENE_ARR[@]}"; do
     CMD="cd ${REPO_ROOT} && ${PY} run_single_scene_sweep.py \
-        --scenes '${SCENE}' --seeds ${SEEDS} \
+        --scenes '${SCENE}' --methods ${METHODS} --seeds ${SEEDS} \
         --epochs ${EPOCHS} --eval-intervals ${EVAL_INTERVALS}"
     if [ "$DRY_RUN" = true ]; then
         echo "DRY RUN: bsub -q ${QUEUE} -J ss_${SCENE} ... \"${CMD}\""
