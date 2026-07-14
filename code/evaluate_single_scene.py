@@ -191,7 +191,16 @@ def main():
 
         rec = {'method': method, 'scene': scene, 'seed': seed,
                'wall_clock_s': meta.get('wall_clock_s')}
-        rec.update(harmonized_from_cameras(cams, gt))
+        # Fail-soft: a run with degenerate final cameras (e.g. NaN rotations from a
+        # diverged optimization) must not kill the evaluation of every other run.
+        # Such runs get no harmonized_metrics.json and are reported loudly instead.
+        try:
+            rec.update(harmonized_from_cameras(cams, gt))
+        except Exception as e:
+            finite = bool(np.isfinite(cams['Rs']).all())
+            flags.append('{} seed{} {}: HARMONIZED EVAL FAILED ({}); '
+                         'finite rotations: {}'.format(method, seed, scene, e, finite))
+            continue
 
         nat = native_metrics(run_dir, method, scene)
         rec['native'] = nat
