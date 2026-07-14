@@ -32,7 +32,8 @@ UESFM_REPO = os.path.dirname(CODE_DIR)
 PROJECT_ROOT = os.path.dirname(UESFM_REPO)
 ESFM_REPO = os.path.join(PROJECT_ROOT, 'esfm-baseline')
 
-METHOD_LABELS = {'esfm': 'ESFM', 'uesfm': 'U-ESFM', 'esfm_paper': 'ESFM (paper)'}
+METHOD_LABELS = {'esfm': 'ESFM (official code)', 'esfm_rc': 'ESFM (RESfM code)',
+                 'uesfm': 'U-ESFM', 'esfm_paper': 'ESFM (paper)'}
 
 # Published per-scene numbers from Moran et al., ICCV 2021 (supplementary calibrated
 # table: "Ours" columns, before-BA and after-BA). Reference only: their post-BA uses
