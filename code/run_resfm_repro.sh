@@ -28,6 +28,8 @@ while [[ $# -gt 0 ]]; do
         --queue) QUEUE="$2"; shift 2;;
         --scans) SCENES="${2//,/ }"; shift 2;;
         --seed) SEED="$2"; shift 2;;
+        --template) TEMPLATE="$2"; shift 2;;
+        --eval_root) EVAL_ROOT="$2"; shift 2;;
         --dry_run) DRY_RUN=true; shift;;
         *) echo "Unknown option $1"; exit 1;;
     esac
