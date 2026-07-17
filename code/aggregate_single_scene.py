@@ -344,9 +344,22 @@ def write_repro(df, results_root, out_path):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--results-root', default=os.path.join(CODE_DIR, 'results', 'single_scene'))
+    ap.add_argument('--exclude-methods', default='uesfm_abl',
+                    help='comma-separated methods to leave out of the tables. Default '
+                         'excludes uesfm_abl: the layer-norm/residual/dropout flags only '
+                         'exist in the Deep models, so at 1x3 that arm is a bit-exact '
+                         'duplicate of esfm_rc (verified per-run); uesfm vs esfm_rc is '
+                         'already the pure loss ablation.')
     args = ap.parse_args()
 
     df, failures = collect(args.results_root)
+    excluded = [m.strip() for m in args.exclude_methods.split(',') if m.strip()]
+    if excluded and not df.empty:
+        n_before = len(df)
+        df = df[~df['method'].isin(excluded)]
+        if len(df) < n_before:
+            print('NOTE: excluded {} runs from methods {} (see --exclude-methods help)'.format(
+                n_before - len(df), excluded))
     if df.empty:
         sys.exit('No evaluated runs found under {} — run the sweep and '
                  'evaluate_single_scene.py first.'.format(args.results_root))
