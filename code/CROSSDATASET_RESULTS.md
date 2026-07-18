@@ -52,8 +52,40 @@ reproj_only = control; frozen row = step-0 in the ttt result dirs).
    on Strecha (the lr, not the loss, is the binding constraint there) —
    consistent with the MegaDepth verdict that TTT rescues mis-tuned configs.
 5. **Ellis_Island and Tower_of_London fail for every arm** (17-50 deg incl.
-   RESfM-off), pointing at those scenes' tracks/GT (gt_bundle) rather than any
-   model. Open item.
+   RESfM-off) — RESOLVED as a data pathology (see "Failure investigation").
 6. Shallow-adaptive caveats: best checkpoint Ep17000 (validation plateaued;
    training ran to Ep19999); the earlier Ep3000 rows in the CSV are superseded
    but kept for the training-progress comparison.
+
+## Failure investigation: Ellis_Island + Tower_of_London (2026-07-18)
+
+Ruled out, in order: (a) camera-graph connectivity — Ellis is the
+best-connected scene of the set (Fiedler 0.41 vs healthy NYC 0.0099);
+(b) GT calibration — gt_bundle focals match coords.txt EXIF (median ratio
+1.00) on all scenes; (c) coherent symmetry fold — the misplaced cameras are
+internally incoherent (34-60 deg relative errors); (d) contamination
+structure — NYC_Library has the same profile (55.6% outlier-dominated
+"deceptive" camera pairs, 30% fully-outlier tracks) and evaluates fine.
+
+Decisive **oracle experiment** (GT-labeled outliers removed at load,
+remove_outliers_gt=True, plain ESFM protocol, stage-1 ckpt;
+confs/crossdataset_oracle_1dsfm.conf.template,
+results/crossdataset/oracle_1dsfm_eval/):
+
+| scene | contaminated Rot/Trans | oracle Rot/Trans |
+|---|---|---|
+| Ellis_Island | 16.96 / 18.8 | 15.65 / 16.1 |
+| Tower_of_London | 21.58 / 51.7 | 15.85 / 71.9 |
+| NYC_Library (control) | 1.74 / 3.4 | 0.53 / 0.70 |
+| Alamo (control) | 1.61 / 1.3 | 2.53 / 1.5 |
+
+Even perfect outlier removal does not rescue Ellis/Tower, while the equally
+contaminated NYC control becomes near-perfect. The labeled-INLIER tracks of
+these two scenes reconstruct ~15 deg away from gt_bundle's cameras despite
+low per-point reprojection (1.4-1.6 px) — the released tracks.txt +
+gt_bundle combination is globally inconsistent there (landmark-confusion
+scenes; RESfM's paper sidestepped this by rebuilding tracks from images with
+COLMAP GT). **Recommendation:** footnote Ellis_Island and Tower_of_London as
+excluded-for-data-pathology in the 1DSfM comparison; the remaining 8 scenes
+carry the row. The 1DSfM per-dataset means above INCLUDE the two pathological
+scenes for all arms symmetrically.
