@@ -1,4 +1,41 @@
-# Cross-dataset evaluation results (R10) — 2026-07-18, seed 20, our tracks
+# Cross-dataset evaluation results (R10) — our tracks
+
+Two protocols below: the seed-20 single-run tables (paper protocol,
+2026-07-18) and the **5-seed median protocol** (seeds 20-24, 2026-07-20 —
+the headline numbers). Per-scene seed-medians:
+`results/crossdataset/all_arms_seed_medians.csv`
+(built by `aggregate_crossdataset_seeds.py`; full 5/5 seed coverage for
+every arm x dataset x scene).
+
+## 5-SEED MEDIAN PROTOCOL (per-dataset mean of per-scene seed-medians)
+
+Rotation (deg, post-BA):
+
+| dataset | ESFM | ESFM@1e-4 | RESfM-off | stage1 | stage1@1e-4 | shal-Ep17k | shal-Ep17k@1e-4 | TTT-comb | TTT-reproj |
+|---|---|---|---|---|---|---|---|---|---|
+| 1DSfM | 8.08 | 14.33 | 10.48 | **7.46** | 11.78 | 8.32 | 9.81 | 8.14 | 8.25 |
+| BlendedMVS | 8.20 | 6.97 | 31.91 | **2.25** | 12.26 | 19.27 | 24.71 | 10.32 | 19.28 |
+| Strecha | 17.20 | **0.09** | 2.04 | 15.95 | 0.13 | 16.65 | 8.45 | 14.53 | 16.72 |
+
+Translation:
+
+| dataset | ESFM | ESFM@1e-4 | RESfM-off | stage1 | stage1@1e-4 | shal-Ep17k | shal-Ep17k@1e-4 | TTT-comb | TTT-reproj |
+|---|---|---|---|---|---|---|---|---|---|
+| 1DSfM | 16.21 | 16.66 | 10.60 | 10.94 | 13.48 | 12.08 | 12.10 | 13.14 | 13.75 |
+| BlendedMVS | 0.106 | 0.109 | 0.330 | **0.041** | 0.185 | 0.271 | 0.330 | 0.156 | 0.271 |
+| Strecha | 3.20 | **0.017** | 0.196 | 2.97 | 0.021 | 3.07 | 2.15 | 2.97 | 2.96 |
+
+Seed-robust conclusions: (1) the Strecha lr finding holds across seeds
+(ESFM/stage1 @1e-4: 0.09-0.13 deg vs 16-17 at protocol lr); (2) stage1
+(deep 2x3, MAD) is the best arm on both 1DSfM (7.46/10.94) and BlendedMVS
+(2.25/0.041) — the seed-20 TTT-comb edge on 1DSfM does not survive the
+median protocol (8.14); (3) RESfM-off is seed-invariant (deterministic
+checkpoint) and remains the Strecha protocol-lr reference (2.04) and the
+BlendedMVS outlier (31.91).
+
+---
+
+# Seed-20 tables (paper protocol, 2026-07-18)
 
 All arms evaluated per-scene (RESfM protocol: TEST -> outlier prune -> ~1K-epoch
 fine-tune -> robust BA) on the tracks built per `build_tracks/BUILD_TRACKS.md`
