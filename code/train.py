@@ -277,6 +277,11 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
 
     # === Optimizer & Scheduler ===
     lr = conf.get_float('train.lr')
+    if phase in [Phases.FINE_TUNE, Phases.SHORT_OPTIMIZATION]:
+        # Per-dataset fine-tune lr override (mirrors loss.func_tuning): the
+        # protocol lr 5e-3 flatlines on small scenes (Strecha) where 1e-4
+        # converges — see CROSSDATASET_RESULTS.md.
+        lr = conf.get_float('train.lr_tuning', default=lr)
     scheduler_milestone = conf.get_list('train.scheduler_milestone')
     gamma = conf.get_float('train.gamma', default=0.1)
     optim_type = conf.get_string('train.optim_type', default='Adam')

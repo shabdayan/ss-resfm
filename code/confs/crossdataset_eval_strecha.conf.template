@@ -63,6 +63,9 @@ train
 {
     # RESfM's per-test-scene fine-tune stage: ~1K epochs, eval every 250, lr 5e-3
     lr = 5e-3
+    # Per-dataset fine-tune lr (train.lr_tuning overrides train.lr at
+    # FINE_TUNE only): Strecha: protocol 5e-3 flatlines 8-25-image scenes (CROSSDATASET_RESULTS.md)
+    lr_tuning = 1e-4
     num_epochs = 1001
     scheduler_milestone = [10000]
     gamma = 0.9
