@@ -1,37 +1,39 @@
 # Cross-dataset evaluation results (R10) — our tracks
 
 Two protocols below: the seed-20 single-run tables (paper protocol,
-2026-07-18) and the **5-seed median protocol** (seeds 20-24, 2026-07-20 —
-the headline numbers). Per-scene seed-medians:
-`results/crossdataset/all_arms_seed_medians.csv`
-(built by `aggregate_crossdataset_seeds.py`; full 5/5 seed coverage for
-every arm x dataset x scene).
+2026-07-18) and the **5-seed protocol** (seeds 20-24, 2026-07-20 — the
+headline numbers; per-scene MEANS over seeds per the project's reporting
+convention). Per-scene values:
+`results/crossdataset/all_arms_seed_means.csv`
+(built by `aggregate_crossdataset_seeds.py --stat mean`; full 5/5 seed
+coverage for every arm x dataset x scene; `--stat median` variant also
+available).
 
-## 5-SEED MEDIAN PROTOCOL (per-dataset mean of per-scene seed-medians)
+## 5-SEED PROTOCOL (per-dataset mean of per-scene seed-means)
 
 Rotation (deg, post-BA):
 
 | dataset | ESFM | ESFM@1e-4 | RESfM-off | stage1 | stage1@1e-4 | shal-Ep17k | shal-Ep17k@1e-4 | TTT-comb | TTT-reproj |
 |---|---|---|---|---|---|---|---|---|---|
-| 1DSfM | 8.08 | 14.33 | 10.48 | **7.46** | 11.78 | 8.32 | 9.81 | 8.14 | 8.25 |
-| BlendedMVS | 8.20 | 6.97 | 31.91 | **2.25** | 12.26 | 19.27 | 24.71 | 10.32 | 19.28 |
-| Strecha | 17.20 | **0.09** | 2.04 | 15.95 | 0.13 | 16.65 | 8.45 | 14.53 | 16.72 |
+| 1DSfM | 8.37 | 14.38 | 10.21 | **7.91** | 12.08 | 9.23 | 9.85 | 8.93 | 8.83 |
+| BlendedMVS | 7.78 | 7.15 | 31.91 | **2.39** | 12.31 | 15.42 | 23.24 | 9.94 | 15.45 |
+| Strecha | 16.69 | **0.14** | 2.04 | 15.63 | 0.15 | 14.44 | 8.37 | 12.48 | 14.40 |
 
 Translation:
 
 | dataset | ESFM | ESFM@1e-4 | RESfM-off | stage1 | stage1@1e-4 | shal-Ep17k | shal-Ep17k@1e-4 | TTT-comb | TTT-reproj |
 |---|---|---|---|---|---|---|---|---|---|
-| 1DSfM | 16.21 | 16.66 | 10.60 | 10.94 | 13.48 | 12.08 | 12.10 | 13.14 | 13.75 |
-| BlendedMVS | 0.106 | 0.109 | 0.330 | **0.041** | 0.185 | 0.271 | 0.330 | 0.156 | 0.271 |
-| Strecha | 3.20 | **0.017** | 0.196 | 2.97 | 0.021 | 3.07 | 2.15 | 2.97 | 2.96 |
+| 1DSfM | 15.34 | 16.99 | **10.71** | 12.62 | 14.44 | 13.17 | 12.07 | 13.51 | 14.09 |
+| BlendedMVS | 0.111 | 0.113 | 0.330 | **0.040** | 0.176 | 0.224 | 0.299 | 0.152 | 0.224 |
+| Strecha | 2.97 | 0.030 | 0.196 | 2.93 | **0.027** | 2.90 | 2.18 | 2.73 | 2.88 |
 
 Seed-robust conclusions: (1) the Strecha lr finding holds across seeds
-(ESFM/stage1 @1e-4: 0.09-0.13 deg vs 16-17 at protocol lr); (2) stage1
-(deep 2x3, MAD) is the best arm on both 1DSfM (7.46/10.94) and BlendedMVS
-(2.25/0.041) — the seed-20 TTT-comb edge on 1DSfM does not survive the
-median protocol (8.14); (3) RESfM-off is seed-invariant (deterministic
-checkpoint) and remains the Strecha protocol-lr reference (2.04) and the
-BlendedMVS outlier (31.91).
+(ESFM/stage1 @1e-4: 0.14-0.15 deg vs 15-17 at protocol lr); (2) stage1
+(deep 2x3, MAD) is the best rotation arm on both 1DSfM (7.91) and
+BlendedMVS (2.39/0.040) — though RESfM-off has the best 1DSfM translation
+(10.71); (3) RESfM-off is seed-invariant (deterministic checkpoint) and
+remains the Strecha protocol-lr reference (2.04) and the BlendedMVS
+outlier (31.91).
 
 ---
 

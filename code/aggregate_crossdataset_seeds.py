@@ -1,4 +1,5 @@
-"""Aggregate the cross-dataset 5-seed protocol: per-scene MEDIAN over seeds
+"""Aggregate the cross-dataset 5-seed protocol: per-scene MEAN (default,
+Ortal's reporting preference) or MEDIAN over seeds
 of Rot / Trans / Nr for every arm of CROSSDATASET_RESULTS.md, then
 per-dataset means of those medians.
 
@@ -49,9 +50,13 @@ def seed_root(label, base, seed):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--seeds", default="20,21,22,23,24")
-    ap.add_argument("--csv", default=XD + "/all_arms_seed_medians.csv")
+    ap.add_argument("--csv", default=None)
+    ap.add_argument("--stat", choices=["mean", "median"], default="mean")
     args = ap.parse_args()
     seeds = [int(s) for s in args.seeds.split(",")]
+    if args.csv is None:
+        args.csv = XD + f"/all_arms_seed_{args.stat}s.csv"
+    agg = (lambda s: s.mean()) if args.stat == "mean" else (lambda s: s.median())
 
     rows = []
     for label, (base_t, rf_glob) in ARMS.items():
@@ -81,10 +86,10 @@ def main():
                 df = pd.DataFrame(per_seed.values(), columns=["Rot", "Trans", "Nr"])
                 rows.append(dict(arm=label, ds=ds, scene=scene,
                                  n_seeds=len(per_seed),
-                                 Rot_med=df["Rot"].median(),
-                                 Trans_med=df["Trans"].median(),
-                                 Nr_med=df["Nr"].median(),
-                                 Rot_iqr=df["Rot"].quantile(0.75) - df["Rot"].quantile(0.25)))
+                                 Rot_agg=agg(df["Rot"]),
+                                 Trans_agg=agg(df["Trans"]),
+                                 Nr_agg=agg(df["Nr"]),
+                                 Rot_std=df["Rot"].std()))
 
     t = pd.DataFrame(rows)
     t.to_csv(args.csv, index=False)
@@ -98,11 +103,11 @@ def main():
         print(f"\nincomplete cells ({len(incomplete)}):")
         print(incomplete[["arm", "ds", "scene", "n_seeds"]].to_string(index=False))
 
-    print("\n=== per-dataset MEAN of per-scene seed-MEDIAN Rot (deg) ===")
-    print(t.pivot_table(index="ds", columns="arm", values="Rot_med",
+    print(f"\n=== per-dataset MEAN of per-scene seed-{args.stat.upper()} Rot (deg) ===")
+    print(t.pivot_table(index="ds", columns="arm", values="Rot_agg",
                         aggfunc="mean").reindex(columns=order).round(2).to_string())
-    print("\n=== per-dataset MEAN of per-scene seed-MEDIAN Trans ===")
-    print(t.pivot_table(index="ds", columns="arm", values="Trans_med",
+    print(f"\n=== per-dataset MEAN of per-scene seed-{args.stat.upper()} Trans ===")
+    print(t.pivot_table(index="ds", columns="arm", values="Trans_agg",
                         aggfunc="mean").reindex(columns=order).round(3).to_string())
     print(f"\nper-scene medians -> {args.csv} ({len(t)} rows)")
 
