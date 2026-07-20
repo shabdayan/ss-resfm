@@ -11,21 +11,24 @@ available).
 
 ## 5-SEED PROTOCOL (per-dataset mean of per-scene seed-means)
 
-Rotation (deg, post-BA):
+Rotation (deg, post-BA). The `paper` column is RESfM's published Tables 2-4
+"Ours" (THEIR tracks + COLMAP GT, seed 20 — reference only, see the paper
+section below; bold marks the best of OUR arms):
 
-| dataset | ESFM | ESFM@1e-4 | RESfM-off | stage1 | stage1@1e-4 | shal-Ep17k | shal-Ep17k@1e-4 | TTT-comb | TTT-reproj |
-|---|---|---|---|---|---|---|---|---|---|
-| 1DSfM | 8.37 | 14.38 | 10.21 | **7.91** | 12.08 | 9.23 | 9.85 | 8.93 | 8.83 |
-| BlendedMVS | 7.78 | 7.15 | 31.91 | **2.39** | 12.31 | 15.42 | 23.24 | 9.94 | 15.45 |
-| Strecha | 16.69 | **0.14** | 2.04 | 15.63 | 0.15 | 14.44 | 8.37 | 12.48 | 14.40 |
+| dataset | ESFM | ESFM@1e-4 | RESfM-off | stage1 | stage1@1e-4 | shal-Ep17k | shal-Ep17k@1e-4 | TTT-comb | TTT-reproj | paper |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1DSfM | 8.37 | 14.38 | 10.21 | **7.91** | 12.08 | 9.23 | 9.85 | 8.93 | 8.83 | 3.98 |
+| BlendedMVS | 7.78 | 7.15 | 31.91 | **2.39** | 12.31 | 15.42 | 23.24 | 9.94 | 15.45 | 0.011 |
+| Strecha | 16.69 | **0.14** | 2.04 | 15.63 | 0.15 | 14.44 | 8.37 | 12.48 | 14.40 | 0.027 |
 
-Translation:
+Translation (paper 1DSfM value is in THEIR GT's scale — not comparable to
+our gt_bundle-scaled column):
 
-| dataset | ESFM | ESFM@1e-4 | RESfM-off | stage1 | stage1@1e-4 | shal-Ep17k | shal-Ep17k@1e-4 | TTT-comb | TTT-reproj |
-|---|---|---|---|---|---|---|---|---|---|
-| 1DSfM | 15.34 | 16.99 | **10.71** | 12.62 | 14.44 | 13.17 | 12.07 | 13.51 | 14.09 |
-| BlendedMVS | 0.111 | 0.113 | 0.330 | **0.040** | 0.176 | 0.224 | 0.299 | 0.152 | 0.224 |
-| Strecha | 2.97 | 0.030 | 0.196 | 2.93 | **0.027** | 2.90 | 2.18 | 2.73 | 2.88 |
+| dataset | ESFM | ESFM@1e-4 | RESfM-off | stage1 | stage1@1e-4 | shal-Ep17k | shal-Ep17k@1e-4 | TTT-comb | TTT-reproj | paper |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1DSfM | 15.34 | 16.99 | **10.71** | 12.62 | 14.44 | 13.17 | 12.07 | 13.51 | 14.09 | (0.427) |
+| BlendedMVS | 0.111 | 0.113 | 0.330 | **0.040** | 0.176 | 0.224 | 0.299 | 0.152 | 0.224 | 0.001 |
+| Strecha | 2.97 | 0.030 | 0.196 | 2.93 | **0.027** | 2.90 | 2.18 | 2.73 | 2.88 | 0.005 |
 
 Seed-robust conclusions: (1) the Strecha lr finding holds across seeds
 (ESFM/stage1 @1e-4: 0.14-0.15 deg vs 15-17 at protocol lr); (2) stage1
