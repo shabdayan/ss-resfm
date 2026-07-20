@@ -85,8 +85,22 @@ def native_metrics(run_dir, method, scene):
     return out
 
 
+def subset_gt(cams, gt):
+    """Post-stage pruned runs keep only the largest connected camera component, so
+    their predictions cover a subset of the scene's cameras. In that case use the
+    GT the run itself stored (decomposed from the pruned data's Ps_gt); otherwise
+    use the independently loaded full-scene GT."""
+    if cams['Rs'].shape[0] == gt['Rs_gt'].shape[0]:
+        return gt
+    Ks = cams['Ks'].astype(np.float64)
+    return {'Rs_gt': cams['Rs_gt'].astype(np.float64),
+            'ts_gt': cams['ts_gt'].astype(np.float64),
+            'Ks': Ks, 'Ns': np.linalg.inv(Ks)}
+
+
 def harmonized_from_cameras(cams, gt):
     """Recompute all comparison metrics from raw predicted cameras (pre-BA)."""
+    gt = subset_gt(cams, gt)
     Rs = cams['Rs'].astype(np.float64)
     ts = cams['ts'].astype(np.float64)
     Ps = cams['Ps'].astype(np.float64)
@@ -115,6 +129,7 @@ def shared_ba(cams, gt):
     import pycolmap
     from utils.ba_advanced import (batch_matrix_to_pycolmap, prepare_ba_options,
                                    pycolmap_to_batch_matrix)
+    gt = subset_gt(cams, gt)
     xs_full = cams['xs'].astype(np.float64)
     Rs = cams['Rs'].astype(np.float64)
     ts = cams['ts'].astype(np.float64)

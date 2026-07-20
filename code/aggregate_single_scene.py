@@ -34,7 +34,14 @@ ESFM_REPO = os.path.join(PROJECT_ROOT, 'esfm-baseline')
 
 METHOD_LABELS = {'esfm': 'ESFM (official code)', 'esfm_rc': 'ESFM (RESfM code)',
                  'uesfm': 'U-ESFM', 'uesfm_abl': 'U-ESFM arch + ESFMLoss',
-                 'esfm_paper': 'ESFM (paper)'}
+                 'esfm_paper': 'ESFM (paper)',
+                 # post-stage completions of the U-ESFM protocol (uesfm_poststage.py)
+                 'uesfm_ft_learned_1k': 'U-ESFM +prune(learned)+FT1k',
+                 'uesfm_ft_learned_5k': 'U-ESFM +prune(learned)+FT5k',
+                 'uesfm_ft_mad_1k': 'U-ESFM +prune(MAD)+FT1k',
+                 'uesfm_ft_mad_5k': 'U-ESFM +prune(MAD)+FT5k',
+                 'uesfm_ttt_1k': 'U-ESFM +TTT1k',
+                 'uesfm_ttt_5k': 'U-ESFM +TTT5k'}
 
 # Published per-scene numbers from Moran et al., ICCV 2021 (supplementary calibrated
 # table: "Ours" columns, before-BA and after-BA). Reference only: their post-BA uses
