@@ -35,6 +35,55 @@ BlendedMVS (2.39/0.040) — though RESfM-off has the best 1DSfM translation
 remains the Strecha protocol-lr reference (2.04) and the BlendedMVS
 outlier (31.91).
 
+## RESfM paper reference (Tables 2-4 "Ours" — THEIR tracks, not comparable head-to-head)
+
+Source: resfm.pdf; RESfM's own tracks (SIFT rebuilt from images) and their
+GT (COLMAP for 1DSfM; seed 20, no multi-seed protocol). Rotation (deg) is
+unit-free and indicative; translation units follow each GT's scale, so
+1DSfM translation is NOT comparable across track provenances (their COLMAP
+scale vs our gt_bundle scale).
+
+| scene | Nc | Out% | Nr | Rot | Trans |
+|---|---|---|---|---|---|
+| Alamo | 573 | 32.6 | 484 | 3.66 | 0.515 |
+| Ellis Island | 227 | 25.1 | 214 | 0.82 | 0.122 |
+| Madrid Metropolis | 333 | 39.4 | 244 | 8.42 | 0.827 |
+| Montreal Notre Dame | 448 | 31.7 | 346 | 2.82 | 0.352 |
+| Notre Dame | 549 | 35.6 | 517 | 1.20 | 0.231 |
+| NYC Library | 330 | 33.6 | 224 | 3.96 | 0.429 |
+| Piazza del Popolo | 336 | 33.1 | 249 | 2.20 | 0.186 |
+| Tower of London | 467 | 27.0 | 94 | 0.67 | 0.026 |
+| Vienna Cathedral | 824 | 31.4 | 479 | 1.52 | 0.112 |
+| Yorkminster | 432 | 29.0 | 331 | 14.54 | 1.468 |
+| **1DSfM mean** | | | | **3.98** | 0.427 |
+| entry-P10 | 10 | 4.8 | 10 | 0.024 | 0.008 |
+| fountain-P11 | 11 | 1.4 | 11 | 0.028 | 0.003 |
+| Herz-Jesu-P8 | 8 | 1.8 | 8 | 0.026 | 0.004 |
+| Herz-Jesu-P25 | 25 | 2.8 | 24 | 0.030 | 0.006 |
+| **Strecha mean** | | | | **0.027** | 0.005 |
+| scene0 (75) | 75 | 2.0 | 75 | 0.016 | 0.0007 |
+| scene1 (51) | 51 | 1.4 | 51 | 0.011 | 0.0021 |
+| scene2 (33) | 33 | 2.2 | 33 | 0.009 | 0.0006 |
+| scene3 (66) | 66 | 8.8 | 66 | 0.007 | 0.0007 |
+| **BlendedMVS mean** | | | | **0.011** | 0.001 |
+
+Readings against our tables (all-ours, our tracks):
+- **Track provenance dominates the gap.** Same released weights: RESfM-off
+  on our 1DSfM tracks 10.21 deg vs 3.98 in the paper on theirs. Our best
+  arm (stage1 7.91) also sits well above their numbers everywhere —
+  consistent with our tracks carrying more contamination (e.g. Ellis 56.3%
+  vs their 25.1%) and different GT (gt_bundle vs their COLMAP).
+- **Tower_of_London is scene-pathology only on OUR data**: paper 0.67 deg
+  (their tracks, though with Nr 94/467 — they register only 20% of the
+  cameras) vs 14-50 deg for every arm on ours — supports the oracle verdict
+  that the released tracks/gt_bundle are the problem, not the scene.
+  Ellis Island likewise: paper 0.82, ours >= 15 for all arms.
+- **Their hardest scene is Yorkminster (14.54)** — where several of our
+  arms do BETTER on our tracks (shal@1e-4 9.13, stage1@1e-4 11.38).
+- On Strecha/BlendedMVS their numbers (0.011-0.03 deg) are 1-2 orders
+  below anything on our tracks (best: 0.14 / 2.39) — our SIFT tracks are
+  the visible ceiling there, not the models.
+
 ---
 
 # Seed-20 tables (paper protocol, 2026-07-18)
