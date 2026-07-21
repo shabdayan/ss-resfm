@@ -15,28 +15,35 @@ Rotation (deg, post-BA). The `paper` column is RESfM's published Tables 2-4
 "Ours" (THEIR tracks + COLMAP GT, seed 20 — reference only, see the paper
 section below; bold marks the best of OUR arms):
 
-| dataset | ESFM | ESFM@1e-4 | RESfM-off | stage1 | stage1@1e-4 | shal-Ep17k | shal-Ep17k@1e-4 | TTT-comb | TTT-reproj | paper |
-|---|---|---|---|---|---|---|---|---|---|---|
-| 1DSfM | 8.37 | 14.38 | 10.21 | **7.91** | 12.08 | 9.23 | 9.85 | 8.93 | 8.83 | 3.98 |
-| BlendedMVS | 7.78 | 7.15 | 31.91 | **2.39** | 12.31 | 15.42 | 23.24 | 9.94 | 15.45 | 0.011 |
-| Strecha | 16.69 | **0.14** | 2.04 | 15.63 | 0.15 | 14.44 | 8.37 | 12.48 | 14.40 | 0.027 |
+| dataset | ESFM | ESFM@1e-4 | RESfM-off | stage1 | stage1@1e-4 | shal-Ep17k | shal-Ep17k@1e-4 | TTT-comb | TTT-reproj | deep-adpt | paper |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1DSfM | 8.37 | 14.38 | 10.21 | 7.91 | 12.08 | 9.23 | 9.85 | 8.93 | 8.83 | **5.73** | 3.98 |
+| BlendedMVS | 7.78 | 7.15 | 31.91 | **2.39** | 12.31 | 15.42 | 23.24 | 9.94 | 15.45 | 6.29 | 0.011 |
+| Strecha | 16.69 | **0.14** | 2.04 | 15.63 | 0.15 | 14.44 | 8.37 | 12.48 | 14.40 | 1.59 | 0.027 |
 
 Translation (paper 1DSfM value is in THEIR GT's scale — not comparable to
 our gt_bundle-scaled column):
 
-| dataset | ESFM | ESFM@1e-4 | RESfM-off | stage1 | stage1@1e-4 | shal-Ep17k | shal-Ep17k@1e-4 | TTT-comb | TTT-reproj | paper |
-|---|---|---|---|---|---|---|---|---|---|---|
-| 1DSfM | 15.34 | 16.99 | **10.71** | 12.62 | 14.44 | 13.17 | 12.07 | 13.51 | 14.09 | (0.427) |
-| BlendedMVS | 0.111 | 0.113 | 0.330 | **0.040** | 0.176 | 0.224 | 0.299 | 0.152 | 0.224 | 0.001 |
-| Strecha | 2.97 | 0.030 | 0.196 | 2.93 | **0.027** | 2.90 | 2.18 | 2.73 | 2.88 | 0.005 |
+| dataset | ESFM | ESFM@1e-4 | RESfM-off | stage1 | stage1@1e-4 | shal-Ep17k | shal-Ep17k@1e-4 | TTT-comb | TTT-reproj | deep-adpt | paper |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1DSfM | 15.34 | 16.99 | 10.71 | 12.62 | 14.44 | 13.17 | 12.07 | 13.51 | 14.09 | **9.36** | (0.427) |
+| BlendedMVS | 0.111 | 0.113 | 0.330 | **0.040** | 0.176 | 0.224 | 0.299 | 0.152 | 0.224 | 0.097 | 0.001 |
+| Strecha | 2.97 | 0.030 | 0.196 | 2.93 | **0.027** | 2.90 | 2.18 | 2.73 | 2.88 | 0.218 | 0.005 |
 
-Seed-robust conclusions: (1) the Strecha lr finding holds across seeds
-(ESFM/stage1 @1e-4: 0.14-0.15 deg vs 15-17 at protocol lr); (2) stage1
-(deep 2x3, MAD) is the best rotation arm on both 1DSfM (7.91) and
-BlendedMVS (2.39/0.040) — though RESfM-off has the best 1DSfM translation
-(10.71); (3) RESfM-off is seed-invariant (deterministic checkpoint) and
-remains the Strecha protocol-lr reference (2.04) and the BlendedMVS
-outlier (31.91).
+Seed-robust conclusions (final, incl. the deep-adaptive arm added
+2026-07-21 — deep 2x3 + reproj+outlier CombinedLoss, Ep16500, per-dataset
+lr_tuning policy): (1) **on every dataset, a U-ESFM arm is the best method
+on both metrics** — 1DSfM: deep-adpt 5.73/9.36 (also the 1DSfM-8 rotation
+leader at 2.86, and it fixes stage1's Yorkminster failure, 9.7 vs 23.0);
+BlendedMVS: stage1 2.39/0.040; Strecha: stage1@1e-4 0.15/0.027 (ESFM@1e-4
+rotation 0.14 = same checkpoint, no MAD). RESfM-off's only remaining edge
+is 1DSfM-8 translation (3.36 vs deep-adpt 4.60). (2) No single arm sweeps:
+deep-adpt is 1st/2nd/2nd across datasets with the best worst-case (6.29)
+— the adaptive loss wins internet-photo scenes but keeps a BlendedMVS
+scene2/3 fragility and Strecha's entry-P10 (6.14, all seeds); stage1+lr
+policy is 1st/1st/4th. The robustness claim ("U-ESFM never collapses;
+the released classifier does: 31.9 on BlendedMVS") holds for both.
+(3) The Strecha lr finding is unchanged (0.14-0.15 @1e-4 vs 15-17 @5e-3).
 
 ## RESfM paper reference (Tables 2-4 "Ours" — THEIR tracks, not comparable head-to-head)
 
