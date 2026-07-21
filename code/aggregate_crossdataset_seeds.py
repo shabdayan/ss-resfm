@@ -33,6 +33,8 @@ ARMS = {
     "shal-Ep17k@1e-4": (XD + "/uesfm_shallow_adaptive_ep17k_ftlr1e4_{ds}_eval", "Results_FINE_TUNE*"),
     "TTT-comb": (TTT + "/xd_{ds}_shallow_adaptive_ep17k_comb", "Results_FINE_TUNE*"),
     "TTT-reproj": (TTT + "/xd_{ds}_shallow_adaptive_ep17k_reproj_only", "Results_FINE_TUNE*"),
+    # deep 2x3 + adaptive CombinedLoss (Ep16500), per-dataset lr_tuning policy
+    "deep-adpt": (XD + "/uesfm_deep_adaptive_{ds}_eval", "Results_FINE_TUNE*"),
 }
 DATASETS = ["1dsfm", "strecha", "blendedmvs"]
 # seed-20 stage1 ran under uesfm_{ds}_eval; seeds 21+ use uesfm_stage1_{ds}_eval
