@@ -479,6 +479,14 @@ class AdaptiveConfidenceWeightedOutliersLoss(nn.Module):
         self.min_confident_samples = conf.get_int('loss.min_confident_samples', default=10)
         self.min_separation = conf.get_float('loss.min_threshold_separation', default=0.5)
         self.warmup_epochs = conf.get_int('loss.warmup_epochs', default=10)
+
+        # A2.5.1 (diagnosis task): contamination-linked outlier percentile.
+        # The fixed outlier_percentile encodes a ~20% contamination prior; when
+        # enabled, estimate the scene's outlier fraction per forward with a MAD
+        # rule and label the top est-fraction as confident outliers instead.
+        # Off by default — existing confs are unaffected.
+        self.contamination_linked = conf.get_bool('loss.contamination_linked_percentile', default=False)
+        self.contamination_mad_alpha = conf.get_float('loss.contamination_mad_alpha', default=2.0)
         
     def forward(self, pred_cam, pred_outliers, data, epoch=None):
         """
@@ -507,8 +515,14 @@ class AdaptiveConfidenceWeightedOutliersLoss(nn.Module):
         # ============================================
         # KEY: ADAPTIVE THRESHOLDS (per-scene)
         # ============================================
+        outlier_percentile = self.outlier_percentile
+        if self.contamination_linked:
+            med = errors_flat.median()
+            mad = (errors_flat - med).abs().median()
+            est_frac = (errors_flat > med + self.contamination_mad_alpha * 1.4826 * mad).float().mean()
+            outlier_percentile = float(torch.clamp(100.0 * (1.0 - est_frac), 55.0, 95.0))
         low_threshold = torch.quantile(errors_flat, self.inlier_percentile / 100.0)
-        high_threshold = torch.quantile(errors_flat, self.outlier_percentile / 100.0)
+        high_threshold = torch.quantile(errors_flat, outlier_percentile / 100.0)
         
         # Ensure minimum separation (handle degenerate distributions)
         if high_threshold - low_threshold < self.min_separation:
@@ -542,6 +556,7 @@ class AdaptiveConfidenceWeightedOutliersLoss(nn.Module):
                 'pred_outlier_frac': float((pred_outliers.squeeze() > 0.5).float().mean()),
                 'low_threshold': float(low_threshold),
                 'high_threshold': float(high_threshold),
+                'outlier_percentile_used': float(outlier_percentile),
                 'confident_frac': float(confident_mask.float().mean()),
             }
         
