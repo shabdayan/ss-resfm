@@ -135,6 +135,11 @@ def build_conf(base_conf_path, scene, seed, variant, budget, raw_dir, dataset_na
     conf.put('train.output_mode', 1)
     conf.put('train.early_stopping_patience', 0)
     conf.put('train.extract_reproj_errors', False)
+    # keys normally injected by general_utils.init_exp (bypassed here)
+    conf.put('wandb', 0)
+    conf.put('exp_version', 'single_scene_post')
+    conf.put('resume', False)
+    conf.put('resuming_epoch', 0)
     return conf
 
 
