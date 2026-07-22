@@ -77,6 +77,30 @@ scale vs our gt_bundle scale).
 | scene3 (66) | 66 | 8.8 | 66 | 0.007 | 0.0007 |
 | **BlendedMVS mean** | | | | **0.011** | 0.001 |
 
+### Scene-matched validation: the paper gap is three scenes, not a bias
+
+Comparing like-for-like (mean rotation, deg) dissolves the apparent
+paper-vs-ours discrepancy — on comparable data our evaluation REPRODUCES
+the paper's numbers with the released checkpoint:
+
+| comparison | paper (their tracks) | ours (our tracks) |
+|---|---|---|
+| RESfM, 1DSfM healthy-8 (excl. Ellis/Tower) | 4.79 | 4.16 |
+| ESFM, 1DSfM healthy-8 | 8.56 | 6.57 |
+| RESfM, Strecha excl. Herz-Jesu-P8 | 0.02-0.03 | 0.01-0.02 |
+
+The full-dataset gap (10.21 vs 3.98 on 1DSfM; 2.04 vs 0.027 on Strecha) is
+manufactured entirely by: Ellis_Island (18.7 vs 0.82) + Tower_of_London
+(50.2 vs 0.67) — the two scenes the oracle experiment proved pathological
+in the RELEASED data (their rebuilt tracks lack the defect; their Tower
+row registers only 94/467 cameras) — and Strecha's Herz-Jesu-P8 (8.12 vs
+0.026). BlendedMVS is the one genuine anomaly (classifier collapse on two
+scenes our own arms solve — the domain-shift finding). The paper's
+ESFM-vs-RESfM ordering on 1DSfM (8.56 vs 4.79) is also reproduced
+qualitatively by ours (6.57 vs 4.16). Note the paper reports ESFM only on
+1DSfM; Tables 3-4 (Strecha/BlendedMVS) compare against MASt3R/VGGSfM/
+Theia/COLMAP/GLOMAP — our tables are the first ESFM-family numbers there.
+
 Readings against our tables (all-ours, our tracks):
 - **Track provenance dominates the gap.** Same released weights: RESfM-off
   on our 1DSfM tracks 10.21 deg vs 3.98 in the paper on theirs. Our best

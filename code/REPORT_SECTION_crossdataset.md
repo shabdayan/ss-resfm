@@ -85,13 +85,22 @@ tracks/gt_bundle combination is globally inconsistent for these two scenes
 cameras). We therefore report them included in all means for symmetry, and
 additionally quote the 8-scene means where relevant.
 
-5. *Track provenance dominates absolute numbers.* With identical weights,
-the released checkpoint scores 10.21 deg on our 1DSfM tracks vs 3.98 in
-the paper on theirs; on Strecha/BlendedMVS the paper's 0.01-0.03 deg
-regime reflects their (unreleased) track construction rather than model
-differences. All comparisons in Table X are therefore same-track and
-internal; the absolute gap to the paper row measures data provenance, not
-model quality.
+5. *Track provenance dominates absolute numbers - and scene-matched
+comparison validates our evaluation.* With identical weights, the released
+checkpoint scores 10.21 deg on our 1DSfM tracks vs 3.98 in the paper on
+theirs; but the gap is concentrated in three scenes rather than being a
+bias. On the eight healthy 1DSfM scenes our run of their checkpoint
+reproduces - indeed slightly betters - the paper's own mean on their
+tracks (4.16 vs 4.79 deg), our ESFM baseline matches their reported ESFM
+(6.57 vs 8.56 deg; the paper reports ESFM only on 1DSfM, not on
+Strecha/BlendedMVS), and on three of four Strecha scenes we reproduce
+their accuracy exactly (0.01-0.02 vs 0.02-0.03 deg). The remainder of the
+gap is Ellis Island and Tower of London (the released-data pathology of
+finding 4; the paper's Tower row registers only 94/467 cameras), one
+Strecha scene, and the BlendedMVS classifier collapse of finding 2. All
+comparisons in Table X are therefore same-track and internal; the
+absolute gap to the paper row measures data provenance, not model
+quality.
 
 *(Appendix pointers: full 10-arm tables incl. lr variants and TTT,
 per-scene values, and the oracle experiment - CROSSDATASET_RESULTS.md;
