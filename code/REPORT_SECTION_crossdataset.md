@@ -85,6 +85,16 @@ tracks/gt_bundle combination is globally inconsistent for these two scenes
 cameras). We therefore report them included in all means for symmetry, and
 additionally quote the 8-scene means where relevant.
 
+**Table X+1: scene-matched validation (mean rotation, deg).** Where the
+data permits a like-for-like comparison, our evaluation reproduces the
+paper's numbers:
+
+| comparison | paper (their tracks) | ours (our tracks) |
+|---|---|---|
+| RESfM, 1DSfM healthy-8 (excl. Ellis/Tower) | 4.79 | 4.16 |
+| ESFM, 1DSfM healthy-8 | 8.56 | 6.57 |
+| RESfM, Strecha excl. Herz-Jesu-P8 | 0.02-0.03 | 0.01-0.02 |
+
 5. *Track provenance dominates absolute numbers - and scene-matched
 comparison validates our evaluation.* With identical weights, the released
 checkpoint scores 10.21 deg on our 1DSfM tracks vs 3.98 in the paper on
