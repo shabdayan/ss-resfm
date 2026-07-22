@@ -11,12 +11,16 @@ Nc and Outliers% come from the scene npz (our tracks); Time = mean over seeds
 of inference + fine-tune convergence + BA seconds from the per-scene xlsx.
 
 Usage: python make_paper_style_tables.py
-Writes results/crossdataset/paper_style_tables.md and .xlsx.
+Writes results/crossdataset/paper_style_tables.{md,xlsx,pdf}.
 """
 import glob
 import os
 import re
 
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import pandas as pd
 
@@ -130,15 +134,30 @@ def main():
           "(inference + fine-tune + BA) for Tables 3-4.",
           "Paper columns = RESfM Tables 2-4 'Ours' on THEIR tracks + their GT",
           "(reference only; 1DSfM Paper Trans is in their GT scale).\n"]
-    with pd.ExcelWriter(XD + "/paper_style_tables.xlsx") as xl:
+    with pd.ExcelWriter(XD + "/paper_style_tables.xlsx") as xl, \
+         PdfPages(XD + "/paper_style_tables.pdf") as pdf:
         for ds in ["1dsfm", "strecha", "blendedmvs"]:
             df = build(ds, with_time=(ds != "1dsfm"))
             df.to_excel(xl, sheet_name=ds, index=False)
             md.append(f"\n## {titles[ds]}\n")
             md.append(df.to_markdown(index=False))
             print(titles[ds]); print(df.to_string(index=False)); print()
+
+            fig = plt.figure(figsize=(16.5, 5.8))  # wide landscape
+            fig.text(0.03, 0.93, titles[ds], fontsize=12, weight="bold",
+                     color="#1a1f24")
+            fig.text(0.03, 0.86,
+                     "Methods: U-ESFM-DA = deep adaptive ('Ours') | U-ESFM = "
+                     "deep + MAD | ESFM = no removal | RESfM = released ckpt | "
+                     "Paper = RESfM Tables 2-4 on THEIR tracks (reference only)",
+                     fontsize=8, color="#5b6570")
+            fig.text(0.03, 0.80, df.to_string(index=False), fontsize=6.5,
+                     family="monospace", va="top", color="#1a1f24",
+                     linespacing=1.6)
+            pdf.savefig(fig)
+            plt.close(fig)
     open(XD + "/paper_style_tables.md", "w").write("\n".join(md) + "\n")
-    print(f"wrote {XD}/paper_style_tables.md and .xlsx")
+    print(f"wrote {XD}/paper_style_tables.md, .xlsx and .pdf")
 
 
 if __name__ == "__main__":
