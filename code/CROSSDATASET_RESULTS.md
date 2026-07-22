@@ -166,6 +166,16 @@ reproj_only = control; frozen row = step-0 in the ttt result dirs).
    the protocol lr) — the Strecha tracks/GT are sound; failures elsewhere are
    model/protocol-side. Its BlendedMVS failure (31.9 mean, driven by scene2/
    scene3) did not reproduce for our arms.
+   MECHANISM (measured 2026-07-22 from the TEST-pass Final_outliers.npz —
+   NOT the Final_Cameras.npz `outliers_pred` field, which is a zeros
+   placeholder): the released classifier OVER-PRUNES off its native track
+   distribution — on BlendedMVS scene2 it flags 51.3% of observations as
+   outliers when true contamination is 1.5%, amputating a clean scene until
+   the fine-tune collapses (81 deg); on 1DSfM Vienna it flags 26.1% against
+   51.5% contamination (under-pruning, consistent with its mediocre 1DSfM
+   showing). The scores themselves are healthy sigmoids (p50 0.4-0.8) —
+   the failure is calibration under track-distribution shift, exactly what
+   the label-free MAD criterion sidesteps.
 3. **Best per dataset (mean Rot/Trans):** 1DSfM: TTT-comb 7.74/12.04 (best of
    all arms incl. RESfM-off 10.59/11.12); BlendedMVS: stage1@5e-3 0.79/0.013;
    Strecha: ESFM or stage1 @1e-4 0.10/0.018. No single arm wins everywhere.

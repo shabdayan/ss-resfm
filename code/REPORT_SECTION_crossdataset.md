@@ -60,12 +60,18 @@ internet-photo setting but retains a fragility on two BlendedMVS scenes
 and one Strecha scene, while the MAD-only model is the most robust overall.
 
 2. *The released supervised classifier does not transfer across track
-distributions.* On our tracks, RESfM's official checkpoint trails every
-U-ESFM variant on 1DSfM, and collapses on BlendedMVS (31.9 deg, driven by
-two scenes at 46-81 deg) - while the same weights reproduce their
-paper-level Strecha accuracy (0.01-0.02 deg on 3/4 scenes). Label-free
-statistical removal degrades gracefully where the learned classifier
-breaks; this is the central robustness argument for U-ESFM.
+distributions - a measured calibration failure.* On our tracks, RESfM's
+official checkpoint trails every U-ESFM variant on 1DSfM, and collapses on
+BlendedMVS (31.9 deg, driven by two scenes at 46-81 deg) - while the same
+weights reproduce their paper-level Strecha accuracy (0.01-0.02 deg on 3/4
+scenes). Inspecting its saved test-time predictions shows the mechanism:
+on BlendedMVS scene2 the classifier flags 51.3% of observations as
+outliers against a true contamination of 1.5%, amputating a clean scene
+before fine-tuning; on 1DSfM it flags only 26.1% against 51.5% (under-
+pruning). The score distributions are healthy - the thresholds are simply
+mis-calibrated under track-distribution shift, exactly the failure mode
+the label-free MAD criterion avoids. This is the central robustness
+argument for U-ESFM.
 
 3. *The fine-tune learning rate is scene-scale-dependent and decisive.* At
 the protocol lr (5e-3), every method degenerates on Strecha's 8-25-image
