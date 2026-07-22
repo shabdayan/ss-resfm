@@ -49,6 +49,20 @@ DS_SCENES = {
 BMVS_NAME = {"58c4bb4f4a69c55606122be4": "scene0", "5acf8ca0f3d8a750097e4b15": "scene1",
              "5a48ba95c7dab83a7d7b44ed": "scene2", "5b950c71608de421b1e7318f": "scene3"}
 
+# RESfM paper Tables 2-4 "Ours" (THEIR tracks + their GT — reference only;
+# extracted from resfm.pdf). (Nr, Rot, Trans) or (Nr, Rot, Trans, Time).
+PAPER_VALS = {
+    "Alamo": (484, 3.66, 0.515), "Ellis Island": (214, 0.82, 0.122),
+    "Madrid Metropolis": (244, 8.42, 0.827), "Montreal Notre Dame": (346, 2.82, 0.352),
+    "Notre Dame": (517, 1.20, 0.231), "NYC Library": (224, 3.96, 0.429),
+    "Piazza del Popolo": (249, 2.20, 0.186), "Tower of London": (94, 0.67, 0.026),
+    "Vienna Cathedral": (479, 1.52, 0.112), "Yorkminster": (331, 14.54, 1.468),
+    "entry-P10": (10, 0.024, 0.008, 3), "fountain-P11": (11, 0.028, 0.003, 5),
+    "Herz-Jesu-P8": (8, 0.026, 0.004, 3), "Herz-Jesu-P25": (24, 0.030, 0.006, 9),
+    "scene0": (75, 0.016, 0.0007, 54), "scene1": (51, 0.011, 0.0021, 32),
+    "scene2": (33, 0.009, 0.0006, 21), "scene3": (66, 0.007, 0.0007, 52),
+}
+
 
 def scene_meta(ds, scene):
     d = np.load(f"datasets/{ds}/{scene}.npz", allow_pickle=True)
@@ -90,6 +104,11 @@ def build(ds, with_time):
             row[f"{m} Trans"] = round(v["Trans"], 3)
             if with_time:
                 row[f"{m} Time"] = int(round(v["Time"]))
+        pv = PAPER_VALS.get(row["Scene"])
+        if pv:
+            row["Paper Nr"], row["Paper Rot"], row["Paper Trans"] = pv[0], pv[1], pv[2]
+            if with_time and len(pv) > 3:
+                row["Paper Time"] = pv[3]
         rows.append(row)
     df = pd.DataFrame(rows)
     mean_row = {"Scene": "Mean"}
@@ -108,7 +127,9 @@ def main():
           "ESFM = no outlier removal; RESfM = official released checkpoint.",
           "Per scene: Nc / Out.% from our tracks; per method: Nr (registered cameras,",
           "5-seed mean), mean rotation (deg), mean translation; Time in seconds",
-          "(inference + fine-tune + BA) for Tables 3-4.\n"]
+          "(inference + fine-tune + BA) for Tables 3-4.",
+          "Paper columns = RESfM Tables 2-4 'Ours' on THEIR tracks + their GT",
+          "(reference only; 1DSfM Paper Trans is in their GT scale).\n"]
     with pd.ExcelWriter(XD + "/paper_style_tables.xlsx") as xl:
         for ds in ["1dsfm", "strecha", "blendedmvs"]:
             df = build(ds, with_time=(ds != "1dsfm"))
