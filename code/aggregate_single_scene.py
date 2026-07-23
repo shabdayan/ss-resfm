@@ -41,7 +41,9 @@ METHOD_LABELS = {'esfm': 'ESFM (official code)', 'esfm_rc': 'ESFM (RESfM code)',
                  'uesfm_ft_mad_1k': 'U-ESFM +prune(MAD)+FT1k',
                  'uesfm_ft_mad_5k': 'U-ESFM +prune(MAD)+FT5k',
                  'uesfm_ttt_1k': 'U-ESFM +TTT1k',
-                 'uesfm_ttt_5k': 'U-ESFM +TTT5k'}
+                 'uesfm_ttt_5k': 'U-ESFM +TTT5k',
+                 'uesfm_ttt_comb_1k': 'U-ESFM +TTT(adaptive)1k',
+                 'uesfm_ttt_comb_5k': 'U-ESFM +TTT(adaptive)5k'}
 
 # Published per-scene numbers from Moran et al., ICCV 2021 (supplementary calibrated
 # table: "Ours" columns, before-BA and after-BA). Reference only: their post-BA uses

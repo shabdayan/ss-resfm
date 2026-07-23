@@ -38,7 +38,7 @@ from pyhocon import ConfigFactory, HOCONConverter
 
 from run_single_scene_sweep import OLSSON_SCENES, slug, gpu_info
 
-VARIANTS = ('ft_learned', 'ft_mad', 'ttt')
+VARIANTS = ('ft_learned', 'ft_mad', 'ttt', 'ttt_comb')
 BUDGET_TAG = {1000: '1k', 5000: '5k'}
 
 UESFM_ROOT = os.path.join(CODE_DIR, 'results', 'single_scene', 'uesfm')
@@ -126,13 +126,17 @@ def build_conf(base_conf_path, scene, seed, variant, budget, raw_dir, dataset_na
                                                        slug(scene), seed))
     conf.put('results_path', raw_dir)
     conf.put('dataset.dataset', dataset_name)
-    # fine-tune objective and schedule: multiscene per-scene fine-tune protocol
-    conf.put('loss.func', 'ESFMLoss')
+    # fine-tune objective and schedule: multiscene per-scene fine-tune protocol.
+    # ttt_comb keeps the base run's adaptive CombinedLoss (and the output_mode-3
+    # outlier head it needs) — the multiscene TTT 'comb' variant; every other
+    # variant continues with plain ESFMLoss ('reproj_only').
+    if variant != 'ttt_comb':
+        conf.put('loss.func', 'ESFMLoss')
+        conf.put('train.output_mode', 1)
     conf.put('train.num_epochs', budget)
     conf.put('train.eval_intervals', 250)
     conf.put('train.lr', 5e-3)
     conf.put('train.scheduler_milestone', [])
-    conf.put('train.output_mode', 1)
     conf.put('train.early_stopping_patience', 0)
     conf.put('train.extract_reproj_errors', False)
     # keys normally injected by general_utils.init_exp (bypassed here)
@@ -170,7 +174,7 @@ def run_one(scene, seed, variant, budget, force=False):
     t0 = time.monotonic()
     try:
         # dataset: pruned copy (per seed — masks are run-specific) or the original
-        if variant == 'ttt':
+        if variant in ('ttt', 'ttt_comb'):
             dataset_name = 'Euclidean'
         else:
             dataset_name = os.path.join('single_scene_post',
