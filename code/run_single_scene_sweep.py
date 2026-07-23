@@ -178,8 +178,8 @@ loss
     hinge_loss = True
     hinge_loss_weight = 1
 
-    inlier_percentile = 20.0
-    outlier_percentile = 80.0
+    inlier_percentile = {inlier_pct}
+    outlier_percentile = {outlier_pct}
     min_confident_samples = 10
     min_threshold_separation = 0.0
     warmup_epochs = 10
@@ -358,7 +358,8 @@ def default_milestones(epochs):
     return [int(epochs * f) for f in (0.5, 0.7, 0.9)]
 
 
-def gen_conf(method, scene, seed, epochs, eval_intervals, raw_dir):
+def gen_conf(method, scene, seed, epochs, eval_intervals, raw_dir,
+             inlier_pct=20.0, outlier_pct=80.0):
     milestones = '[{}]'.format(', '.join(str(m) for m in default_milestones(epochs)))
     if method == 'esfm':
         return ESFM_CONF.format(seed=seed, scene=scene, epochs=epochs,
@@ -366,7 +367,8 @@ def gen_conf(method, scene, seed, epochs, eval_intervals, raw_dir):
     template = {'esfm_rc': ESFM_RC_CONF, 'uesfm_abl': UESFM_ABL_CONF}.get(method, UESFM_CONF)
     return template.format(seed=seed, scene=scene, scene_slug=slug(scene),
                            epochs=epochs, milestones=milestones,
-                           eval_intervals=eval_intervals, raw_dir=raw_dir)
+                           eval_intervals=eval_intervals, raw_dir=raw_dir,
+                           inlier_pct=inlier_pct, outlier_pct=outlier_pct)
 
 
 # --------------------------------------------------------------------------
@@ -419,13 +421,18 @@ def gpu_info():
 # Running one (method, scene, seed)
 # --------------------------------------------------------------------------
 
-def launch_one(method, scene, seed, epochs, eval_intervals, results_root, gpu_env=None):
-    run_dir = run_dir_for(results_root, method, scene, seed)
+def launch_one(method, scene, seed, epochs, eval_intervals, results_root, gpu_env=None,
+               alias=None, inlier_pct=20.0, outlier_pct=80.0):
+    # alias: store results under a different method name (loss-threshold probe runs,
+    # e.g. uesfm with percentiles 10/90 recorded as method 'uesfm_p1090')
+    eff = alias or method
+    run_dir = run_dir_for(results_root, eff, scene, seed)
     raw_dir = os.path.join(run_dir, 'raw')
     os.makedirs(raw_dir, exist_ok=True)
 
-    conf_text = gen_conf(method, scene, seed, epochs, eval_intervals, raw_dir)
-    conf_name = 'ss_{}_{}_seed{}.conf'.format(method, slug(scene), seed)
+    conf_text = gen_conf(method, scene, seed, epochs, eval_intervals, raw_dir,
+                         inlier_pct=inlier_pct, outlier_pct=outlier_pct)
+    conf_name = 'ss_{}_{}_seed{}.conf'.format(eff, slug(scene), seed)
 
     if method == 'esfm':
         repo_code = os.path.join(ESFM_REPO, 'code')
@@ -464,7 +471,8 @@ def launch_one(method, scene, seed, epochs, eval_intervals, results_root, gpu_en
         env.update(gpu_env)
 
     meta = {
-        'method': method, 'scene': scene, 'seed': seed,
+        'method': eff, 'scene': scene, 'seed': seed,
+        'loss_percentiles': [inlier_pct, outlier_pct],
         'epochs': epochs, 'eval_intervals': eval_intervals,
         'cmd': cmd, 'cwd': repo_code,
         'host': socket.gethostname(), 'gpu': gpu_info(),
@@ -518,6 +526,10 @@ def main():
     ap.add_argument('--epochs', type=int, default=100000)
     ap.add_argument('--eval-intervals', type=int, default=5000)
     ap.add_argument('--results-root', default=os.path.join(CODE_DIR, 'results', 'single_scene'))
+    ap.add_argument('--method-alias', default=None,
+                    help='store uesfm runs under this method name (loss-threshold probe)')
+    ap.add_argument('--uesfm-inlier-pct', type=float, default=20.0)
+    ap.add_argument('--uesfm-outlier-pct', type=float, default=80.0)
     ap.add_argument('--dry-run', action='store_true', help='print planned runs and exit')
     args = ap.parse_args()
 
@@ -554,22 +566,27 @@ def main():
         len(plan), len(scenes), len(seeds), len(methods)))
     if args.dry_run:
         for scene, seed, method in plan:
-            state = 'DONE' if is_completed(run_dir_for(args.results_root, method, scene, seed), method, scene, args.epochs) else 'todo'
-            print('  [{}] {:6s} seed{} {}'.format(state, method, seed, scene))
+            eff = args.method_alias if (method == 'uesfm' and args.method_alias) else method
+            state = 'DONE' if is_completed(run_dir_for(args.results_root, eff, scene, seed), eff, scene, args.epochs) else 'todo'
+            print('  [{}] {:6s} seed{} {}'.format(state, eff, seed, scene))
         return
 
     failures, skipped, completed = [], 0, 0
     for i, (scene, seed, method) in enumerate(plan, 1):
-        run_dir = run_dir_for(args.results_root, method, scene, seed)
-        if is_completed(run_dir, method, scene, args.epochs):
-            print('[{}/{}] SKIP (done) {} seed{} {}'.format(i, len(plan), method, seed, scene), flush=True)
+        eff = args.method_alias if (method == 'uesfm' and args.method_alias) else method
+        run_dir = run_dir_for(args.results_root, eff, scene, seed)
+        if is_completed(run_dir, eff, scene, args.epochs):
+            print('[{}/{}] SKIP (done) {} seed{} {}'.format(i, len(plan), eff, seed, scene), flush=True)
             skipped += 1
             continue
         print('[{}/{}] RUN {} seed{} {} (epochs={})'.format(
-            i, len(plan), method, seed, scene, args.epochs), flush=True)
+            i, len(plan), eff, seed, scene, args.epochs), flush=True)
         try:
             meta = launch_one(method, scene, seed, args.epochs, args.eval_intervals,
-                              args.results_root)
+                              args.results_root,
+                              alias=args.method_alias if method == 'uesfm' else None,
+                              inlier_pct=args.uesfm_inlier_pct,
+                              outlier_pct=args.uesfm_outlier_pct)
         except Exception as e:
             meta = {'method': method, 'scene': scene, 'seed': seed,
                     'status': 'failed', 'runner_error': str(e)}

@@ -43,7 +43,16 @@ METHOD_LABELS = {'esfm': 'ESFM (official code)', 'esfm_rc': 'ESFM (RESfM code)',
                  'uesfm_ttt_1k': 'U-ESFM +TTT1k',
                  'uesfm_ttt_5k': 'U-ESFM +TTT5k',
                  'uesfm_ttt_comb_1k': 'U-ESFM +TTT(adaptive)1k',
-                 'uesfm_ttt_comb_5k': 'U-ESFM +TTT(adaptive)5k'}
+                 'uesfm_ttt_comb_5k': 'U-ESFM +TTT(adaptive)5k',
+                 # pruning-threshold sweep (learned scores, FT5k)
+                 'uesfm_ft_learned_t3_5k': 'U-ESFM +prune(learned .3)+FT5k',
+                 'uesfm_ft_learned_t5_5k': 'U-ESFM +prune(learned .5)+FT5k',
+                 'uesfm_ft_learned_t7_5k': 'U-ESFM +prune(learned .7)+FT5k',
+                 'uesfm_ft_learned_t9_5k': 'U-ESFM +prune(learned .9)+FT5k',
+                 # adaptive-loss percentile probe (6-scene subset)
+                 'uesfm_p1090': 'U-ESFM pct 10/90',
+                 'uesfm_p3070': 'U-ESFM pct 30/70',
+                 'uesfm_p4060': 'U-ESFM pct 40/60'}
 
 # Published per-scene numbers from Moran et al., ICCV 2021 (supplementary calibrated
 # table: "Ours" columns, before-BA and after-BA). Reference only: their post-BA uses

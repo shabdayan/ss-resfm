@@ -47,8 +47,12 @@ POST_DATA_ROOT = os.path.join(CODE_DIR, 'datasets', 'single_scene_post')
 DATASETS_EUC = os.path.join(os.path.dirname(CODE_DIR), 'datasets', 'Euclidean')
 
 
-def method_name(variant, budget):
-    return 'uesfm_{}_{}'.format(variant, BUDGET_TAG.get(budget, str(budget)))
+def method_name(variant, budget, thr=None):
+    tag = BUDGET_TAG.get(budget, str(budget))
+    if thr is not None:
+        # threshold-sweep runs of the learned-score pruning, e.g. uesfm_ft_learned_t03_5k
+        return 'uesfm_{}_t{}_{}'.format(variant, str(thr).replace('.', '').lstrip('0') or '0', tag)
+    return 'uesfm_{}_{}'.format(variant, tag)
 
 
 def base_run_dir(scene, seed):
@@ -147,9 +151,9 @@ def build_conf(base_conf_path, scene, seed, variant, budget, raw_dir, dataset_na
     return conf
 
 
-def run_one(scene, seed, variant, budget, force=False):
+def run_one(scene, seed, variant, budget, force=False, prune_thr=None):
     import torch
-    method = method_name(variant, budget)
+    method = method_name(variant, budget, thr=prune_thr)
     run_dir = os.path.join(RESULTS_ROOT, method, slug(scene), 'seed{}'.format(seed))
     raw_dir = os.path.join(run_dir, 'raw')
     cams_path = os.path.join(raw_dir, 'forFigures', '{}_Final_Cameras.npz'.format(scene))
@@ -180,7 +184,9 @@ def run_one(scene, seed, variant, budget, force=False):
             dataset_name = os.path.join('single_scene_post',
                                         '{}_{}_seed{}'.format(method, slug(scene), seed))
             base_conf = ConfigFactory.parse_file(os.path.join(base, 'run.conf'))
-            thr = base_conf.get_float('test.outliers_threshold', default=0.6)
+            thr = prune_thr if prune_thr is not None else \
+                base_conf.get_float('test.outliers_threshold', default=0.6)
+            meta['prune_threshold'] = thr
             mask = outlier_mask(variant, base_raw, scene, thr)
             kept, total, n_removed = write_pruned_npz(
                 scene, mask, os.path.join(CODE_DIR, 'datasets', dataset_name))
@@ -249,6 +255,10 @@ def main():
     ap.add_argument('--seeds', default='0,1,2')
     ap.add_argument('--variants', default=','.join(VARIANTS))
     ap.add_argument('--budgets', default='1000,5000')
+    ap.add_argument('--prune-thresholds', default='',
+                    help='comma-separated learned-score pruning thresholds for a '
+                         'threshold sweep (applies to ft_learned only; empty = the '
+                         'conf default 0.6 with the plain method name)')
     ap.add_argument('--force', action='store_true')
     args = ap.parse_args()
 
@@ -263,12 +273,17 @@ def main():
         if v not in VARIANTS:
             sys.exit('Unknown variant: {!r}'.format(v))
 
+    thresholds = [float(t) for t in args.prune_thresholds.split(',') if t.strip()]
+
     failures = 0
     for seed in seeds:
         for budget in budgets:
             for variant in variants:
-                meta = run_one(scene, seed, variant, budget, force=args.force)
-                failures += int(meta.get('status') != 'completed')
+                thr_list = thresholds if (thresholds and variant == 'ft_learned') else [None]
+                for thr in thr_list:
+                    meta = run_one(scene, seed, variant, budget, force=args.force,
+                                   prune_thr=thr)
+                    failures += int(meta.get('status') != 'completed')
     print('post-stage for {}: done ({} failures)'.format(scene, failures))
     sys.exit(1 if failures else 0)
 

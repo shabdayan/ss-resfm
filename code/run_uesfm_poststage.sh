@@ -12,6 +12,7 @@ QUEUE="waic-risk"
 SEEDS="0,1,2"
 VARIANTS="ft_learned,ft_mad,ttt"
 BUDGETS="1000,5000"
+PRUNE_THRESHOLDS=""
 SCENES=""
 DRY_RUN=false
 
@@ -22,6 +23,7 @@ while [[ $# -gt 0 ]]; do
         --seeds) SEEDS="$2"; shift 2 ;;
         --variants) VARIANTS="$2"; shift 2 ;;
         --budgets) BUDGETS="$2"; shift 2 ;;
+        --prune-thresholds) PRUNE_THRESHOLDS="$2"; shift 2 ;;
         --queue) QUEUE="$2"; shift 2 ;;
         --dry-run) DRY_RUN=true; shift ;;
         *) echo "Unknown arg: $1"; exit 1 ;;
@@ -41,6 +43,7 @@ IFS=',' read -ra SCENE_ARR <<< "$SCENES"
 for SCENE in "${SCENE_ARR[@]}"; do
     CMD="cd ${REPO_ROOT} && ${PY} uesfm_poststage.py --scene '${SCENE}' \
         --seeds ${SEEDS} --variants ${VARIANTS} --budgets ${BUDGETS}"
+    [ -n "$PRUNE_THRESHOLDS" ] && CMD="${CMD} --prune-thresholds ${PRUNE_THRESHOLDS}"
     if [ "$DRY_RUN" = true ]; then echo "DRY RUN: ${CMD}"; continue; fi
     bsub -q "${QUEUE}" \
         -J "ssp_${SCENE}" \
