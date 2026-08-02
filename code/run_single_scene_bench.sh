@@ -19,6 +19,10 @@ EPOCHS=100000
 EVAL_INTERVALS=5000
 SCENES=""            # empty = all 36 Olsson scenes
 METHODS="esfm,uesfm"
+METHOD_ALIAS=""      # store uesfm runs under this name (loss-threshold probe)
+INLIER_PCT=""        # override adaptive-loss inlier percentile
+OUTLIER_PCT=""       # override adaptive-loss outlier percentile
+EXCLUDE_HOST="lgn15" # bad node that hangs jobs at startup (see memory); '' to disable
 DRY_RUN=false
 SMOKE=false
 
@@ -26,6 +30,10 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --smoke) SMOKE=true; shift ;;
         --methods) METHODS="$2"; shift 2 ;;
+        --method-alias) METHOD_ALIAS="$2"; shift 2 ;;
+        --inlier-pct) INLIER_PCT="$2"; shift 2 ;;
+        --outlier-pct) OUTLIER_PCT="$2"; shift 2 ;;
+        --exclude-host) EXCLUDE_HOST="$2"; shift 2 ;;
         --scenes) SCENES="$2"; shift 2 ;;
         --seeds) SEEDS="$2"; shift 2 ;;
         --epochs) EPOCHS="$2"; shift 2 ;;
@@ -54,21 +62,29 @@ fi
 
 mkdir -p "${REPO_ROOT}/lsf_output/single_scene"
 
+RES="rusage[mem=50000]"
+[ -n "$EXCLUDE_HOST" ] && RES="${RES} select[hname!='${EXCLUDE_HOST}']"
+JOBTAG="ss"
+[ -n "$METHOD_ALIAS" ] && JOBTAG="ss_${METHOD_ALIAS}"
+
 IFS=',' read -ra SCENE_ARR <<< "$SCENES"
 for SCENE in "${SCENE_ARR[@]}"; do
     CMD="cd ${REPO_ROOT} && ${PY} run_single_scene_sweep.py \
         --scenes '${SCENE}' --methods ${METHODS} --seeds ${SEEDS} \
         --epochs ${EPOCHS} --eval-intervals ${EVAL_INTERVALS}"
+    [ -n "$METHOD_ALIAS" ] && CMD="${CMD} --method-alias ${METHOD_ALIAS}"
+    [ -n "$INLIER_PCT" ]   && CMD="${CMD} --uesfm-inlier-pct ${INLIER_PCT}"
+    [ -n "$OUTLIER_PCT" ]  && CMD="${CMD} --uesfm-outlier-pct ${OUTLIER_PCT}"
     if [ "$DRY_RUN" = true ]; then
-        echo "DRY RUN: bsub -q ${QUEUE} -J ss_${SCENE} ... \"${CMD}\""
+        echo "DRY RUN: bsub -q ${QUEUE} -J ${JOBTAG}_${SCENE} -R \"${RES}\" ... \"${CMD}\""
         continue
     fi
     bsub -q "${QUEUE}" \
-        -J "ss_${SCENE}" \
-        -oo "${REPO_ROOT}/lsf_output/single_scene/${SCENE}_%J.out" \
-        -eo "${REPO_ROOT}/lsf_output/single_scene/${SCENE}_%J.err" \
+        -J "${JOBTAG}_${SCENE}" \
+        -oo "${REPO_ROOT}/lsf_output/single_scene/${JOBTAG}_${SCENE}_%J.out" \
+        -eo "${REPO_ROOT}/lsf_output/single_scene/${JOBTAG}_${SCENE}_%J.err" \
         -gpu "num=1:j_exclusive=yes:gmem=80G" \
-        -R "rusage[mem=50000]" \
+        -R "${RES}" \
         "${CMD}"
 done
 
