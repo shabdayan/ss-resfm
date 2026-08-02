@@ -89,7 +89,7 @@ for SCAN in $SCENES; do
         bsub -q "${QUEUE}" -J "ttt_${PREFIX}${TTT_LOSS}_s${SEED}_${SCAN}" \
             -oo "${REPO_ROOT}/lsf_output/ttt/${PREFIX}${SCAN}_${TTT_LOSS}_s${SEED}_%J.out" \
             -eo "${REPO_ROOT}/lsf_output/ttt/${PREFIX}${SCAN}_${TTT_LOSS}_s${SEED}_%J.err" \
-            -gpu "num=1:j_exclusive=yes:gmem=80G" -R "rusage[mem=50000]" "${CMD}"
+            -gpu "num=1:j_exclusive=yes:gmem=40G" -R "rusage[mem=50000]" "${CMD}"
     fi
 done
 echo "Submitted $(echo $SCENES | wc -w) TTT jobs (${TTT_LOSS}); results: ${EVAL_ROOT}"

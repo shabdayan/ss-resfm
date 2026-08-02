@@ -94,7 +94,7 @@ for SCAN in $SCENES; do
             -J "ueval_s${SEED}_${SCAN}" \
             -oo "${REPO_ROOT}/lsf_output/multiscene_eval/${SCAN}_s${SEED}_%J.out" \
             -eo "${REPO_ROOT}/lsf_output/multiscene_eval/${SCAN}_s${SEED}_%J.err" \
-            -gpu "num=1:j_exclusive=yes:gmem=80G" \
+            -gpu "num=1:j_exclusive=yes:gmem=40G" \
             -R "rusage[mem=50000]" \
             "${CMD}"
     fi

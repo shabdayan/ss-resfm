@@ -110,7 +110,7 @@ for VALUE in $VALUES; do
             bsub -q "${QUEUE}" -J "sw_${TAG}_s${SEED}_${SCAN}" \
                 -oo "${REPO_ROOT}/lsf_output/sweeps/${SCAN}_${TAG}_s${SEED}_%J.out" \
                 -eo "${REPO_ROOT}/lsf_output/sweeps/${SCAN}_${TAG}_s${SEED}_%J.err" \
-                -gpu "num=1:j_exclusive=yes:gmem=80G" -R "rusage[mem=50000]" "${CMD}"
+                -gpu "num=1:j_exclusive=yes:gmem=40G" -R "rusage[mem=50000]" "${CMD}"
         fi
     done
 done

@@ -92,7 +92,7 @@ for DSPEC in $DATASETS; do
       bsub -q "${QUEUE}" -J "xsmoke_${TAG}" \
         -oo "${REPO_ROOT}/lsf_output/crossdataset_smoke/${TAG}_%J.out" \
         -eo "${REPO_ROOT}/lsf_output/crossdataset_smoke/${TAG}_%J.err" \
-        -gpu "num=1:j_exclusive=yes:gmem=80G" -R "rusage[mem=50000]" "${CMD}"
+        -gpu "num=1:j_exclusive=yes:gmem=40G" -R "rusage[mem=50000]" "${CMD}"
     fi
   done
   done
