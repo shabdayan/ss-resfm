@@ -48,8 +48,20 @@ def log_code(conf):
         shutil.copyfile('{}'.format(file_name), os.path.join(code_path, file_name))
 
     dirs_to_log = ["datasets", "models", "utils"]
+    # datasets/ holds the npz DATA folders (megadepth/, 1dsfm/, ...) in this repo,
+    # not just loader code — copying them archived ~80GB per training run. The
+    # snapshot's purpose is CODE provenance: keep source files, skip data/caches.
+    keep = ('.py', '.conf', '.md', '.txt')
+    ignore_data = lambda d, names: [n for n in names
+                                    if not n.endswith(keep)
+                                    and not os.path.isdir(os.path.join(d, n))] \
+                                   + [n for n in names
+                                      if os.path.isdir(os.path.join(d, n))
+                                      and n in ('__pycache__', 'megadepth', '1dsfm', 'strecha',
+                                                'blendedmvs', 'Euclidean', 'raw')]
     for dir_name in dirs_to_log:
-        shutil.copytree('{}'.format(dir_name), os.path.join(code_path, dir_name), dirs_exist_ok=True)
+        shutil.copytree('{}'.format(dir_name), os.path.join(code_path, dir_name),
+                        dirs_exist_ok=True, ignore=ignore_data)
 
     # Print conf
     with open(os.path.join(code_path, 'exp.conf'), 'w') as conf_log_file:
