@@ -124,10 +124,17 @@ def train_single_model(conf, device, phase, stage=1, architecture_type="esfm_out
     # TEST evaluation with the pretrained model so its predicted outliers get saved
     # (epoch_evaluation -> save_outliers); the FINE_TUNE data load below prunes the
     # tracks with that file (Euclidean.get_raw_data).
-    if phase is Phases.FINE_TUNE and conf.get_int('train.output_mode', default=3) == 3:
+    if phase is Phases.FINE_TUNE and (conf.get_int('train.output_mode', default=3) == 3
+                                      or conf.get_bool('test.mad_no_head', default=False)):
         print("Run test before fine-tuning")
         test_model_class = general_utils.get_class("models." + conf.get_string("model.type"))
-        test_model = test_model_class(conf, Phases.TEST).to(device)
+        # SetOfSetNet/DeepSetOfSetNet take only conf (no phase arg); the Outliers
+        # variants take (conf, phase). test.mad_no_head runs this MAD-outlier TEST
+        # pass for the headless vanilla ESFM network (SetOfSetNet, output_mode=1).
+        if conf.get_string("model.type") in ["SetOfSet.SetOfSetNet", "SetOfSet.DeepSetOfSetNet"]:
+            test_model = test_model_class(conf).to(device)
+        else:
+            test_model = test_model_class(conf, Phases.TEST).to(device)
         test_scene_data = SceneData.create_scene_data(conf, Phases.TEST, stage=stage)
         test_dataset = ScenesDataSet.ScenesDataSet([test_scene_data], return_all=True)
         test_loader = torch.utils.data.DataLoader(test_dataset, collate_fn=ScenesDataSet.collate_fn)
