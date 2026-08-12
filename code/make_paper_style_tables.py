@@ -97,6 +97,10 @@ PAPER_VALS = {
 
 
 def scene_meta(ds, scene):
+    # NOTE units trap: outlier_pct is a PERCENT in the 1dsfm/strecha/blendedmvs
+    # npz (used here) but a FRACTION [0,1] in the MegaDepth npz. This function is
+    # only called on the three cross-dataset sets, so no scaling is needed; do
+    # NOT reuse it on MegaDepth without multiplying outlier_pct by 100.
     d = np.load(f"datasets/{ds}/{scene}.npz", allow_pickle=True)
     return d["M"].shape[0] // 2, float(d["outlier_pct"])
 

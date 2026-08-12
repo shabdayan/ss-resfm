@@ -24,6 +24,16 @@ rotation-gap check by construction.
 Scene identity confirmed (our Nc ≈ pub Nc on all ten) — the scenes/images match;
 only the track construction differs.
 
+> **npz units convention (trap).** `outlier_pct` is stored as a **percent** in
+> the 1DSfM / Strecha / BlendedMVS npz, but as a **fraction [0,1]** in the
+> MegaDepth npz (sanity: MegaDepth 0060 npz `0.416` = paper Out% 41.6). The
+> 1DSfM numbers in this file are the percent values and are correct. Corrected
+> record: the **27 MegaDepth training scenes are NOT clean** — median 30.5% /
+> mean 33.6% / max 58.3% outliers (23/27 > 20%), matching the test distribution.
+> RESfM's classifier therefore trained on heavily-contaminated tracks (labels
+> from COLMAP, Appendix C), which makes the fixed 20% adaptive-loss outlier tail
+> an under-estimate of true contamination.
+
 ## 2. Aggregates
 
 | set | repro rot (mean-of-means) | pub rot | ratio | our Out% | pub Out% |
