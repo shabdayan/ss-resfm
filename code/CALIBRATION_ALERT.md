@@ -47,6 +47,31 @@ only the track construction differs.
   higher on 8/10 scenes (Ellis +31, NYC +20, Vienna +20, Notre_Dame +12). The
   fixed 0.6 removal threshold was tuned on their cleaner score distribution.
 
+## 4. Eval-path vs track decomposition (via MegaDepth identical tracks)
+
+Track provenance (user, 2026-08-12): **MegaDepth tracks are identical to RESfM's
+release** (byte-verified); the **1DSfM/Strecha/BlendedMVS tracks were built by us**,
+provenance of RESfM's OOD tracks unknown (possibly different processing). This
+enables the spec's row-2/row-3 decomposition for the in-distribution case:
+
+| comparison | tracks | reproduced | published | factor | isolates |
+|---|---|---|---|---|---|
+| MegaDepth (row 2 − row 1) | **identical** | 1.82 | 1.29 | **1.41×** | eval path / BA environment |
+| 1DSfM full-10 | ours | 10.21 | 3.98 | 2.57× | eval path × tracks |
+| 1DSfM healthy-8 | ours | 4.16 | 4.79 | 0.87× | eval path × tracks |
+
+- On **identical MegaDepth tracks** the reproduction factor is **1.41×** (BA
+  environment sensitivity, seed-negligible — prior finding). This is the clean
+  eval-path measurement the spec's row 2 requires; **the eval path is not broken.**
+- The **residual 1DSfM factor** on top of eval-path ≈ 2.57 / 1.41 = **1.83×** is
+  the OOD track-construction effect — and it collapses on healthy-8 (0.87× < the
+  1.41× eval-path factor), i.e. once Ellis/Tower are removed our tracks are *not*
+  systematically worse for RESfM.
+- We **cannot** produce the true OOD row 2 (`released, their tracks`) — we do not
+  have RESfM's OOD tracks and do not know their construction. Only Fadi can supply
+  them; until then the OOD track factor is an estimate anchored on the MegaDepth
+  eval-path factor.
+
 ## Gate R0 — verdict: **TRACK-MISMATCH (benign, resolved)**
 
 The gap is explained by the track distribution (our tracks are dirtier; the
@@ -56,10 +81,12 @@ paper (4.16 vs 4.79). No retraining performed (spec forbids it).
 
 ## BLOCKED sub-items (require inputs we do not have)
 
-- **`RESfM (released, their tracks)` row** — the decisive eval-path-vs-track
-  decomposition. Needs RESfM's preprocessed 1DSfM tracks (Appendix B says they
-  were to be released — obtain or ask Fadi). Unblock: 1 eval fleet once tracks
-  are in hand.
+- **`RESfM (released, their tracks)` row for OOD** — the decisive OOD track
+  isolation. We built the 1DSfM/Strecha/BlendedMVS tracks ourselves; RESfM's OOD
+  tracks are not in hand and their construction is unknown. **Only Fadi can
+  supply them.** (In-distribution row 2 is DONE via MegaDepth identical tracks =
+  1.41× eval-path factor, §4.) Unblock: obtain Fadi's OOD tracks + processing
+  procedure, then 1 eval fleet.
 - **Steelman: 0.6 threshold swept on our track distribution** — required before
   any published comparison (comparing our adaptive mechanism to their
   miscalibrated fixed threshold is not a fair comparison). Unblock: threshold
