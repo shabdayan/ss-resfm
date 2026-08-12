@@ -55,6 +55,8 @@ EVALS = {
                             for d in ("1dsfm", "strecha", "blendedmvs")], 90),
     "shallow MADlink eval": ([XD + "/uesfm_shallow_adaptive_madlink_%s_eval" % d
                               for d in ("1dsfm", "strecha", "blendedmvs")], 90),
+    "deep MADlink eval": ([XD + "/uesfm_deep_adaptive_madlink_%s_eval" % d
+                           for d in ("1dsfm", "strecha", "blendedmvs")], 90),
 }
 # PoC roots for the collapse (Nr) check
 POC_ROOTS = {"advhead": [XD + "/uesfm_deep_advhead_%s_eval" % d for d in ("1dsfm", "strecha", "blendedmvs")],
