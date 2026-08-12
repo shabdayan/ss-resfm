@@ -77,6 +77,7 @@ train
     # the saved outliers come from reprojection-error statistics, NOT the (untrained)
     # classifier head, and the fine-tune itself runs in mode 1 (cameras/points only).
     output_mode = 3
+    fine_tune_output_mode = 3  # run model in outlier mode during fine-tune so CombinedLoss gets pred_outliers
     validation_metric = ["our_repro"]
     validation_metric_higher_is_better = False
     validation_metric_fine_tuning = ["our_repro"]
