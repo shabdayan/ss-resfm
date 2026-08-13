@@ -60,6 +60,13 @@ EVALS = {
                               for d in ("1dsfm", "strecha", "blendedmvs")], 90),
     "deep MADlink eval": ([XD + "/uesfm_deep_adaptive_madlink_%s_eval" % d
                            for d in ("1dsfm", "strecha", "blendedmvs")], 90),
+    # auto-launch after their training completes (heal gates on Ep19999)
+    "RESfM-shallow eval": ([XD + "/resfm_shallow_%s_eval" % d
+                            for d in ("1dsfm", "strecha", "blendedmvs")], 90),
+    "shallow 10/90 eval": ([XD + "/uesfm_shallow_adaptive_p1090_%s_eval" % d
+                            for d in ("1dsfm", "strecha", "blendedmvs")], 90),
+    "shallow 40/60 eval": ([XD + "/uesfm_shallow_adaptive_p4060_%s_eval" % d
+                            for d in ("1dsfm", "strecha", "blendedmvs")], 90),
 }
 # PoC roots for the collapse (Nr) check
 POC_ROOTS = {"advhead": [XD + "/uesfm_deep_advhead_%s_eval" % d for d in ("1dsfm", "strecha", "blendedmvs")],

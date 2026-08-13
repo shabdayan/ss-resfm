@@ -25,11 +25,17 @@ FLEETS=(
  "crossdataset_shallow_adaptive|crossdataset_shallow_adaptive_strecha_ftlr1e4|uesfm_27scenes_shallow_adaptive_p3070|uesfm_shallow_adaptive_p3070|esfm_outliers_shallow|20 21 22 23 24"
  "crossdataset_shallow_adaptive|crossdataset_shallow_adaptive_strecha_ftlr1e4|uesfm_27scenes_shallow_adaptive_madlink|uesfm_shallow_adaptive_madlink|esfm_outliers_shallow|20 21 22 23 24"
  "crossdataset_eval|crossdataset_eval_strecha|uesfm_27scenes_adaptive_madlink|uesfm_deep_adaptive_madlink|esfm_outliers_deep|20 21 22 23 24"
+ # These three auto-launch ONLY once their training reaches 20k (gate field 7 =
+ # models_all/Model_Ep19999.pt); heal then keeps them healed to completion.
+ "crossdataset_resfm_shallow|crossdataset_resfm_shallow_strecha|resfm_shallow_27scenes|resfm_shallow|esfm_outliers_shallow|20 21 22 23 24|models_all/Model_Ep19999.pt"
+ "crossdataset_shallow_adaptive|crossdataset_shallow_adaptive_strecha_ftlr1e4|uesfm_27scenes_shallow_adaptive_p1090|uesfm_shallow_adaptive_p1090|esfm_outliers_shallow|20 21 22 23 24|models_all/Model_Ep19999.pt"
+ "crossdataset_shallow_adaptive|crossdataset_shallow_adaptive_strecha_ftlr1e4|uesfm_27scenes_shallow_adaptive_p4060|uesfm_shallow_adaptive_p4060|esfm_outliers_shallow|20 21 22 23 24|models_all/Model_Ep19999.pt"
 )
 total=0
 for row in "${FLEETS[@]}"; do
-  IFS='|' read -r tp stp train rp arch seeds <<< "$row"
-  [ -d "results/multiscene/$train/models" ] || continue   # checkpoint not ready
+  IFS='|' read -r tp stp train rp arch seeds gate <<< "$row"
+  gate="${gate:-models}"                                   # default gate = models dir
+  [ -e "results/multiscene/$train/$gate" ] || continue     # training/checkpoint not ready yet
   for ds in 1dsfm strecha blendedmvs; do
     tmpl="confs/${tp}_${ds}.conf.template"; [ "$ds" = strecha ] && tmpl="confs/${stp}.conf.template"
     [ -f "$tmpl" ] || continue
