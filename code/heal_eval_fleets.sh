@@ -20,6 +20,7 @@ RUNNING=$(bjobs -w 2>/dev/null | grep ueval | awk '{print $7}' | sed 's/ueval_s/
 FLEETS=(
  "crossdataset_advhead|crossdataset_advhead_strecha|uesfm_27scenes_adaptive|uesfm_deep_advhead|esfm_outliers_deep|20"
  "crossdataset_advheadttt|crossdataset_advheadttt_strecha|uesfm_27scenes_adaptive|uesfm_deep_advheadttt|esfm_outliers_deep|20"
+ "crossdataset_advweight|crossdataset_advweight_strecha|uesfm_27scenes_adaptive|uesfm_deep_advweight|esfm_outliers_deep|20"
  "crossdataset_eval|crossdataset_eval_strecha|uesfm_27scenes_adaptive_p3070|uesfm_deep_adaptive_p3070|esfm_outliers_deep|20 21 22 23 24"
  "crossdataset_shallow_adaptive|crossdataset_shallow_adaptive_strecha_ftlr1e4|uesfm_27scenes_shallow_adaptive_p3070|uesfm_shallow_adaptive_p3070|esfm_outliers_shallow|20 21 22 23 24"
  "crossdataset_shallow_adaptive|crossdataset_shallow_adaptive_strecha_ftlr1e4|uesfm_27scenes_shallow_adaptive_madlink|uesfm_shallow_adaptive_madlink|esfm_outliers_shallow|20 21 22 23 24"
