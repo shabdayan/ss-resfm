@@ -69,6 +69,7 @@ TRAININGS = {
     "shallow 30/70": "uesfm_27scenes_shallow_adaptive_p3070",
     "deep MAD-linked": "uesfm_27scenes_adaptive_madlink",
     "shallow MAD-linked": "uesfm_27scenes_shallow_adaptive_madlink",
+    "RESfM-shallow (from scratch)": "resfm_shallow_27scenes",
 }
 
 prev = {}
