@@ -130,13 +130,22 @@ def get_raw_data(conf, scan, phase, stage=1):
     outliers_mask = outliers.clone()
     
 
+    # weight_not_remove: soft-weight points by the frozen head score instead of
+    # hard-removing them (U-ESFM soft-weighting variant). Scores are used as a
+    # per-point weight (proj_err_weight) by ESFMLoss_weighted_by_rep_err.
+    frozen_weights = None
+    weight_not_remove = conf.get_bool('test.weight_not_remove', default=False)
     # === Fine-tuning: Load predicted outliers ===
     if phase is Phases.FINE_TUNE and output_mode == 3:
         print(f"Fine-tuning phase: loading predicted outliers for scan {scan}")
         print("Loading outliers from:", path_to_outliers(conf, Phases.TEST, epoch=None, scan=scan))
         outliers_mask_np = np.load(path_to_outliers(conf, Phases.TEST, epoch=None, scan=scan) + ".npz")['outliers_pred']
-        outliers_mask = torch.from_numpy(outliers_mask_np > outliers_threshold)
-        remove_outliers_pred = True
+        if weight_not_remove:
+            # Keep continuous frozen scores as per-point weights; do NOT remove.
+            frozen_weights = torch.from_numpy(outliers_mask_np).float()
+        else:
+            outliers_mask = torch.from_numpy(outliers_mask_np > outliers_threshold)
+            remove_outliers_pred = True
 
 
     # === Remove outliers ===
@@ -160,8 +169,10 @@ def get_raw_data(conf, scan, phase, stage=1):
         names_list = names_list[valid_cam_indices]
         M = M[double_cam_indices]
         M_original = M_original[double_cam_indices]
+        if frozen_weights is not None:
+            frozen_weights = frozen_weights[valid_cam_indices]
 
-    if stage == 2: 
+    if stage == 2:
         # Try to get the path from config, but make it optional
         # For stage 2, weights are loaded manually in the training script
         
@@ -229,7 +240,7 @@ def get_raw_data(conf, scan, phase, stage=1):
         
         return M, Ns, Ps_gt, outliers, dict_info, names_list, M_original, rep_error_weights
     else:
-        return M, Ns, Ps_gt, outliers, dict_info, names_list, M_original, None 
+        return M, Ns, Ps_gt, outliers, dict_info, names_list, M_original, frozen_weights 
 
 
 
