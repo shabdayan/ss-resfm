@@ -169,6 +169,7 @@ loss
 {{
     func = CombinedLoss          # alpha*ESFMLoss + beta*confident-pseudo-label BCE
     func_tuning = ESFMLoss
+    reproj_weighting = {reproj_weighting}  # none|weighted|weighted_detach (report sec 2.2.2)
 
     reproj_loss_weight = 1.0
     classification_loss_weight = 0.3
@@ -359,7 +360,7 @@ def default_milestones(epochs):
 
 
 def gen_conf(method, scene, seed, epochs, eval_intervals, raw_dir,
-             inlier_pct=20.0, outlier_pct=80.0):
+             inlier_pct=20.0, outlier_pct=80.0, reproj_weighting='none'):
     milestones = '[{}]'.format(', '.join(str(m) for m in default_milestones(epochs)))
     if method == 'esfm':
         return ESFM_CONF.format(seed=seed, scene=scene, epochs=epochs,
@@ -368,7 +369,8 @@ def gen_conf(method, scene, seed, epochs, eval_intervals, raw_dir,
     return template.format(seed=seed, scene=scene, scene_slug=slug(scene),
                            epochs=epochs, milestones=milestones,
                            eval_intervals=eval_intervals, raw_dir=raw_dir,
-                           inlier_pct=inlier_pct, outlier_pct=outlier_pct)
+                           inlier_pct=inlier_pct, outlier_pct=outlier_pct,
+                           reproj_weighting=reproj_weighting)
 
 
 # --------------------------------------------------------------------------
@@ -422,7 +424,7 @@ def gpu_info():
 # --------------------------------------------------------------------------
 
 def launch_one(method, scene, seed, epochs, eval_intervals, results_root, gpu_env=None,
-               alias=None, inlier_pct=20.0, outlier_pct=80.0):
+               alias=None, inlier_pct=20.0, outlier_pct=80.0, reproj_weighting='none'):
     # alias: store results under a different method name (loss-threshold probe runs,
     # e.g. uesfm with percentiles 10/90 recorded as method 'uesfm_p1090')
     eff = alias or method
@@ -431,7 +433,8 @@ def launch_one(method, scene, seed, epochs, eval_intervals, results_root, gpu_en
     os.makedirs(raw_dir, exist_ok=True)
 
     conf_text = gen_conf(method, scene, seed, epochs, eval_intervals, raw_dir,
-                         inlier_pct=inlier_pct, outlier_pct=outlier_pct)
+                         inlier_pct=inlier_pct, outlier_pct=outlier_pct,
+                         reproj_weighting=reproj_weighting)
     conf_name = 'ss_{}_{}_seed{}.conf'.format(eff, slug(scene), seed)
 
     if method == 'esfm':
@@ -473,6 +476,7 @@ def launch_one(method, scene, seed, epochs, eval_intervals, results_root, gpu_en
     meta = {
         'method': eff, 'scene': scene, 'seed': seed,
         'loss_percentiles': [inlier_pct, outlier_pct],
+        'reproj_weighting': reproj_weighting,
         'epochs': epochs, 'eval_intervals': eval_intervals,
         'cmd': cmd, 'cwd': repo_code,
         'host': socket.gethostname(), 'gpu': gpu_info(),
@@ -530,6 +534,9 @@ def main():
                     help='store uesfm runs under this method name (loss-threshold probe)')
     ap.add_argument('--uesfm-inlier-pct', type=float, default=20.0)
     ap.add_argument('--uesfm-outlier-pct', type=float, default=80.0)
+    ap.add_argument('--reproj-weighting', default='none',
+                    choices=['none', 'weighted', 'weighted_detach'],
+                    help='CombinedLoss reprojection weighting (report sec 2.2.2)')
     ap.add_argument('--dry-run', action='store_true', help='print planned runs and exit')
     args = ap.parse_args()
 
@@ -586,7 +593,8 @@ def main():
                               args.results_root,
                               alias=args.method_alias if method == 'uesfm' else None,
                               inlier_pct=args.uesfm_inlier_pct,
-                              outlier_pct=args.uesfm_outlier_pct)
+                              outlier_pct=args.uesfm_outlier_pct,
+                              reproj_weighting=args.reproj_weighting)
         except Exception as e:
             meta = {'method': method, 'scene': scene, 'seed': seed,
                     'status': 'failed', 'runner_error': str(e)}

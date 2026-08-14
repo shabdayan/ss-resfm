@@ -187,13 +187,21 @@ class CombinedLoss(nn.Module):
     def __init__(self, conf):
         super().__init__()
         
-        # Loss components. Per the report's definition (sec. 2.2.2):
-        #   Adaptive Confidence Weighted Outlier Loss = alpha * ESFM Loss + beta * Classification Loss
-        # The geometric term is the PLAIN (unweighted) ESFM reprojection loss; the
-        # outlier scores never weight it during training. The detector trains only
-        # via the confident-pseudo-label BCE, and its scores are used at test time.
+        # Loss components. The report (sec 2.2.2, p11) specifies that the outlier
+        # detector's scores WEIGHT the reprojection loss during training (predicted
+        # inliers keep weight, predicted outliers are down-weighted). Selectable via
+        # loss.reproj_weighting:
+        #   'none'            plain ESFMLoss, scores do NOT weight geometry. This is
+        #                     what the frozen single-scene benchmark ran (kept as
+        #                     default so those confs reproduce exactly).
+        #   'weighted'        ESFMLoss_weighted((1-score)*err), report-literal — the
+        #                     confident-pseudo-label BCE is the anti-collapse mechanism.
+        #   'weighted_detach' (1-score.detach())*err — geometry is down-weighted but
+        #                     scores learn only from the BCE (extra collapse guard).
+        self.reproj_weighting = conf.get_string('loss.reproj_weighting', default='none')
         self.outliers_loss = AdaptiveConfidenceWeightedOutliersLoss(conf)
         self.esfm_loss = ESFMLoss(conf)
+        self.weighted_esfm_loss = ESFMLoss_weighted(conf)
         
         # Loss weights (your existing code)
         self.alpha = conf.get_float('loss.reproj_loss_weight', default=1.0)
@@ -257,9 +265,17 @@ class CombinedLoss(nn.Module):
         classificationLoss = torch.tensor([0.0], device=pred_outliers.device, dtype=torch.float32)
         ESFMLoss = torch.tensor([0.0], device=pred_outliers.device, dtype=torch.float32)
 
-        # Compute Reprojection loss (geometric loss) - plain ESFM loss per the formula
+        # Reprojection (geometric) term. Weighted by the detector scores per the
+        # report (sec 2.2.2) when loss.reproj_weighting != 'none'.
         if self.alpha:
-            ESFMLoss = self.esfm_loss(pred_cam, data)
+            if self.reproj_weighting == 'none':
+                ESFMLoss = self.esfm_loss(pred_cam, data)
+            elif self.reproj_weighting == 'weighted':
+                ESFMLoss = self.weighted_esfm_loss(pred_cam, pred_outliers, data, epoch)
+            elif self.reproj_weighting == 'weighted_detach':
+                ESFMLoss = self.weighted_esfm_loss(pred_cam, pred_outliers.detach(), data, epoch)
+            else:
+                raise ValueError(f"Unknown loss.reproj_weighting: {self.reproj_weighting}")
 
         # Compute Outlier classification loss - your existing code
         if self.beta:
