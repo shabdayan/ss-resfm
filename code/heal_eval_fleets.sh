@@ -55,4 +55,21 @@ for row in "${FLEETS[@]}"; do
     done
   done
 done
+# --- MegaDepth (in-distribution) U-ESFM-SA 20/80 eval, seed 20 only ---
+MDSCENES="0238 0060 0197 0094 0265 0083 0076 0185 0048 0024 0223 5016 0046 0099 1001 0231 0411 0377 0102 0147 0148 0446 0022 0327 0015 0455 0496 1589 0012 0104 0019 0063 0130 0080 0240 0007"
+mdbase="results/crossdataset/../multiscene/uesfm_shallow_adaptive_megadepth_eval"
+mdtodo=""
+for sc in $MDSCENES; do
+  ls "results/multiscene/uesfm_shallow_adaptive_megadepth_eval/${sc}_ba/Results_FINE_TUNE"*.xlsx >/dev/null 2>&1 && continue
+  echo "$RUNNING" | grep -qx "20_${sc}" && continue
+  mdtodo="$mdtodo,$sc"
+done
+mdtodo="${mdtodo#,}"
+if [ -n "$mdtodo" ]; then
+  EVAL_PYTHON="$PY38" ./run_multiscene_eval.sh --template confs/megadepth_shallow_adaptive.conf.template \
+    --train_results results/multiscene/uesfm_27scenes_shallow_adaptive \
+    --eval_root results/multiscene/uesfm_shallow_adaptive_megadepth_eval \
+    --arch esfm_outliers_shallow --scans "$mdtodo" --seed 20 >/dev/null 2>&1 \
+    && { c=$(echo "$mdtodo"|tr ',' '\n'|wc -l); total=$((total+c)); echo "  heal MegaDepth-SA s20: $mdtodo"; }
+fi
 echo "heal_eval_fleets: resubmitted $total cell(s)"

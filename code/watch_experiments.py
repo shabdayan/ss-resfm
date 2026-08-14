@@ -60,6 +60,7 @@ EVALS = {
                               for d in ("1dsfm", "strecha", "blendedmvs")], 90),
     "deep MADlink eval": ([XD + "/uesfm_deep_adaptive_madlink_%s_eval" % d
                            for d in ("1dsfm", "strecha", "blendedmvs")], 90),
+    "U-ESFM-SA MegaDepth (s20)": (["results/multiscene/uesfm_shallow_adaptive_megadepth_eval"], 36),
     # auto-launch after their training completes (heal gates on Ep19999)
     "RESfM-shallow eval": ([XD + "/resfm_shallow_%s_eval" % d
                             for d in ("1dsfm", "strecha", "blendedmvs")], 90),
