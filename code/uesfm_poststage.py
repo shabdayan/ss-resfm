@@ -38,8 +38,16 @@ from pyhocon import ConfigFactory, HOCONConverter
 
 from run_single_scene_sweep import OLSSON_SCENES, slug, gpu_info
 
-VARIANTS = ('ft_learned', 'ft_mad', 'ttt', 'ttt_comb')
-BUDGET_TAG = {1000: '1k', 5000: '5k'}
+VARIANTS = ('ft_learned', 'ft_mad', 'ttt', 'ttt_comb',
+            # second stage on the existing uesfm stage-1: use its detector to
+            # {remove | weight} outliers, then {continue from ckpt | fresh scratch}
+            'remove_continue', 'remove_scratch', 'weight_continue', 'weight_scratch')
+BUDGET_TAG = {1000: '1k', 5000: '5k', 100000: '100k'}
+
+def is_prune(v):    return v in ('ft_learned', 'ft_mad', 'remove_continue', 'remove_scratch')
+def is_weight(v):   return v in ('weight_continue', 'weight_scratch')
+def is_scratch(v):  return v.endswith('_scratch')
+def uses_euclidean(v): return v in ('ttt', 'ttt_comb', 'weight_continue', 'weight_scratch')
 
 UESFM_ROOT = os.path.join(CODE_DIR, 'results', 'single_scene', 'uesfm')
 RESULTS_ROOT = os.path.join(CODE_DIR, 'results', 'single_scene')
@@ -77,7 +85,8 @@ def best_checkpoint(base_raw, scene):
 
 def outlier_mask(variant, base_raw, scene, thr):
     """[m, n] float mask of observations to remove (1 = outlier)."""
-    if variant == 'ft_learned':
+    if variant in ('ft_learned', 'remove_continue', 'remove_scratch'):
+        # learned detector scores from the stage-1 run
         d = np.load(os.path.join(base_raw, 'OPTIMIZATION', scene, 'outliers_results',
                                  'Final_outliers.npz'), allow_pickle=True)
         return (d['outliers_pred'] > thr).astype(np.float32)
@@ -130,17 +139,31 @@ def build_conf(base_conf_path, scene, seed, variant, budget, raw_dir, dataset_na
                                                        slug(scene), seed))
     conf.put('results_path', raw_dir)
     conf.put('dataset.dataset', dataset_name)
-    # fine-tune objective and schedule: multiscene per-scene fine-tune protocol.
-    # ttt_comb keeps the base run's adaptive CombinedLoss (and the output_mode-3
-    # outlier head it needs) — the multiscene TTT 'comb' variant; every other
-    # variant continues with plain ESFMLoss ('reproj_only').
-    if variant != 'ttt_comb':
+    # Stage-2 objective:
+    #  - ttt_comb / weight_*: keep the adaptive CombinedLoss + output_mode-3 detector.
+    #    weight_* additionally turns on report-faithful outlier weighting so the
+    #    detector's scores down-weight the reprojection (weighted_detach = safe).
+    #  - everything else (ttt, ft_*, remove_*): plain ESFMLoss on the (pruned) data.
+    if variant == 'ttt_comb':
+        pass  # inherits base CombinedLoss / output_mode 3 as trained
+    elif is_weight(variant):
+        conf.put('loss.func', 'CombinedLoss')
+        conf.put('loss.reproj_weighting', 'weighted_detach')
+        conf.put('train.output_mode', 3)
+    else:
         conf.put('loss.func', 'ESFMLoss')
         conf.put('train.output_mode', 1)
     conf.put('train.num_epochs', budget)
-    conf.put('train.eval_intervals', 250)
-    conf.put('train.lr', 5e-3)
-    conf.put('train.scheduler_milestone', [])
+    conf.put('train.eval_intervals', 250 if budget <= 5000 else 5000)
+    # continue (warm-start) uses the multiscene TTT lr 5e-3; a fresh-scratch second
+    # stage is a full optimization, so use the from-scratch lr 1e-4 with the standard
+    # depth-scaled milestones.
+    if is_scratch(variant):
+        conf.put('train.lr', 1e-4)
+        conf.put('train.scheduler_milestone', [int(budget*0.5), int(budget*0.7), int(budget*0.9)])
+    else:
+        conf.put('train.lr', 5e-3)
+        conf.put('train.scheduler_milestone', [])
     conf.put('train.early_stopping_patience', 0)
     conf.put('train.extract_reproj_errors', False)
     # keys normally injected by general_utils.init_exp (bypassed here)
@@ -178,7 +201,7 @@ def run_one(scene, seed, variant, budget, force=False, prune_thr=None):
     t0 = time.monotonic()
     try:
         # dataset: pruned copy (per seed — masks are run-specific) or the original
-        if variant in ('ttt', 'ttt_comb'):
+        if uses_euclidean(variant):
             dataset_name = 'Euclidean'
         else:
             dataset_name = os.path.join('single_scene_post',
@@ -216,13 +239,17 @@ def run_one(scene, seed, variant, budget, force=False, prune_thr=None):
 
         model_class = general_utils.get_class('models.' + conf.get_string('model.type'))
         model = model_class(conf, phase).to(device)
-        ckpt_path, best_ep = best_checkpoint(base_raw, scene)
-        state = torch.load(ckpt_path, map_location=device)['model_state_dict']
-        # stage-1 checkpoints were saved from a compiled model (_orig_mod prefix)
-        state = { (k[len('_orig_mod.'):] if k.startswith('_orig_mod.') else k): v
-                  for k, v in state.items() }
-        model.load_state_dict(state)
-        meta['warm_start'] = {'checkpoint': ckpt_path, 'epoch': best_ep}
+        if is_scratch(variant):
+            # fresh 100k from scratch on the pruned data (no warm start)
+            meta['warm_start'] = None
+        else:
+            ckpt_path, best_ep = best_checkpoint(base_raw, scene)
+            state = torch.load(ckpt_path, map_location=device)['model_state_dict']
+            # stage-1 checkpoints were saved from a compiled model (_orig_mod prefix)
+            state = { (k[len('_orig_mod.'):] if k.startswith('_orig_mod.') else k): v
+                      for k, v in state.items() }
+            model.load_state_dict(state)
+            meta['warm_start'] = {'checkpoint': ckpt_path, 'epoch': best_ep}
         model = torch.compile(model, mode='reduce-overhead')
 
         train_stat, train_errors, _, _ = train_mod.train(conf, loader, model, phase,

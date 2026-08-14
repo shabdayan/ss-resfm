@@ -52,7 +52,17 @@ METHOD_LABELS = {'esfm': 'ESFM (official code)', 'esfm_rc': 'ESFM (RESfM code)',
                  # adaptive-loss percentile probe (6-scene subset)
                  'uesfm_p1090': 'U-ESFM pct 10/90',
                  'uesfm_p3070': 'U-ESFM pct 30/70',
-                 'uesfm_p4060': 'U-ESFM pct 40/60'}
+                 'uesfm_p4060': 'U-ESFM pct 40/60',
+                 # report-faithful weighted-reprojection CombinedLoss (fresh training)
+                 'uesfm_wtd': 'U-ESFM weighted',
+                 'uesfm_wtddet': 'U-ESFM weighted(detach)',
+                 'uesfm_wtd_smoke': 'U-ESFM weighted [smoke]',
+                 'uesfm_wtddet_smoke': 'U-ESFM weighted-detach [smoke]',
+                 # second stage on stage-1 detector: remove|weight x continue|scratch
+                 'uesfm_remove_continue_100k': 'U-ESFM remove+continue100k',
+                 'uesfm_remove_scratch_100k': 'U-ESFM remove+scratch100k',
+                 'uesfm_weight_continue_100k': 'U-ESFM weight+continue100k',
+                 'uesfm_weight_scratch_100k': 'U-ESFM weight+scratch100k'}
 
 # Published per-scene numbers from Moran et al., ICCV 2021 (supplementary calibrated
 # table: "Ours" columns, before-BA and after-BA). Reference only: their post-BA uses
