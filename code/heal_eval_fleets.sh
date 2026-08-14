@@ -41,9 +41,12 @@ for row in "${FLEETS[@]}"; do
     [ -f "$tmpl" ] || continue
     for seed in $seeds; do
       base="results/crossdataset/${rp}_${ds}_eval"; [ "$seed" != 20 ] && base="${base}_seed${seed}"
+      # One glob per base (robust to slow-FS per-cell ls flakiness that caused a
+      # spurious mass-resubmit); build the done-set once, then check membership.
+      donelist=$(ls "$base"/*_ba/Results_FINE_TUNE*.xlsx 2>/dev/null)
       todo=""
       for sc in $(scenes_for $ds); do
-        ls "$base/${sc}_ba/Results_FINE_TUNE"*.xlsx >/dev/null 2>&1 && continue
+        echo "$donelist" | grep -q "/${sc}_ba/" && continue
         echo "$RUNNING" | grep -qx "${seed}_${sc}" && continue
         todo="$todo,$sc"
       done
@@ -58,9 +61,10 @@ done
 # --- MegaDepth (in-distribution) U-ESFM-SA 20/80 eval, seed 20 only ---
 MDSCENES="0238 0060 0197 0094 0265 0083 0076 0185 0048 0024 0223 5016 0046 0099 1001 0231 0411 0377 0102 0147 0148 0446 0022 0327 0015 0455 0496 1589 0012 0104 0019 0063 0130 0080 0240 0007"
 mdbase="results/crossdataset/../multiscene/uesfm_shallow_adaptive_megadepth_eval"
+mddone=$(ls results/multiscene/uesfm_shallow_adaptive_megadepth_eval/*_ba/Results_FINE_TUNE*.xlsx 2>/dev/null)
 mdtodo=""
 for sc in $MDSCENES; do
-  ls "results/multiscene/uesfm_shallow_adaptive_megadepth_eval/${sc}_ba/Results_FINE_TUNE"*.xlsx >/dev/null 2>&1 && continue
+  echo "$mddone" | grep -q "/${sc}_ba/" && continue
   echo "$RUNNING" | grep -qx "20_${sc}" && continue
   mdtodo="$mdtodo,$sc"
 done
