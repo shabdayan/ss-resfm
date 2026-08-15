@@ -50,7 +50,7 @@ for SCENE in "${SCENE_ARR[@]}"; do
         -oo "${REPO_ROOT}/lsf_output/single_scene_post/${SCENE}_%J.out" \
         -eo "${REPO_ROOT}/lsf_output/single_scene_post/${SCENE}_%J.err" \
         -gpu "num=1:j_exclusive=yes:gmem=80G" \
-        -R "rusage[mem=50000]" \
+        -R "rusage[mem=50000] select[hname!='lgn15']" \
         "${CMD}"
 done
 [ "$DRY_RUN" = false ] && echo "Submitted ${#SCENE_ARR[@]} post-stage job(s) to ${QUEUE}."
