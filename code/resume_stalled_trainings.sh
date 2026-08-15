@@ -14,6 +14,8 @@ JOBS=(
  "resfm_shallow_ms27|confs/multiscene_resfm_shallow.conf|resfm_shallow_27scenes"
  "uesfm_shallow_adaptive_p1090|confs/multiscene_uesfm_shallow_adaptive_p1090.conf|uesfm_27scenes_shallow_adaptive_p1090"
  "uesfm_shallow_adaptive_p4060|confs/multiscene_uesfm_shallow_adaptive_p4060.conf|uesfm_27scenes_shallow_adaptive_p4060"
+ "uesfm_adaptive_reportfaithful|confs/multiscene_uesfm_adaptive_reportfaithful.conf|uesfm_27scenes_adaptive_reportfaithful"
+ "uesfm_shallow_adaptive_reportfaithful|confs/multiscene_uesfm_shallow_adaptive_reportfaithful.conf|uesfm_27scenes_shallow_adaptive_reportfaithful"
 )
 for row in "${JOBS[@]}"; do
   IFS='|' read -r exp conf resdir <<< "$row"

@@ -68,6 +68,18 @@ EVALS = {
                             for d in ("1dsfm", "strecha", "blendedmvs")], 90),
     "shallow 40/60 eval": ([XD + "/uesfm_shallow_adaptive_p4060_%s_eval" % d
                             for d in ("1dsfm", "strecha", "blendedmvs")], 90),
+    # shallow head-arm PoC (U-ESFM-SA-advhead / -advweight), seed 20 only (18 cells)
+    "SA-advhead (s20)": ([XD + "/uesfm_shallow_advhead_%s_eval" % d
+                          for d in ("1dsfm", "strecha", "blendedmvs")], 18),
+    "SA-advweight (s20)": ([XD + "/uesfm_shallow_advweight_%s_eval" % d
+                            for d in ("1dsfm", "strecha", "blendedmvs")], 18),
+    # report-faithful arms (weighted, beta=1): RESfM-paper-style eval (OOD 5-seed + MegaDepth s20)
+    "RF-deep OOD": ([XD + "/uesfm_deep_reportfaithful_%s_eval" % d
+                     for d in ("1dsfm", "strecha", "blendedmvs")], 90),
+    "RF-shallow OOD": ([XD + "/uesfm_shallow_reportfaithful_%s_eval" % d
+                        for d in ("1dsfm", "strecha", "blendedmvs")], 90),
+    "RF-deep MegaDepth": (["results/multiscene/uesfm_deep_reportfaithful_megadepth_eval"], 36),
+    "RF-shallow MegaDepth": (["results/multiscene/uesfm_shallow_reportfaithful_megadepth_eval"], 36),
 }
 # PoC roots for the collapse (Nr) check
 POC_ROOTS = {"advhead": [XD + "/uesfm_deep_advhead_%s_eval" % d for d in ("1dsfm", "strecha", "blendedmvs")],
@@ -80,6 +92,8 @@ TRAININGS = {
     "RESfM-shallow (from scratch)": "resfm_shallow_27scenes",
     "shallow 10/90": "uesfm_27scenes_shallow_adaptive_p1090",
     "shallow 40/60": "uesfm_27scenes_shallow_adaptive_p4060",
+    "report-faithful (weighted,b=1)": "uesfm_27scenes_adaptive_reportfaithful",
+    "report-faithful shallow": "uesfm_27scenes_shallow_adaptive_reportfaithful",
 }
 
 prev = {}
