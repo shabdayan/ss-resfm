@@ -33,13 +33,13 @@ PROJECT_ROOT = os.path.dirname(UESFM_REPO)
 ESFM_REPO = os.path.join(PROJECT_ROOT, 'esfm-baseline')
 
 METHOD_LABELS = {'esfm': 'ESFM (official code)', 'esfm_rc': 'ESFM (RESfM code)',
-                 'uesfm': 'U-ESFM', 'uesfm_abl': 'U-ESFM arch + ESFMLoss',
+                 'uesfm': 'U-ESFM-SA-advhead', 'uesfm_abl': 'U-ESFM arch + ESFMLoss',
                  'esfm_paper': 'ESFM (paper)',
                  # post-stage completions of the U-ESFM protocol (uesfm_poststage.py)
                  'uesfm_ft_learned_1k': 'U-ESFM +prune(learned)+FT1k',
                  'uesfm_ft_learned_5k': 'U-ESFM +prune(learned)+FT5k',
-                 'uesfm_ft_mad_1k': 'U-ESFM +prune(MAD)+FT1k',
-                 'uesfm_ft_mad_5k': 'U-ESFM +prune(MAD)+FT5k',
+                 'uesfm_ft_mad_1k': 'U-ESFM-SA-MAD +FT1k',
+                 'uesfm_ft_mad_5k': 'U-ESFM-SA-MAD +FT5k',
                  'uesfm_ttt_1k': 'U-ESFM +TTT1k',
                  'uesfm_ttt_5k': 'U-ESFM +TTT5k',
                  'uesfm_ttt_comb_1k': 'U-ESFM +TTT(adaptive)1k',
@@ -54,10 +54,10 @@ METHOD_LABELS = {'esfm': 'ESFM (official code)', 'esfm_rc': 'ESFM (RESfM code)',
                  'uesfm_p3070': 'U-ESFM pct 30/70',
                  'uesfm_p4060': 'U-ESFM pct 40/60',
                  # report-faithful weighted-reprojection CombinedLoss (fresh training)
-                 'uesfm_wtd': 'U-ESFM weighted',
-                 'uesfm_wtddet': 'U-ESFM weighted(detach)',
-                 'uesfm_wtd_smoke': 'U-ESFM weighted [smoke]',
-                 'uesfm_wtddet_smoke': 'U-ESFM weighted-detach [smoke]',
+                 'uesfm_wtd': 'U-ESFM-SA-advweight',
+                 'uesfm_wtddet': 'U-ESFM-SA-advweight(detach)',
+                 'uesfm_wtd_smoke': 'U-ESFM-SA-advweight [smoke]',
+                 'uesfm_wtddet_smoke': 'U-ESFM-SA-advweight-detach [smoke]',
                  # second stage on stage-1 detector: remove|weight x continue|scratch
                  'uesfm_remove_continue_100k': 'U-ESFM remove+continue100k',
                  'uesfm_remove_scratch_100k': 'U-ESFM remove+scratch100k',
