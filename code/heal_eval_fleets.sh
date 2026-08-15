@@ -30,6 +30,10 @@ FLEETS=(
  "crossdataset_resfm_shallow|crossdataset_resfm_shallow_strecha|resfm_shallow_27scenes|resfm_shallow|esfm_outliers_shallow|20 21 22 23 24|models_all/Model_Ep19999.pt"
  "crossdataset_shallow_adaptive|crossdataset_shallow_adaptive_strecha_ftlr1e4|uesfm_27scenes_shallow_adaptive_p1090|uesfm_shallow_adaptive_p1090|esfm_outliers_shallow|20 21 22 23 24|models_all/Model_Ep19999.pt"
  "crossdataset_shallow_adaptive|crossdataset_shallow_adaptive_strecha_ftlr1e4|uesfm_27scenes_shallow_adaptive_p4060|uesfm_shallow_adaptive_p4060|esfm_outliers_shallow|20 21 22 23 24|models_all/Model_Ep19999.pt"
+ # Shallow head-arm PoC (U-ESFM-SA-advhead / -advweight): same shallow adaptive
+ # checkpoint as SA-MAD, learned-head remove/soft-weight at test time; seed 20 only.
+ "crossdataset_advhead_sa|crossdataset_advhead_sa_strecha|uesfm_27scenes_shallow_adaptive|uesfm_shallow_advhead|esfm_outliers_shallow|20"
+ "crossdataset_advweight_sa|crossdataset_advweight_sa_strecha|uesfm_27scenes_shallow_adaptive|uesfm_shallow_advweight|esfm_outliers_shallow|20"
 )
 total=0
 for row in "${FLEETS[@]}"; do
