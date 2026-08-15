@@ -491,9 +491,19 @@ class AdaptiveConfidenceWeightedOutliersLoss(nn.Module):
         self.inlier_percentile = conf.get_float('loss.inlier_percentile', default=20.0)
         self.outlier_percentile = conf.get_float('loss.outlier_percentile', default=80.0)
         
-        # Safety parameters
+        # Safety parameters.
         self.min_confident_samples = conf.get_int('loss.min_confident_samples', default=10)
-        self.min_separation = conf.get_float('loss.min_threshold_separation', default=0.5)
+        # Minimum gap between the inlier/outlier thresholds, to keep pseudo-labels
+        # confident when the error distribution is peaked. This MUST be scale-aware:
+        # reprojection errors here live in NORMALIZED image coordinates (~0.01-0.2),
+        # not pixels, so the old absolute default of 0.5 was larger than the entire
+        # error range and pushed the inlier threshold below zero (no confident
+        # inliers ever). Now expressed as a FRACTION of a robust error scale (the
+        # median error) computed per forward pass, so it works in any coordinate
+        # system. Set loss.min_threshold_separation (absolute, same units as the
+        # errors) to override with a hard value; default -1 = use the fraction.
+        self.min_separation_frac = conf.get_float('loss.min_threshold_separation_frac', default=0.25)
+        self.min_separation_abs = conf.get_float('loss.min_threshold_separation', default=-1.0)
         self.warmup_epochs = conf.get_int('loss.warmup_epochs', default=10)
 
         # A2.5.1 (diagnosis task): contamination-linked outlier percentile.
@@ -539,12 +549,20 @@ class AdaptiveConfidenceWeightedOutliersLoss(nn.Module):
             outlier_percentile = float(torch.clamp(100.0 * (1.0 - est_frac), 55.0, 95.0))
         low_threshold = torch.quantile(errors_flat, self.inlier_percentile / 100.0)
         high_threshold = torch.quantile(errors_flat, outlier_percentile / 100.0)
-        
-        # Ensure minimum separation (handle degenerate distributions)
-        if high_threshold - low_threshold < self.min_separation:
+
+        # Ensure minimum separation (handle degenerate/peaked distributions).
+        # Scale-aware: unless an absolute override is given, the floor is a fraction
+        # of the median error, so it tracks the (normalized) coordinate scale and
+        # can never exceed the error range. clamp(min=0) keeps a non-negative inlier
+        # threshold even under a hard absolute override.
+        if self.min_separation_abs >= 0.0:
+            min_sep = self.min_separation_abs
+        else:
+            min_sep = self.min_separation_frac * torch.median(errors_flat)
+        if high_threshold - low_threshold < min_sep:
             mid = (high_threshold + low_threshold) / 2.0
-            low_threshold = mid - self.min_separation / 2.0
-            high_threshold = mid + self.min_separation / 2.0
+            low_threshold = torch.clamp(mid - min_sep / 2.0, min=0.0)
+            high_threshold = mid + min_sep / 2.0
         
         # High-confidence samples only
         confident_inliers = errors_flat < low_threshold
