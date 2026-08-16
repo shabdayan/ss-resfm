@@ -99,6 +99,7 @@ train
     gamma = 0.1
     eval_intervals = {eval_intervals}
     sequential = {sequential}
+    sequential_final_epochs = {seq_final_epochs}
 }}
 loss
 {{
@@ -363,19 +364,20 @@ def default_milestones(epochs):
 
 def gen_conf(method, scene, seed, epochs, eval_intervals, raw_dir,
              inlier_pct=20.0, outlier_pct=80.0, reproj_weighting='none',
-             sequential=False):
+             sequential=False, seq_final_epochs=20000):
     milestones = '[{}]'.format(', '.join(str(m) for m in default_milestones(epochs)))
     seq = 'true' if sequential else 'false'
     if method == 'esfm':
         return ESFM_CONF.format(seed=seed, scene=scene, epochs=epochs,
                                 milestones=milestones, eval_intervals=eval_intervals,
-                                sequential=seq)
+                                sequential=seq, seq_final_epochs=seq_final_epochs)
     template = {'esfm_rc': ESFM_RC_CONF, 'uesfm_abl': UESFM_ABL_CONF}.get(method, UESFM_CONF)
     return template.format(seed=seed, scene=scene, scene_slug=slug(scene),
                            epochs=epochs, milestones=milestones,
                            eval_intervals=eval_intervals, raw_dir=raw_dir,
                            inlier_pct=inlier_pct, outlier_pct=outlier_pct,
-                           reproj_weighting=reproj_weighting, sequential=seq)
+                           reproj_weighting=reproj_weighting, sequential=seq,
+                           seq_final_epochs=seq_final_epochs)
 
 
 # --------------------------------------------------------------------------
@@ -430,7 +432,7 @@ def gpu_info():
 
 def launch_one(method, scene, seed, epochs, eval_intervals, results_root, gpu_env=None,
                alias=None, inlier_pct=20.0, outlier_pct=80.0, reproj_weighting='none',
-               sequential=False):
+               sequential=False, seq_final_epochs=20000):
     # alias: store results under a different method name (loss-threshold probe runs,
     # e.g. uesfm with percentiles 10/90 recorded as method 'uesfm_p1090'; esfm with
     # sequential recorded as 'esfm_seq').
@@ -441,7 +443,8 @@ def launch_one(method, scene, seed, epochs, eval_intervals, results_root, gpu_en
 
     conf_text = gen_conf(method, scene, seed, epochs, eval_intervals, raw_dir,
                          inlier_pct=inlier_pct, outlier_pct=outlier_pct,
-                         reproj_weighting=reproj_weighting, sequential=sequential)
+                         reproj_weighting=reproj_weighting, sequential=sequential,
+                         seq_final_epochs=seq_final_epochs)
     conf_name = 'ss_{}_{}_seed{}.conf'.format(eff, slug(scene), seed)
 
     if method == 'esfm':
@@ -549,6 +552,9 @@ def main():
     ap.add_argument('--sequential', action='store_true',
                     help='sequential-optimization fallback (ESFM paper Table 8): warm-start '
                          'on greedily-grown image subsets before the full optimization')
+    ap.add_argument('--sequential-final-epochs', type=int, default=20000,
+                    help='epochs for the final full-scene stage of sequential optimization '
+                         '(ESFM default 20000; diagnostic: 100000 to match the standard budget)')
     ap.add_argument('--dry-run', action='store_true', help='print planned runs and exit')
     args = ap.parse_args()
 
@@ -607,7 +613,8 @@ def main():
                               inlier_pct=args.uesfm_inlier_pct,
                               outlier_pct=args.uesfm_outlier_pct,
                               reproj_weighting=args.reproj_weighting,
-                              sequential=args.sequential)
+                              sequential=args.sequential,
+                              seq_final_epochs=args.sequential_final_epochs)
         except Exception as e:
             meta = {'method': method, 'scene': scene, 'seed': seed,
                     'status': 'failed', 'runner_error': str(e)}

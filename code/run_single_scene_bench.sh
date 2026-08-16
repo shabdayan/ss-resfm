@@ -24,6 +24,7 @@ INLIER_PCT=""        # override adaptive-loss inlier percentile
 OUTLIER_PCT=""       # override adaptive-loss outlier percentile
 REPROJ_WEIGHTING=""  # none|weighted|weighted_detach (report sec 2.2.2)
 SEQUENTIAL=false     # sequential-optimization fallback (ESFM paper Table 8)
+SEQ_FINAL_EPOCHS=""   # override sequential final-stage epochs
 EXCLUDE_HOST="lgn15" # bad node that hangs jobs at startup (see memory); '' to disable
 DRY_RUN=false
 SMOKE=false
@@ -37,6 +38,7 @@ while [[ $# -gt 0 ]]; do
         --outlier-pct) OUTLIER_PCT="$2"; shift 2 ;;
         --reproj-weighting) REPROJ_WEIGHTING="$2"; shift 2 ;;
         --sequential) SEQUENTIAL=true; shift ;;
+        --sequential-final-epochs) SEQ_FINAL_EPOCHS="$2"; shift 2 ;;
         --exclude-host) EXCLUDE_HOST="$2"; shift 2 ;;
         --scenes) SCENES="$2"; shift 2 ;;
         --seeds) SEEDS="$2"; shift 2 ;;
@@ -81,6 +83,7 @@ for SCENE in "${SCENE_ARR[@]}"; do
     [ -n "$OUTLIER_PCT" ]  && CMD="${CMD} --uesfm-outlier-pct ${OUTLIER_PCT}"
     [ -n "$REPROJ_WEIGHTING" ] && CMD="${CMD} --reproj-weighting ${REPROJ_WEIGHTING}"
     [ "$SEQUENTIAL" = true ] && CMD="${CMD} --sequential"
+    [ -n "$SEQ_FINAL_EPOCHS" ] && CMD="${CMD} --sequential-final-epochs ${SEQ_FINAL_EPOCHS}"
     if [ "$DRY_RUN" = true ]; then
         echo "DRY RUN: bsub -q ${QUEUE} -J ${JOBTAG}_${SCENE} -R \"${RES}\" ... \"${CMD}\""
         continue
