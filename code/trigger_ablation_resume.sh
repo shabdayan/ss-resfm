@@ -8,6 +8,14 @@
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
 CONF="$1"; EXP="$2"; RESULTS_REL="$3"; RETRY_COUNT=${4:-0}
 MODELS="${REPO_ROOT}/${RESULTS_REL}/models"
+# True completion marker: the final-epoch checkpoint. The best-val checkpoint in
+# models/ can be EARLY (validation plateaus before epoch 19000), which otherwise
+# makes the epoch check below fail forever -> infinite resubmit loop. Check the
+# final marker first and stop unconditionally if training actually reached 20k.
+if [ -e "${REPO_ROOT}/${RESULTS_REL}/models_all/Model_Ep19999.pt" ]; then
+    echo "TRIGGER[${EXP}]: training complete (models_all/Model_Ep19999.pt present). Not resubmitting."
+    exit 0
+fi
 TARGET_EPOCH=19000  # 20000-epoch run; require the best checkpoint to be late-stage
 MAX_RETRIES=10
 PY=/home/projects/bagon/ortalda/MVG/final-project/u-esfm/.venv38-resfm/bin/python
