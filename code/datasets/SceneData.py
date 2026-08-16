@@ -163,8 +163,18 @@ def get_subset(data, subset_size):
     M_indices = torch.sort(torch.cat((2 * indices, 2 * indices + 1)))[0]
     y, Ns = data.y[indices], data.Ns[indices]
     M = data.M[M_indices]
-    M = M[:, (M > 0).sum(dim=0) > 2]
-    return SceneData(M, Ns, y, data.scan_name + "_{}".format(subset_size), outliers=data.outlier_indices[indices], dict_info=data.dict_info, nameslist=data.img_list[indices])
+    kept = (M > 0).sum(dim=0) > 2
+    M = M[:, kept]
+    # Outliers for the subset: take the selected cameras' rows and the same column
+    # filter applied to M (as sample_data does). The Euclidean scenes carry no
+    # per-camera outlier mask (it defaults to a non-per-camera zeros/placeholder),
+    # so fall back to an all-zero mask of the correct [subset_cams, kept_pts] shape.
+    oi = data.outlier_indices
+    if oi is not None and hasattr(oi, 'shape') and len(oi.shape) == 2 and oi.shape[0] == data.y.shape[0]:
+        sub_out = oi[indices][:, kept]
+    else:
+        sub_out = torch.zeros((len(indices), int(kept.sum())))
+    return SceneData(M, Ns, y, data.scan_name + "_{}".format(subset_size), outliers=sub_out, dict_info=data.dict_info, nameslist=data.img_list[indices])
 
 if __name__ == "__main__":
     test_dataset()
