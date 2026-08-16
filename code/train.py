@@ -261,6 +261,15 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
     validation_metric = conf.get_list('train.validation_metric') if phase is not Phases.FINE_TUNE else conf.get_list('train.validation_metric_fine_tuning')
     early_stopping_patience = conf.get_int('train.early_stopping_patience', default=0)  # 0 means no early stopping
 
+    # Match the ESFM reference exactly on epoch bookkeeping. resuming_epoch is the
+    # "last completed epoch" and the loop is range(resuming_epoch+1, num_epochs), so
+    # a fresh run must start from -1 to run epochs 0..num_epochs-1 (== ESFM's
+    # range(num_of_epochs)) and to evaluate at epoch 0 (0 % eval_intervals == 0).
+    # init_exp defaults it to 0 (= 99999 epochs, first eval at eval_intervals); force
+    # -1 here for fresh runs. The resume block below overrides it to the checkpoint
+    # epoch, so preemption-resume is unaffected.
+    conf["resuming_epoch"] = -1
+
     # === Loss Function ===
     if phase in [Phases.FINE_TUNE, Phases.SHORT_OPTIMIZATION]:
         conf["resuming_epoch"] = -1
