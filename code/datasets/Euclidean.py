@@ -135,12 +135,33 @@ def get_raw_data(conf, scan, phase, stage=1):
     # per-point weight (proj_err_weight) by ESFMLoss_weighted_by_rep_err.
     frozen_weights = None
     weight_not_remove = conf.get_bool('test.weight_not_remove', default=False)
+    # hybrid_remove_weight: 3-band adaptive scheme (mirrors the adaptive loss's
+    # percentile bands). Per-scene head-score thresholds: score > high -> REMOVE,
+    # score < low -> full weight, in-between -> soft-weight by (1-score).
+    hybrid_remove_weight = conf.get_bool('test.hybrid_remove_weight', default=False)
     # === Fine-tuning: Load predicted outliers ===
     if phase is Phases.FINE_TUNE and output_mode == 3:
         print(f"Fine-tuning phase: loading predicted outliers for scan {scan}")
         print("Loading outliers from:", path_to_outliers(conf, Phases.TEST, epoch=None, scan=scan))
         outliers_mask_np = np.load(path_to_outliers(conf, Phases.TEST, epoch=None, scan=scan) + ".npz")['outliers_pred']
-        if weight_not_remove:
+        if hybrid_remove_weight:
+            # Adaptive 3-band: remove confident outliers, soft-weight the ambiguous,
+            # keep confident inliers at full weight. Thresholds are per-scene
+            # percentiles of the head-score distribution (default 20/80).
+            s = torch.from_numpy(outliers_mask_np).float()
+            lo_pct = conf.get_float('test.hybrid_low_pct', default=20.0)
+            hi_pct = conf.get_float('test.hybrid_high_pct', default=80.0)
+            flat = s.flatten()
+            low_thr = torch.quantile(flat, lo_pct / 100.0)
+            high_thr = torch.quantile(flat, hi_pct / 100.0)
+            outliers_mask = s > high_thr            # remove confident outliers
+            remove_outliers_pred = True
+            fw = s.clone()                           # weight survivors by (1-score)
+            fw[s < low_thr] = 0.0                     # confident inliers -> full weight
+            frozen_weights = fw
+            print(f"[hybrid] low_thr={float(low_thr):.3f} high_thr={float(high_thr):.3f} "
+                  f"remove_frac={float((s > high_thr).float().mean()):.3f}")
+        elif weight_not_remove:
             # Keep continuous frozen scores as per-point weights; do NOT remove.
             frozen_weights = torch.from_numpy(outliers_mask_np).float()
         else:

@@ -1,0 +1,116 @@
+# Per-test-scene evaluation conf TEMPLATE for the U-RESfM multi-scene model
+# (RESfM protocol: load the multi-scene best checkpoint, fine-tune ~1K epochs per
+# test scene with the conf-selected loss.func_tuning, then evaluate with BA).
+#
+# Do not run this file directly — run_multiscene_eval.sh substitutes the
+# __SCAN__ / __RESULTS_PATH__ / __PRETRAINED__ placeholders per scene and submits
+# one LSF job per scene via single_scene_optimization.py --phase FINE_TUNE.
+#
+# The full reconstructed MegaDepth test set (resfm.pdf Table 1; see
+# RUN_MULTISCENE.md for the 13-vs-14 Group-1 caveat) — kept here for the record;
+# the fan-out script iterates this same list:
+#   Group 1: 0238 0060 0197 0094 0265 0083 0076 0185 0048 0024 0223 5016 0046
+#   Group 2 (300-image subsamples): 0099 1001 0231 0411 0377 0102 0147 0148 0446
+#     0022 0327 0015 0455 0496 1589 0012 0104 0019 0063 0130 0080 0240 0007
+#
+# With train.output_mode = 3, the FINE_TUNE flow follows upstream RESfM: a TEST
+# evaluation with the loaded checkpoint first saves predicted outliers
+# (restored in train.py/single_scene_optimization.py), which the fine-tune data
+# load prunes before optimizing.
+
+exp_name = uesfm_eval___SCAN__
+results_path = "__RESULTS_PATH__"
+pretrainedPath = "__PRETRAINED__"
+num_iter = 1
+random_seed = 20
+num_jobs = 1
+num_gpus = 1
+general
+{
+    stage = "3"
+}
+dataset
+{
+    dataset = "megadepth"
+    use_gt = False
+    calibrated = True
+    remove_outliers_gt = False
+
+    scan = "__SCAN__"
+
+    # Full test set (informational here; used by fan-out paths that read test_set)
+    test_set = ["0238", "0060", "0197", "0094", "0265", "0083", "0076", "0185", "0048", "0024", "0223", "5016", "0046", "0099", "1001", "0231", "0411", "0377", "0102", "0147", "0148", "0446", "0022", "0327", "0015", "0455", "0496", "1589", "0012", "0104", "0019", "0063", "0130", "0080", "0240", "0007"]
+    scans_list = ["0238", "0060", "0197", "0094", "0265", "0083", "0076", "0185", "0048", "0024", "0223", "5016", "0046", "0099", "1001", "0231", "0411", "0377", "0102", "0147", "0148", "0446", "0022", "0327", "0015", "0455", "0496", "1589", "0012", "0104", "0019", "0063", "0130", "0080", "0240", "0007"]
+}
+model
+{
+    # Must match the multi-scene training conf (confs/multiscene_uresfm.conf)
+    type = "SetOfSet.DeepSetOfSetOutliersNet"
+    num_features = 256
+    num_blocks = 2  # DEEP adaptive (matches uesfm_27scenes_adaptive_reportfaithful)
+    block_size = 3
+    use_skip = False
+    multires = 0
+    use_progressive = False
+    use_layer_norm = True
+    use_residual = True
+    dropout_rate = 0.1
+}
+train
+{
+    # RESfM's per-test-scene fine-tune stage: ~1K epochs, eval every 250, lr 5e-3
+    lr = 5e-3
+    num_epochs = 1001
+    scheduler_milestone = [10000]
+    gamma = 0.9
+    eval_intervals = 250
+    early_stopping_patience = 0
+    # output_mode=3 here only arms the prune-at-FINE_TUNE path in the data loader
+    # and the test-before-fine-tune step; with test.outlier_source = "mad" below,
+    # the saved outliers come from reprojection-error statistics, NOT the (untrained)
+    # classifier head, and the fine-tune itself runs in mode 1 (cameras/points only).
+    output_mode = 3
+    fine_tune_output_mode = 1
+    validation_metric = ["our_repro"]
+    validation_metric_higher_is_better = False
+    validation_metric_fine_tuning = ["our_repro"]
+}
+loss
+{
+    func = ESFMLoss              # informational: FINE_TUNE reads only func_tuning below
+    # Fine-tune loss (this stage USES func_tuning): RESfM protocol = plain
+    # reprojection. The TTT experiment changes only this key to CombinedLoss.
+    func_tuning = ESFMLoss_weighted_by_rep_err
+
+    reproj_loss_weight = 1.0
+    classification_loss_weight = 0.3
+
+    infinity_pts_margin = 1e-4
+    normalize_grad = True
+    hinge_loss = True
+    hinge_loss_weight = 1
+
+    inlier_percentile = 20.0
+    outlier_percentile = 80.0
+    min_confident_samples = 10
+    min_threshold_separation = 0.0  # 0.5 is pixel-scale; normalized errors are ~0.01-0.2 (see fe55bf0)
+    warmup_epochs = 10
+
+    enable_csv_logging = False
+}
+test
+{
+    outliers_threshold = 0.6
+    hybrid_remove_weight = True
+    hybrid_low_pct = 20.0
+    hybrid_high_pct = 80.0
+    # U-ESFM: statistical outlier identification at test time (label-free)
+}
+ba
+{
+    run_ba = True
+    repeat = True
+    triangulation = False
+    only_last_eval = True
+    filter_outliers = 5.0  # RESfM paper/conf value (multi-scene protocol)
+}

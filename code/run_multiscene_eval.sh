@@ -35,6 +35,8 @@ PY="${EVAL_PYTHON:-${REPO_ROOT}/../.venv/bin/python}"
 QUEUE="waic-risk"
 DRY_RUN=false
 SEED=20  # paper/RESfM-code default; use --seed N for the multi-seed median protocol
+JOBPREFIX="ueval"  # LSF job-name prefix; override with --jobprefix so distinct fleets
+                   # sharing scene+seed don't collide in the heal RUNNING-dedup check
 ARCH="esfm_outliers_deep"
 SCENES="0238 0060 0197 0094 0265 0083 0076 0185 0048 0024 0223 5016 0046 0099 1001 0231 0411 0377 0102 0147 0148 0446 0022 0327 0015 0455 0496 1589 0012 0104 0019 0063 0130 0080 0240 0007"
 
@@ -47,6 +49,7 @@ while [[ $# -gt 0 ]]; do
         --train_results) TRAIN_RESULTS="$2"; shift 2;;
         --eval_root) EVAL_ROOT="$2"; shift 2;;
         --arch) ARCH="$2"; shift 2;;
+        --jobprefix) JOBPREFIX="$2"; shift 2;;
         --dry_run) DRY_RUN=true; shift;;
         *) echo "Unknown option $1"; exit 1;;
     esac
@@ -91,7 +94,7 @@ for SCAN in $SCENES; do
         echo "DRY RUN: ${CMD}"
     else
         bsub -q "${QUEUE}" \
-            -J "ueval_s${SEED}_${SCAN}" \
+            -J "${JOBPREFIX}_s${SEED}_${SCAN}" \
             -oo "${REPO_ROOT}/lsf_output/multiscene_eval/${SCAN}_s${SEED}_%J.out" \
             -eo "${REPO_ROOT}/lsf_output/multiscene_eval/${SCAN}_s${SEED}_%J.err" \
             -gpu "num=1:j_exclusive=yes:gmem=40G" \
