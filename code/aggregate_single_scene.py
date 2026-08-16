@@ -62,7 +62,10 @@ METHOD_LABELS = {'esfm': 'ESFM (official code)', 'esfm_rc': 'ESFM (RESfM code)',
                  'uesfm_remove_continue_100k': 'U-ESFM remove+continue100k',
                  'uesfm_remove_scratch_100k': 'U-ESFM remove+scratch100k',
                  'uesfm_weight_continue_100k': 'U-ESFM weight+continue100k',
-                 'uesfm_weight_scratch_100k': 'U-ESFM weight+scratch100k'}
+                 'uesfm_weight_scratch_100k': 'U-ESFM weight+scratch100k',
+                 # sequential-optimization fallback (ESFM paper Table 8)
+                 'esfm_seq': 'ESFM (official) +sequential',
+                 'uesfm_seq': 'U-ESFM-SA-advhead +sequential'}
 
 # Published per-scene numbers from Moran et al., ICCV 2021 (supplementary calibrated
 # table: "Ours" columns, before-BA and after-BA). Reference only: their post-BA uses

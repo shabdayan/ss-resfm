@@ -98,6 +98,7 @@ train
     scheduler_milestone = {milestones}
     gamma = 0.1
     eval_intervals = {eval_intervals}
+    sequential = {sequential}
 }}
 loss
 {{
@@ -158,6 +159,7 @@ train
     scheduler_milestone = {milestones}
     gamma = 0.1
     eval_intervals = {eval_intervals}
+    sequential = {sequential}
     early_stopping_patience = 0
     output_mode = 3  # camera/point heads + outlier detector
     validation_metric = ["our_repro"]
@@ -360,17 +362,20 @@ def default_milestones(epochs):
 
 
 def gen_conf(method, scene, seed, epochs, eval_intervals, raw_dir,
-             inlier_pct=20.0, outlier_pct=80.0, reproj_weighting='none'):
+             inlier_pct=20.0, outlier_pct=80.0, reproj_weighting='none',
+             sequential=False):
     milestones = '[{}]'.format(', '.join(str(m) for m in default_milestones(epochs)))
+    seq = 'true' if sequential else 'false'
     if method == 'esfm':
         return ESFM_CONF.format(seed=seed, scene=scene, epochs=epochs,
-                                milestones=milestones, eval_intervals=eval_intervals)
+                                milestones=milestones, eval_intervals=eval_intervals,
+                                sequential=seq)
     template = {'esfm_rc': ESFM_RC_CONF, 'uesfm_abl': UESFM_ABL_CONF}.get(method, UESFM_CONF)
     return template.format(seed=seed, scene=scene, scene_slug=slug(scene),
                            epochs=epochs, milestones=milestones,
                            eval_intervals=eval_intervals, raw_dir=raw_dir,
                            inlier_pct=inlier_pct, outlier_pct=outlier_pct,
-                           reproj_weighting=reproj_weighting)
+                           reproj_weighting=reproj_weighting, sequential=seq)
 
 
 # --------------------------------------------------------------------------
@@ -382,13 +387,13 @@ def run_dir_for(results_root, method, scene, seed):
 
 
 def cameras_npz(run_dir, method, scene):
-    if method == 'esfm':
+    if method in ('esfm', 'esfm_seq'):
         return os.path.join(run_dir, 'raw', 'Final_Cameras.npz')
     return os.path.join(run_dir, 'raw', 'forFigures', '{}_Final_Cameras.npz'.format(scene))
 
 
 def metrics_file(run_dir, method):
-    if method == 'esfm':
+    if method in ('esfm', 'esfm_seq'):
         return os.path.join(run_dir, 'raw', 'Results_OPTIMIZATION.xlsx')
     return os.path.join(run_dir, 'raw', 'Results_OPTIMIZATION_stage_1_single_scene_bench.xlsx')
 
@@ -424,9 +429,11 @@ def gpu_info():
 # --------------------------------------------------------------------------
 
 def launch_one(method, scene, seed, epochs, eval_intervals, results_root, gpu_env=None,
-               alias=None, inlier_pct=20.0, outlier_pct=80.0, reproj_weighting='none'):
+               alias=None, inlier_pct=20.0, outlier_pct=80.0, reproj_weighting='none',
+               sequential=False):
     # alias: store results under a different method name (loss-threshold probe runs,
-    # e.g. uesfm with percentiles 10/90 recorded as method 'uesfm_p1090')
+    # e.g. uesfm with percentiles 10/90 recorded as method 'uesfm_p1090'; esfm with
+    # sequential recorded as 'esfm_seq').
     eff = alias or method
     run_dir = run_dir_for(results_root, eff, scene, seed)
     raw_dir = os.path.join(run_dir, 'raw')
@@ -434,12 +441,14 @@ def launch_one(method, scene, seed, epochs, eval_intervals, results_root, gpu_en
 
     conf_text = gen_conf(method, scene, seed, epochs, eval_intervals, raw_dir,
                          inlier_pct=inlier_pct, outlier_pct=outlier_pct,
-                         reproj_weighting=reproj_weighting)
+                         reproj_weighting=reproj_weighting, sequential=sequential)
     conf_name = 'ss_{}_{}_seed{}.conf'.format(eff, slug(scene), seed)
 
     if method == 'esfm':
         repo_code = os.path.join(ESFM_REPO, 'code')
-        exp_version = '{}_seed{}'.format(slug(scene), seed)
+        # include eff so an aliased run (e.g. esfm_seq) writes to its own ESFM-side
+        # results dir and doesn't collide with the standard esfm run
+        exp_version = '{}_{}_seed{}'.format(eff, slug(scene), seed)
     else:
         repo_code = CODE_DIR
         exp_version = None
@@ -537,6 +546,9 @@ def main():
     ap.add_argument('--reproj-weighting', default='none',
                     choices=['none', 'weighted', 'weighted_detach'],
                     help='CombinedLoss reprojection weighting (report sec 2.2.2)')
+    ap.add_argument('--sequential', action='store_true',
+                    help='sequential-optimization fallback (ESFM paper Table 8): warm-start '
+                         'on greedily-grown image subsets before the full optimization')
     ap.add_argument('--dry-run', action='store_true', help='print planned runs and exit')
     args = ap.parse_args()
 
@@ -573,14 +585,14 @@ def main():
         len(plan), len(scenes), len(seeds), len(methods)))
     if args.dry_run:
         for scene, seed, method in plan:
-            eff = args.method_alias if (method == 'uesfm' and args.method_alias) else method
+            eff = args.method_alias or method
             state = 'DONE' if is_completed(run_dir_for(args.results_root, eff, scene, seed), eff, scene, args.epochs) else 'todo'
             print('  [{}] {:6s} seed{} {}'.format(state, eff, seed, scene))
         return
 
     failures, skipped, completed = [], 0, 0
     for i, (scene, seed, method) in enumerate(plan, 1):
-        eff = args.method_alias if (method == 'uesfm' and args.method_alias) else method
+        eff = args.method_alias or method
         run_dir = run_dir_for(args.results_root, eff, scene, seed)
         if is_completed(run_dir, eff, scene, args.epochs):
             print('[{}/{}] SKIP (done) {} seed{} {}'.format(i, len(plan), eff, seed, scene), flush=True)
@@ -591,10 +603,11 @@ def main():
         try:
             meta = launch_one(method, scene, seed, args.epochs, args.eval_intervals,
                               args.results_root,
-                              alias=args.method_alias if method == 'uesfm' else None,
+                              alias=args.method_alias,
                               inlier_pct=args.uesfm_inlier_pct,
                               outlier_pct=args.uesfm_outlier_pct,
-                              reproj_weighting=args.reproj_weighting)
+                              reproj_weighting=args.reproj_weighting,
+                              sequential=args.sequential)
         except Exception as e:
             meta = {'method': method, 'scene': scene, 'seed': seed,
                     'status': 'failed', 'runner_error': str(e)}

@@ -173,10 +173,15 @@ def train_single_model(conf, device, phase, stage=1, architecture_type="esfm_out
     apply_kaiming_if_deep(model, conf)
     # ============================================================================
 
-    
-    # if hasattr(torch, 'compile'):
-    model = torch.compile(model, mode='reduce-overhead')
-    
+
+    # Sequential optimization (below) trains on growing image subsets whose shapes
+    # change every step; torch.compile would recompile each time (a storm on large
+    # scenes), so skip compilation for sequential runs.
+    _sequential = conf.get_bool('train.sequential', default=False)
+    if not _sequential:
+        # if hasattr(torch, 'compile'):
+        model = torch.compile(model, mode='reduce-overhead')
+
     print(f'Number of parameters: {sum([x.numel() for x in model.parameters()])}')
     print(f'Number of trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}')
 
@@ -243,9 +248,32 @@ def train_single_model(conf, device, phase, stage=1, architecture_type="esfm_out
         print(f"  Device: {scene_loader.reprojection_weights.device}")
         print(f"{'='*60}\n")
     
+    # Sequential-optimization fallback (ESFM paper, sec. "Sequential optimization",
+    # Table 8): for hard scenes, warm-start the model on a greedily-grown image
+    # subset (1000 epochs each; get_subset uses the same shared-track ordering as the
+    # ESFM reference) before the final full-scene optimization. Matches the ESFM
+    # official schedule: 1000 epochs/subset, then 20000 for the full scene.
+    if _sequential:
+        n_cams = scene_data.y.shape[0]
+        orig_epochs = conf.get_int('train.num_epochs')
+        orig_ms = conf.get_list('train.scheduler_milestone')
+        conf.put('train.num_epochs', 1000)
+        conf.put('train.scheduler_milestone', [])
+        for subset_size in range(2, n_cams):
+            print(f"########## Sequential: subset of size {subset_size}/{n_cams-1} ##########", flush=True)
+            subset_data = SceneData.get_subset(scene_data, subset_size)
+            subset_loader = torch.utils.data.DataLoader(
+                ScenesDataSet.ScenesDataSet([subset_data], return_all=True),
+                collate_fn=ScenesDataSet.collate_fn, num_workers=0,
+                worker_init_fn=worker_init_fn, shuffle=False, drop_last=False)
+            train.train(conf, subset_loader, model, phase, fabric=fabric)
+        # final full-scene optimization (ESFM uses 20000 epochs here)
+        conf.put('train.num_epochs', 20000)
+        conf.put('train.scheduler_milestone', [10000])
+
     # Regular training mode
     print(f"Running {stage} stage optimization")
-    
+
     # Train the model
     train_stat, train_errors, _, _ = train.train(conf, scene_loader, model, phase, fabric=fabric)
     train_errors.drop("Mean", inplace=True)
