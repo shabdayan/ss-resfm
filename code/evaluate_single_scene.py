@@ -59,14 +59,14 @@ def load_gt(scene):
 
 
 def cameras_npz_path(run_dir, method, scene):
-    if method == 'esfm':
+    if method == 'esfm' or method.startswith('esfm_seq'):
         return os.path.join(run_dir, 'raw', 'Final_Cameras.npz')
     return os.path.join(run_dir, 'raw', 'forFigures', '{}_Final_Cameras.npz'.format(scene))
 
 
 def native_metrics(run_dir, method, scene):
     """Read the method's own final metrics row from its results xlsx."""
-    if method == 'esfm':
+    if method == 'esfm' or method.startswith('esfm_seq'):
         path = os.path.join(run_dir, 'raw', 'Results_OPTIMIZATION.xlsx')
     else:
         path = os.path.join(run_dir, 'raw', 'Results_OPTIMIZATION_stage_1_single_scene_bench.xlsx')

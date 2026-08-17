@@ -389,13 +389,13 @@ def run_dir_for(results_root, method, scene, seed):
 
 
 def cameras_npz(run_dir, method, scene):
-    if method in ('esfm', 'esfm_seq'):
+    if method == 'esfm' or method.startswith('esfm_seq'):
         return os.path.join(run_dir, 'raw', 'Final_Cameras.npz')
     return os.path.join(run_dir, 'raw', 'forFigures', '{}_Final_Cameras.npz'.format(scene))
 
 
 def metrics_file(run_dir, method):
-    if method in ('esfm', 'esfm_seq'):
+    if method == 'esfm' or method.startswith('esfm_seq'):
         return os.path.join(run_dir, 'raw', 'Results_OPTIMIZATION.xlsx')
     return os.path.join(run_dir, 'raw', 'Results_OPTIMIZATION_stage_1_single_scene_bench.xlsx')
 
