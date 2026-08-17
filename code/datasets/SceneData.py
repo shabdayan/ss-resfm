@@ -174,7 +174,15 @@ def get_subset(data, subset_size):
         sub_out = oi[indices][:, kept]
     else:
         sub_out = torch.zeros((len(indices), int(kept.sum())))
-    return SceneData(M, Ns, y, data.scan_name + "_{}".format(subset_size), outliers=sub_out, dict_info=data.dict_info, nameslist=data.img_list[indices])
+    # img_list: index by camera only if it's per-camera; the Euclidean namesList is
+    # stored nested (shape [1, n_cams]), so fall back to None (SceneData then uses
+    # arange) — the subset's image names are display-only and unused for geometry.
+    il = data.img_list
+    if hasattr(il, 'shape') and len(il.shape) >= 1 and il.shape[0] == data.y.shape[0]:
+        sub_names = il[indices]
+    else:
+        sub_names = None
+    return SceneData(M, Ns, y, data.scan_name + "_{}".format(subset_size), outliers=sub_out, dict_info=data.dict_info, nameslist=sub_names)
 
 if __name__ == "__main__":
     test_dataset()
