@@ -84,6 +84,9 @@ def save_camera_mat(conf, save_cam_dict, scan, phase, epoch=None):
 
 def save_outliers_mat(conf, save_cam_dict, scan, phase, epoch=None):
     path_outliers = path_to_outliers(conf, phase, epoch=epoch, scan=scan)
+    # Move any CUDA/torch tensors to CPU numpy first (as in save_camera_mat).
+    save_cam_dict = {k: (v.detach().cpu().numpy() if torch.is_tensor(v) else v)
+                     for k, v in save_cam_dict.items()}
     np.savez(path_outliers, **save_cam_dict)
     # savemat(path_cameras, save_cam_dict)
 

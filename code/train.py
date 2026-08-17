@@ -142,7 +142,12 @@ def epoch_evaluation(data_loader, model, conf, epoch, phase, save_predictions=Fa
                     if errors is not None:
                         errors.update(errors_per_cam)
                         if phase != Phases.TEST and plot:
-                            plot_utils.plot_cameras_before_and_after_ba(outputs, errors, conf, phase, scan=curr_data.scan_name, epoch=epoch, bundle_adjustment=bundle_adjustment)
+                            # Plotting is cosmetic; never let it crash a run (it can
+                            # fail on the intermediate subsets of sequential optim).
+                            try:
+                                plot_utils.plot_cameras_before_and_after_ba(outputs, errors, conf, phase, scan=curr_data.scan_name, epoch=epoch, bundle_adjustment=bundle_adjustment)
+                            except Exception as e:
+                                print(f"plot skipped for {curr_data.scan_name}: {e}")
 
     df_metrics = evaluation.organize_errors(metrics_list)
     model.train()
