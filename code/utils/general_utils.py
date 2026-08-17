@@ -70,6 +70,10 @@ def log_code(conf):
 
 def save_camera_mat(conf, save_cam_dict, scan, phase, epoch=None):
     path_cameras = path_to_cameras(conf, phase, epoch=epoch, scan=scan)
+    # Move any CUDA/torch tensors to CPU numpy first — np.savez can't serialize a
+    # device tensor (hit during sequential-optimization subset saves).
+    save_cam_dict = {k: (v.detach().cpu().numpy() if torch.is_tensor(v) else v)
+                     for k, v in save_cam_dict.items()}
     np.savez(path_cameras, **save_cam_dict)  # npz consumed by evaluate_single_scene.py
     try:
         savemat(path_cameras + ".mat", save_cam_dict)  # for matlab file
