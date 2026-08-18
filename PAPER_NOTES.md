@@ -74,41 +74,45 @@ Results/commits referenced live in `u-esfm/code/results/single_scene/`
   best-of), applied uniformly to all methods, and state that the reference ESFM
   code applies it selectively too.
 
-## 5. Drinking Fountain — reflection degeneracy (EXCLUDED, not "fixed")
+## 5. Drinking Fountain — restart sensitivity, fixed by best-of-seeds (NOT a degeneracy, NOT excluded)
 
-- **Symptom.** Both ESFM and U-ESFM converge to ~23° post-BA rotation on Drinking
-  Fountain, where the paper reports 0.007°. It is the only scene neither standard
-  nor sequential reproduces, and both arms fail *identically* (shared init/env).
-- **Diagnosis (verified).** Our reconstruction is a **global reflection** of the true
-  geometry: the Sim(3) alignment to GT needs a negative scale (det<0), and mirroring
-  the reconstruction drops the rotation error 25.8°→6.0°. The scene is
-  near-degenerate — its 14 camera centers have singular values [18.9, 2.2, **0.08**],
-  i.e. nearly co-planar. Small camera count + near-planar baseline ⇒ the reflected
-  solution is an equally-valid local minimum of the unsupervised reprojection loss.
-- **Why there is no fair fix.** A cheirality (points-in-front) check — the standard
-  tool — **cannot** resolve this: our reconstruction is itself internally
-  cheirality-valid (100% of visible points project in front of their cameras), so a
-  cheirality check finds nothing to flag and has no signal to trigger a flip. The
-  reflection is a *global* gauge relationship to GT (a global reflection of the whole
-  scene preserves cheirality — every point stays in front of every camera), invisible
-  without GT. Cheirality only breaks *local* pose ambiguities, not a global Necker
-  reversal. For a near-planar
-  degenerate configuration this ambiguity is fundamental to correspondence-only SfM;
-  the paper resolved it by luck of initialization, not by an explicit mechanism (the
-  ESFM code has no calibrated cheirality/reflection fix — its only "Chirality" option
-  is projective-only; its ceres BA has no cheirality constraint). Any GT-based pick
-  would be cheating.
-- **Fair handling: exclude Drinking Fountain** as a documented reflection degeneracy
-  (standard practice for degenerate scenes), applied symmetrically to all methods.
-  With it excluded, ESFM best-of = **0.19°** ≈ paper **0.20°** (our baseline
-  reproduces the paper), and U-ESFM best-of = 0.53° (close, still trailing ESFM).
-- **NOT DONE:** a cheirality reflection-fix was investigated and rejected because it
-  provably does not resolve this global-reflection case. Do not claim it in the paper.
+- **Symptom (as first observed).** With **mean-over-seeds** aggregation, both arms
+  report ~15.6° post-BA rotation on Drinking Fountain (paper: 0.007°). This first
+  looked like a global-reflection degeneracy.
+- **Corrected diagnosis (verified per-seed).** It is **not** a degeneracy — it is
+  **restart sensitivity**. Of 3 seeds, **seed 2 solves the scene for BOTH arms**
+  (post-BA rot **0.005°** ≈ paper 0.007°, reproj **0.31px**); seeds 0 and 1 land in a
+  bad local minimum (rot 23°, reproj **7.6px**). The good and bad basins are cleanly
+  separated by **reprojection error alone** — a 24× gap (0.31 vs 7.6 px) — with **no
+  ground truth**.
+
+  | arm | seed0 rot/reproj | seed1 | seed2 |
+  |-----|-----|-----|-----|
+  | esfm  | 23.4° / 7.65px | 23.4° / 7.59px | **0.005° / 0.31px** |
+  | uesfm | 23.4° / 7.67px | 23.5° / 7.59px | **0.005° / 0.31px** |
+
+- **Fair fix: best-of-seeds selected by reprojection error** (GT-free), applied
+  **uniformly to every scene and both arms**. This recovers Drinking Fountain for
+  both methods and needs no scene exclusion. It is standard multi-restart practice
+  and, because the selection metric is reprojection (not GT), it is not cherry-picking.
+  Recommendation for the paper: report best-of-seeds (and/or median-of-seeds), not
+  mean-of-seeds, so a single unlucky restart on one scene doesn't dominate the mean.
+- **What did NOT work (investigated, rejected — do not claim in the paper):**
+  - A **cheirality reflection-fix**: our reconstructions are internally
+    cheirality-valid (points in front), so a cheirality check has no signal to flag.
+  - A **BA-from-both-mirror-hypotheses** fix (run BA from the reconstruction *and*
+    from a global-reflection init, keep lower reprojection): the mirror init always
+    converges to a *worse* reprojection (37–315px) and a different bad basin (~19–21°),
+    so it never rescues the failed seeds. Reported here for completeness; not used.
+  - Both are consistent with the geometry: a proper-rotation reflection twin that
+    reprojects to the observations does not exist, so neither trick can manufacture
+    the correct solution — but a good *restart* finds it directly.
 
 ## 6. One-line takeaways for the paper
 
 - Our re-run ESFM baseline **reproduces the published ESFM** on the calibrated Olsson
-  scenes (best-of, excluding the one reflection-degenerate scene).
+  scenes under best-of-seeds selection (Drinking Fountain included — see §5; it is a
+  restart-sensitivity scene that a good seed solves, not a degeneracy to exclude).
 - **U-ESFM does not beat plain ESFM in single-scene optimization on this (clean,
   low-outlier) dataset** — even with the report-faithful weighted loss, the best
   percentiles (30/70), and the sequential fallback. This is consistent with the
