@@ -166,7 +166,8 @@ def write_tables(agg, methods, metrics, out_md, out_tex, seeds_per_cell, bold_me
     # ---------- markdown ----------
     md = []
     md.append('# Single-scene comparison — Olsson dataset (calibrated)\n')
-    md.append('Mean over seeds per (scene, method); best value per scene in **bold** '
+    md.append('Single random run per (scene, method) — matching ESFM\'s single-scene '
+              'protocol (unseeded single random init); best value per scene in **bold** '
               '(lower is better except Nr).\n')
     header = ['Scene']
     for key, name, _ in metrics:
@@ -225,7 +226,8 @@ def write_tables(agg, methods, metrics, out_md, out_tex, seeds_per_cell, bold_me
     tex.append('\\begin{table*}[t]')
     tex.append('\\centering')
     caption = ('Single-scene optimization on the Olsson dataset (calibrated setting). '
-               'Mean over ' + str(seeds_per_cell) + ' seeds; best per scene in bold.')
+               'A single random run per scene (' + str(seeds_per_cell) + '), matching '
+               'ESFM\'s unseeded single-random-init protocol; best per scene in bold.')
     if 'esfm_paper' in methods:
         caption += (' ESFM (paper) reproduces the published per-scene numbers of '
                     '\\cite{Moran_2021_ICCV} (post-BA values use their BA) and is '
@@ -381,6 +383,14 @@ def main():
                          'exist in the Deep models, so at 1x3 that arm is a bit-exact '
                          'duplicate of esfm_rc (verified per-run); uesfm vs esfm_rc is '
                          'already the pure loss ablation.')
+    ap.add_argument('--seed', type=int, default=0,
+                    help='report a SINGLE random run at this seed (default 0), matching '
+                         'ESFM\'s single-scene protocol: unseeded single random-init run, '
+                         'one number per scene (paper Sec 3.4; Optimization_Euc.conf sets '
+                         'no random_seed). Both arms share the same seed, so the only '
+                         'difference between them is the method, not the initialization. '
+                         'No mean-over-seeds and no best-of-seeds selection, so the '
+                         'comparison is a fair like-for-like against ESFM.')
     args = ap.parse_args()
 
     df, failures = collect(args.results_root)
@@ -398,6 +408,14 @@ def main():
     out_csv = os.path.join(args.results_root, 'summary.csv')
     df.sort_values(['scene', 'method', 'seed']).to_csv(out_csv, index=False)
 
+    # ESFM-fair reporting: a SINGLE random run (one seed), not a mean or best-of.
+    # summary.csv above keeps every seed for provenance; the tables below use only
+    # the requested seed. Both arms share this seed's initialization.
+    all_seeds = sorted(df['seed'].unique().tolist())
+    if args.seed not in all_seeds:
+        sys.exit('Requested --seed {} not found; available seeds: {}'.format(args.seed, all_seeds))
+    df = df[df['seed'] == args.seed]
+
     methods = sorted(df['method'].unique())
     metrics = list(BASE_METRICS)
     if any(k in df.columns for k, _, _ in BA_METRICS):
@@ -405,7 +423,7 @@ def main():
 
     agg = build_scene_table(df, metrics)
     seeds_per_cell = df.groupby(['scene', 'method'])['seed'].nunique()
-    seeds_desc = '{}'.format(sorted(df['seed'].unique().tolist()))
+    seeds_desc = 'single random run (seed {}); all seeds run: {}'.format(args.seed, all_seeds)
 
     # Published ESFM numbers (reference columns, never bolded).
     bold_methods = set(methods)

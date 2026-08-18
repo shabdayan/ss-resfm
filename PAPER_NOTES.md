@@ -74,45 +74,45 @@ Results/commits referenced live in `u-esfm/code/results/single_scene/`
   best-of), applied uniformly to all methods, and state that the reference ESFM
   code applies it selectively too.
 
-## 5. Drinking Fountain — restart sensitivity, fixed by best-of-seeds (NOT a degeneracy, NOT excluded)
+## 5. Seed protocol — single random run, matching ESFM (Drinking Fountain reported as-is)
 
-- **Symptom (as first observed).** With **mean-over-seeds** aggregation, both arms
-  report ~15.6° post-BA rotation on Drinking Fountain (paper: 0.007°). This first
-  looked like a global-reflection degeneracy.
-- **Corrected diagnosis (verified per-seed).** It is **not** a degeneracy — it is
-  **restart sensitivity**. Of 3 seeds, **seed 2 solves the scene for BOTH arms**
-  (post-BA rot **0.005°** ≈ paper 0.007°, reproj **0.31px**); seeds 0 and 1 land in a
-  bad local minimum (rot 23°, reproj **7.6px**). The good and bad basins are cleanly
-  separated by **reprojection error alone** — a 24× gap (0.31 vs 7.6 px) — with **no
-  ground truth**.
-
-  | arm | seed0 rot/reproj | seed1 | seed2 |
-  |-----|-----|-----|-----|
-  | esfm  | 23.4° / 7.65px | 23.4° / 7.59px | **0.005° / 0.31px** |
-  | uesfm | 23.4° / 7.67px | 23.5° / 7.59px | **0.005° / 0.31px** |
-
-- **Fair fix: best-of-seeds selected by reprojection error** (GT-free), applied
-  **uniformly to every scene and both arms**. This recovers Drinking Fountain for
-  both methods and needs no scene exclusion. It is standard multi-restart practice
-  and, because the selection metric is reprojection (not GT), it is not cherry-picking.
-  Recommendation for the paper: report best-of-seeds (and/or median-of-seeds), not
-  mean-of-seeds, so a single unlucky restart on one scene doesn't dominate the mean.
-- **What did NOT work (investigated, rejected — do not claim in the paper):**
-  - A **cheirality reflection-fix**: our reconstructions are internally
+- **ESFM's protocol (verified in paper + code).** Single-scene optimization is a
+  **single unseeded random-init run**, one number per scene (paper Sec 3.4; the
+  released `Optimization_Euc.conf` sets **no** `random_seed`; `single_scene_optimization.py`
+  makes one `train.train` call with no restart/selection loop). There is no seed to
+  copy and no best-of-seeds.
+- **Our protocol (matched).** We report a **single random run at a fixed seed (seed 0)**
+  for every scene and every arm — `aggregate_single_scene.py --seed 0`. Both arms use
+  the *same* injected `random_seed`, so the two methods share an identical
+  initialization and differ only by method. No mean-over-seeds, no best-of-seeds: a
+  strict like-for-like against ESFM. (We still *run* seeds 0/1/2 and keep them all in
+  `summary.csv` for provenance, but only the reported seed enters the tables.)
+- **Drinking Fountain is reported as-is, NOT excluded and NOT rescued.** It is a
+  restart-sensitive scene: at seed 0 all three arms share the same init and all land
+  in the same bad basin (~23.4° post-BA, reproj 7.6px); at seed 2 the same code solves
+  it (0.005°, reproj 0.31px). ESFM's own unseeded run carries the identical lottery
+  risk — its published 0.007° is simply a run that landed good. Since our fixed seed
+  is applied identically to all arms, no method is advantaged, and the comparison stays
+  fair. Report the across-scene **median** alongside the mean so one unlucky scene does
+  not dominate (at seed 0: post-BA rotation median esfm 0.19° / esfm_rc 0.24° / uesfm 1.73°;
+  mean 12.5° / 11.8° / 18.7°).
+- **What we did NOT do (investigated, rejected — do not claim in the paper):**
+  - **best-of-seeds** — would beat ESFM's literal single-run protocol; ruled out for
+    fairness (we match ESFM's procedure, not just its reported outcome).
+  - A **cheirality reflection-fix** — our reconstructions are internally
     cheirality-valid (points in front), so a cheirality check has no signal to flag.
-  - A **BA-from-both-mirror-hypotheses** fix (run BA from the reconstruction *and*
-    from a global-reflection init, keep lower reprojection): the mirror init always
-    converges to a *worse* reprojection (37–315px) and a different bad basin (~19–21°),
-    so it never rescues the failed seeds. Reported here for completeness; not used.
-  - Both are consistent with the geometry: a proper-rotation reflection twin that
-    reprojects to the observations does not exist, so neither trick can manufacture
-    the correct solution — but a good *restart* finds it directly.
+  - **BA-from-both-mirror-hypotheses** (BA from the reconstruction *and* from a
+    global-reflection init, keep lower reprojection): the mirror init always converges
+    to a *worse* reprojection (37–315px) and a different bad basin (~19–21°), so it
+    never rescues the failed seeds. Consistent with the geometry — a proper-rotation
+    reflection twin that reprojects to the observations does not exist.
 
 ## 6. One-line takeaways for the paper
 
 - Our re-run ESFM baseline **reproduces the published ESFM** on the calibrated Olsson
-  scenes under best-of-seeds selection (Drinking Fountain included — see §5; it is a
-  restart-sensitivity scene that a good seed solves, not a degeneracy to exclude).
+  scenes (single random run, seed 0), except on restart-sensitive scenes where the
+  fixed seed lands in a bad basin for *all* arms (e.g. Drinking Fountain — see §5;
+  reported as-is, since ESFM's unseeded run carries the same lottery risk).
 - **U-ESFM does not beat plain ESFM in single-scene optimization on this (clean,
   low-outlier) dataset** — even with the report-faithful weighted loss, the best
   percentiles (30/70), and the sequential fallback. This is consistent with the
