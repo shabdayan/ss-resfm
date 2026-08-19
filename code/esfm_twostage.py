@@ -110,7 +110,15 @@ def base_conf(scene, seed, raw_dir, epochs):
     text = ESFM_RC_CONF.format(scene=scene, scene_slug=slug(scene), seed=seed,
                                raw_dir=raw_dir, epochs=epochs,
                                milestones=milestones(epochs), eval_intervals=5000)
-    return ConfigFactory.parse_string(text)
+    conf = ConfigFactory.parse_string(text)
+    # Keys normally injected by general_utils.init_exp, which we bypass by calling
+    # train() directly (same as uesfm_poststage.py). Without 'wandb' train() raises
+    # ConfigMissingException at its WandB-logging block; 'resume' avoids a warning.
+    conf.put('wandb', 0)
+    conf.put('resume', False)
+    conf.put('resuming_epoch', 0)   # train() overwrites this to -1 for a fresh run
+    conf.put('exp_version', 'single_scene_twostage')
+    return conf
 
 
 def train_esfm_base(conf, scene, seed, proj_err_weight=None):

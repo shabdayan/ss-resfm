@@ -8,8 +8,11 @@
 # Stage 1 once. Usage:  ./launch_esfm_twostage.sh {A|B|both}
 set -euo pipefail
 cd "$(dirname "$0")"
+# Logs MUST go to the shared project FS (compute nodes cannot write the session
+# scratchpad; an unwritable -o path both hides tracebacks and can fail the job).
 PY=../.venv/bin/python
-LOGDIR=/tmp/claude-53387/-home-projects-bagon-ortalda-MVG-final-project-u-esfm/91da1084-3c11-4cd8-a3f6-dbc5d23634a9/scratchpad/esfm_ts_logs
+CODE=$(pwd)
+LOGDIR=$CODE/logs_esfm_ts
 mkdir -p "$LOGDIR"
 
 which=${1:-both}
@@ -24,9 +27,11 @@ submit() {  # $1=scene_slug  $2=design
     args="--stage1-source fresh --stage1-epochs 50000 --stage2-epochs 50000 --label eqbud"
     jname="ets_A_${s}"
   fi
+  # redirect python output INSIDE the command (like the validated diagnostic) so
+  # stdout+stderr are captured on the shared FS regardless of LSF -o behaviour.
   bsub -q waic-risk -gpu "num=1:j_exclusive=yes:gmem=80G" \
-       -R "select[hname!='lgn15']" -J "$jname" -o "$LOGDIR/${jname}.out" \
-       $PY esfm_twostage.py --scene "$s" --seeds 0 --methods mad,std,huber $args
+       -R "select[hname!='lgn15']" -J "$jname" -o "$LOGDIR/${jname}.lsf" \
+       bash -c "cd $CODE && $PY -u esfm_twostage.py --scene '$s' --seeds 0 --methods mad,std,huber $args > '$LOGDIR/${jname}.out' 2>&1"
 }
 
 for s in "${SLUGS[@]}"; do
