@@ -323,6 +323,65 @@ neither labels nor a COLMAP reconstruction: it recomputes the outlier test per-s
 reprojection statistics, so it is unaffected by domain shift and applicable wherever a
 partial reconstruction exists---which is why it wins 1DSfM.
 
+\subsection{Per-scene complementarity and the limits of contamination-based selection}
+The complementarity above is stated at the dataset level. Because individual scenes span
+a wide contamination range (1DSfM $29$--$56\%$, MegaDepth $0.2$--$47\%$), we test whether
+the flip also holds \emph{per scene}. Fig.~\ref{fig:perscene} plots, for every scene, its
+own outlier rate against the signed advantage of removal over soft weighting,
+$\log_{10}(\mathrm{err}_{\mathrm{weight}}/\mathrm{err}_{\mathrm{removal}})$. On
+out-of-distribution data the trend matches the dataset-level story: soft weight wins the
+low-contamination scenes ($6/7$ below $5\%$) and a removal mechanism wins the
+high-contamination scenes ($7/8$ above $30\%$). The flip is thus a scene-level phenomenon,
+not an artifact of dataset averaging.
+
+Two caveats. First, the OOD contamination distribution is bimodal---a cluster at
+$0.5$--$2.7\%$ (Strecha/BlendedMVS) and a cluster at $29$--$56\%$ (1DSfM)---so the crossover
+is only bracketed to $\sim\!3$--$29\%$, a range the OOD datasets leave sparsely sampled.
+Second, at the clean end many scenes are near-ties (sub-$0.05\deg$ for every mechanism), so
+the low-contamination signal is weak in magnitude even where its sign is consistent.
+MegaDepth fills the middle ($12$--$47\%$) but is in-distribution and removal-dominated
+throughout.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{PATHA_fig4_perscene.pdf}
+\caption{\textbf{Per-scene complementarity.} Each point is one scene: its own outlier rate
+(x, log) vs.\ the signed advantage of removal over soft weighting. On OOD data (circles),
+weight wins at low contamination and removal at high contamination; the crossover lies in
+the sparsely-sampled $3$--$29\%$ band. MegaDepth (squares) is in-distribution.}
+\label{fig:perscene}
+\end{figure}
+
+\begin{table}[t]\centering\small
+\caption{\textbf{Per-scene selection} (mean translation, deg). Contamination-keyed
+selection (madweight if scene outlier rate ${\ge}10\%$, else weight) does not improve over
+per-dataset selection; the per-scene oracle (best of all four mechanisms) does, but needs a
+signal beyond contamination.}
+\label{tab:selector}
+\begin{tabular}{lcccc}
+\toprule
+Dataset & weight-all & madwt-all & contam-keyed & oracle (all 4)\\
+\midrule
+MegaDepth  & \textbf{0.459} & 0.511 & 0.511 & \textit{0.204}\\
+1DSfM      & 15.89 & \textbf{5.50} & 5.50 & \textit{4.58}\\
+Strecha    & \textbf{1.95} & 2.66 & 1.95 & \textit{1.95}\\
+BlendedMVS & 0.112 & 0.122 & 0.112 & \textit{0.048}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\textbf{Does per-scene contamination help selection?} Choosing madweight vs.\ weight
+\emph{per scene} by its contamination does \emph{not} improve the aggregate
+(Table~\ref{tab:selector}): within each dataset the contamination is too homogeneous relative
+to any threshold to trigger different choices, so a contamination-keyed selector collapses to
+per-dataset selection---and on in-distribution MegaDepth it chooses removal for every scene
+and thereby \emph{underperforms} plain weight ($0.51$ vs.\ $0.46$). An \emph{oracle} picking
+the best of all four mechanisms per scene (using ground-truth error) would help
+substantially---MegaDepth $0.46\!\to\!0.20$ (matching RESfM-released $0.209$) and 1DSfM
+$5.50\!\to\!4.58$---but the signal it needs is not per-scene contamination, which separates
+datasets rather than scenes within them. A deployable per-scene selector therefore requires a
+richer signal than contamination alone; we leave it to future work.
+
 \subsection{Threshold sensitivity}
 To rule out an under-tuned baseline, we sweep the remove threshold
 $\tau\in\{0.4,\dots,0.8\}$ (RESfM searches the same range). The optimum shifts with
