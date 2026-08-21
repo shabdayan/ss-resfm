@@ -40,12 +40,15 @@ Contamination-Dependent Outlier Handling in Deep Structure-from-Motion}
 \maketitle
 
 \begin{abstract}
-Deep equivariant Structure-from-Motion (SfM) methods such as ESFM and RESfM handle
-outlier correspondences with a \emph{supervised} inlier/outlier classifier trained on
-COLMAP-derived labels. We show that the \emph{optimal} outlier-handling mechanism is not
-fixed but \emph{depends on the scene's contamination level}, and that a \emph{label-free}
-mechanism can match or beat the supervised classifier exactly where supervision is
-weakest. Under a strictly controlled protocol---identical point tracks, robust bundle
+State-of-the-art deep equivariant Structure-from-Motion (SfM), RESfM, handles outlier
+correspondences with a \emph{supervised} inlier/outlier classifier trained on COLMAP-derived
+labels. We present \textbf{U-ESFM}, an \emph{entirely self-supervised} alternative: its
+outlier head is trained with an adaptive confident-pseudo-label loss (from percentiles of the
+model's own reprojection error), and removal, reweighting, robust bundle adjustment, and
+per-scene fine-tuning use \emph{no} ground-truth or COLMAP outlier labels. Within this
+self-supervised setting we show the \emph{optimal} outlier-handling mechanism is not fixed but
+\emph{depends on the scene's contamination level}, and that U-ESFM matches or beats the
+COLMAP-supervised classifier exactly where supervision is weakest. Under a strictly controlled protocol---identical point tracks, robust bundle
 adjustment, and training schedule, varying only the outlier mechanism---we compare hard
 removal, soft reweighting, a three-band hybrid, and a new MAD-remove\,+\,head-reweight
 variant (\mad{}) against a from-scratch RESfM baseline across four datasets spanning
@@ -72,9 +75,13 @@ module}. RESfM's labels are derived from a COLMAP~\cite{colmap} reconstruction i
 stages: first by track membership, then refined by a $4$-pixel reprojection test against
 COLMAP-pose triangulation~\cite{resfm}.
 
-This supervised design raises a question we study directly: \emph{is a single, learned
-outlier mechanism optimal across the range of contamination levels SfM encounters?} We
-find that it is not. Holding everything else fixed---tracks, robust BA, training schedule,
+We take a different route. Rather than supervise the head with COLMAP labels, \textbf{U-ESFM}
+trains it \emph{self-supervised} --- an adaptive confidence-weighted loss forms confident
+pseudo-labels from percentiles of the model's own reprojection error --- so no ground-truth or
+COLMAP outlier labels are used anywhere in training or test. On top of this self-supervised
+head we study a question RESfM's single supervised mechanism leaves open: \emph{is one
+outlier-handling mechanism optimal across the range of contamination levels SfM encounters?}
+We find that it is not. Holding everything else fixed---tracks, robust BA, training schedule,
 seed---and varying \emph{only} the outlier-handling mechanism, the best mechanism
 \textbf{flips with contamination}: aggressive statistics-based removal in the
 high-contamination regime, soft reweighting in the low-contamination regime, and the
@@ -91,17 +98,21 @@ collections where robustness is most needed---so a label-free, per-scene mechani
 attractive precisely in that regime.
 
 \noindent\textbf{Contributions.}
-(1)~A controlled study of four outlier mechanisms (remove / weight / hybrid / \mad{}),
-each with and without test-time fine-tuning, under an identical tracks\,+\,BA\,+\,schedule
-pipeline, isolating the effect of the mechanism alone.
-(2)~The complementarity finding: the optimal mechanism flips with contamination; no single
+(1)~\textbf{U-ESFM, an entirely self-supervised outlier-handling approach} for deep SfM: an
+adaptive confident-pseudo-label head (trained on percentiles of the model's own reprojection
+error), label-free statistical removal, and robust BA --- using \emph{no} ground-truth or
+COLMAP outlier labels, in contrast to RESfM's COLMAP-supervised head. It matches or beats the
+COLMAP-supervised baseline in the high-contamination regime.
+(2)~A controlled study of four outlier mechanisms (remove / weight / hybrid / \mad{}), each
+with and without test-time fine-tuning, under an identical tracks\,+\,BA\,+\,schedule
+pipeline, isolating the effect of the mechanism alone --- all operating on the self-supervised
+head.
+(3)~The complementarity finding: the optimal mechanism flips with contamination; no single
 mechanism dominates.
-(3)~\mad{}, a label-free MAD-remove\,+\,head-reweight variant that is the strongest arm on
-contaminated 1DSfM, beating the from-scratch supervised baseline by $\sim\!2\times$ on both
-mean and median translation.
-(4)~An analysis of \emph{why} label-free removal wins under high contamination, combining
-domain shift with the observation that COLMAP-based supervision is hardest to obtain
-exactly in the contaminated, out-of-distribution regime.
+(4)~\mad{}, which removes outliers by robust reprojection statistics (MAD) --- needing not
+even the head --- and reweights survivors; it is the strongest arm on contaminated 1DSfM,
+beating the from-scratch supervised baseline by $\sim\!2\times$ on both mean and median
+translation.
 
 \section{Related Work}
 \textbf{Deep equivariant SfM.} Learning-based SfM regresses cameras from point tracks with
@@ -137,10 +148,15 @@ uniformly across mechanisms.
 \subsection{Background}
 The input is a (sparse) point-track tensor $M$ of $m$ tracks across $n$ cameras, built by
 concatenating pairwise RANSAC-verified SIFT matches. The sets-of-sets permutation-equivariant
-network~\cite{resfm,esfm} maps $M$ to per-camera poses and, via RESfM's classification
-module, a \emph{per-point} outlier score $s\in[0,1]$ (points in the same track may receive
-different scores); a reprojection error $e$ is available for every observation once an
-initial reconstruction exists. All mechanisms below consume $s$ (and, for \mad{}, $e$),
+network~\cite{resfm,esfm} maps $M$ to per-camera poses and a \emph{per-point} outlier score
+$s\in[0,1]$ (points in the same track may receive different scores). Crucially, unlike RESfM
+--- whose classification head is trained with a BCE loss against \emph{COLMAP-derived}
+inlier/outlier labels --- U-ESFM trains this head \emph{self-supervised}, with an adaptive
+confidence-weighted loss: per forward pass it forms confident pseudo-labels from percentiles
+of the model's own reprojection error (lowest $p$\% inliers, highest $p$\% outliers) and
+applies BCE only to those. No ground-truth or COLMAP outlier labels are used at any point.
+A reprojection error $e$ is available for every observation once an initial reconstruction
+exists. All mechanisms below consume $s$ (and, for \mad{}, $e$),
 produce a per-observation weight $w$ (or a hard keep/drop decision), and feed the result to
 the identical robust-BA stage (Fig.~\ref{fig:method}).
 
@@ -217,8 +233,8 @@ median as the representative figure.
 \centering
 \includegraphics[width=\linewidth]{PATHA_fig1_complementarity.pdf}
 \caption{\textbf{The optimal outlier mechanism flips with contamination.} Translation error
-(log scale) of soft \textbf{weight}, label-free \textbf{\mad{}}, and supervised RESfM across
-the four datasets ordered by contamination. Circled point = best per dataset. \mad{} wins
+(log scale) of U-ESFM's soft \textbf{weight} and \textbf{\mad{}} (both self-supervised) vs.\
+COLMAP-supervised RESfM across the four datasets ordered by contamination. Circled point = best per dataset. \mad{} wins
 high-outlier 1DSfM; weight wins low-outlier BlendedMVS; RESfM wins clean Strecha and
 in-distribution MegaDepth.}
 \label{fig:complement}
@@ -424,14 +440,17 @@ outlier removal can disconnect the viewing graph---a failure mode RESfM itself
 reports (e.g., Tower of London registers only $94$ of $467$ cameras)~\cite{resfm}.
 
 \section{Conclusion}
-The optimal outlier-handling mechanism in deep SfM is contamination-dependent: aggressive,
-label-free removal wins the high-contamination regime, soft reweighting wins the
-low-contamination regime, and supervised classification retains the clean, in-distribution
-regime. Our \mad{} variant---MAD-based removal plus head reweighting, requiring no labels
-and no COLMAP---is the strongest arm on heavily-contaminated 1DSfM, halving the supervised
-baseline's median error, precisely where COLMAP-based supervision is hardest to obtain. These
-results argue that robust deep SfM should treat outlier handling as adaptive rather than a
-single learned mechanism.
+U-ESFM shows that deep SfM outlier handling can be made \emph{entirely self-supervised} --- an
+adaptive confident-pseudo-label head plus statistical removal and robust BA, using no
+ground-truth or COLMAP labels --- and still match or beat the COLMAP-supervised RESfM in the
+high-contamination regime. Within this self-supervised setting the optimal mechanism is
+contamination-dependent: aggressive removal wins high contamination, soft reweighting wins low
+contamination, and the supervised baseline retains only the clean, in-distribution regime. Our
+\mad{} variant---MAD-based removal (needing not even the head) plus reweighting---is the
+strongest arm on heavily-contaminated 1DSfM, halving the supervised baseline's median error,
+precisely where COLMAP-based supervision is hardest to obtain. These results argue that robust
+deep SfM should treat outlier handling as adaptive and self-supervised rather than a single
+supervised mechanism.
 
 \begin{thebibliography}{9}\small
 \bibitem{resfm} Authors. RESfM: Robust Deep Equivariant Structure from Motion. ICLR 2025.
