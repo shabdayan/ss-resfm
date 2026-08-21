@@ -53,10 +53,10 @@ $2.7\%$--$31.9\%$ outliers. We find a clear complementarity: hard, statistics-ba
 removal wins the high-contamination regime (1DSfM, $\sim\!32\%$ outliers), where our
 label-free \mad{} halves the supervised baseline's median translation error
 ($2.32\deg$ vs $3.97\deg$); soft reweighting wins the low-contamination regime; and the
-supervised classifier retains the clean, in-distribution regime (MegaDepth). We analyze
-why---supervised labeling requires a trustworthy COLMAP reconstruction that degrades
-precisely on high-contamination scenes---and position label-free adaptivity as a missing
-ingredient for robust deep SfM.
+supervised classifier retains the clean, in-distribution regime (MegaDepth). We attribute
+this to domain shift and to the fact that supervised labeling depends on a COLMAP
+reconstruction that is hardest to obtain precisely in the contaminated, out-of-distribution
+regime, and we position label-free adaptivity as a missing ingredient for robust deep SfM.
 \end{abstract}
 
 \section{Introduction}
@@ -66,10 +66,11 @@ that survive pairwise geometric verification---particularly in Internet photo co
 where repeated and symmetric structure produces spurious epipolar geometries. Classical
 pipelines reject outliers with RANSAC and robust bundle adjustment (BA); recent deep
 equivariant methods (ESFM~\cite{esfm}, RESfM~\cite{resfm}) instead learn a
-permutation-equivariant network that regresses cameras and, in RESfM, an
-\emph{inlier/outlier classifier head} trained with supervision. RESfM's labels are
-produced by triangulating each track against a COLMAP~\cite{colmap} reconstruction and
-thresholding the reprojection error at $4$ pixels.
+\emph{sets-of-sets} permutation-equivariant network that regresses cameras from point
+tracks and, in RESfM, adds a supervised per-point \emph{inlier/outlier classification
+module}. RESfM's labels are derived from a COLMAP~\cite{colmap} reconstruction in two
+stages: first by track membership, then refined by a $4$-pixel reprojection test against
+COLMAP-pose triangulation~\cite{resfm}.
 
 This supervised design raises a question we study directly: \emph{is a single, learned
 outlier mechanism optimal across the range of contamination levels SfM encounters?} We
@@ -81,10 +82,13 @@ supervised classifier in the clean, in-distribution regime (Fig.~\ref{fig:comple
 We further show that a \emph{label-free} removal mechanism---\mad{}, which discards points
 by the median-absolute-deviation (MAD) of their reprojection error and soft-weights the
 survivors---is the strongest arm on heavily-contaminated 1DSfM, halving the median
-translation error of the supervised from-scratch baseline. We explain this through the
-COLMAP-label dependency: the very reconstruction needed to \emph{supervise} an outlier
-classifier degrades precisely on the scenes where outliers are dense, so supervision is
-fundamentally limited in the regime where robustness matters most.
+translation error of the supervised from-scratch baseline. We attribute this to two
+factors: (i)~the learned classifier is trained only on in-distribution MegaDepth and
+suffers domain shift on out-of-distribution collections; and (ii)~supervised labeling
+itself depends on a COLMAP reconstruction and ground-truth poses, which are readily
+obtained for curated, well-reconstructed data but not for the challenging contaminated
+collections where robustness is most needed---so a label-free, per-scene mechanism is
+attractive precisely in that regime.
 
 \noindent\textbf{Contributions.}
 (1)~A controlled study of four outlier mechanisms (remove / weight / hybrid / \mad{}),
@@ -95,21 +99,30 @@ mechanism dominates.
 (3)~\mad{}, a label-free MAD-remove\,+\,head-reweight variant that is the strongest arm on
 contaminated 1DSfM, beating the from-scratch supervised baseline by $\sim\!2\times$ on both
 mean and median translation.
-(4)~An analysis of \emph{why} supervision fails in high contamination---the
-COLMAP/$4$-pixel labeling assumption breaks where outliers are dense.
+(4)~An analysis of \emph{why} label-free removal wins under high contamination, combining
+domain shift with the observation that COLMAP-based supervision is hardest to obtain
+exactly in the contaminated, out-of-distribution regime.
 
 \section{Related Work}
-\textbf{Deep SfM.} Learning-based SfM regresses cameras from point tracks with
-permutation-equivariant networks: ESFM~\cite{esfm} and GASFM~\cite{gasfm} optimize a
-reprojection objective; RESfM~\cite{resfm} adds an inlier/outlier classifier and robust BA
-to handle contaminated tracks. Neural bundle adjustment and end-to-end pipelines
-(VGGSfM, MASt3R) target smaller image sets. Our work does not propose a new architecture;
-we reuse the RESfM/ESFM backbone and study the outlier-handling stage.
+\textbf{Deep equivariant SfM.} Learning-based SfM regresses cameras from point tracks with
+permutation-equivariant networks. ESFM~\cite{esfm} casts uncalibrated SfM as deep projective
+factorization over a measurement tensor, trained with an unsupervised reprojection loss;
+GASFM~\cite{gasfm} uses a graph-attention variant. Both assume outliers were already removed
+by two-view geometric verification. RESfM~\cite{resfm} targets contaminated internet
+collections with a \emph{sets-of-sets} permutation-equivariant architecture plus a supervised
+per-point inlier/outlier classification module and a robust BA, reporting accuracy close to
+its own clean-track upper bound (ESFM applied to outlier-free tracks, ``ESFM$^\ast$'') and on
+par with classical Theia/GLOMAP. End-to-end pointmap and pose-regression pipelines
+(VGGSfM, MASt3R, DUSt3R) target far smaller image sets. Our work proposes no new
+architecture; we reuse the RESfM/ESFM backbone and study the outlier-handling stage in
+isolation.
 
-\noindent\textbf{Outlier rejection.} RANSAC and its learned variants remove outliers by
-consensus; robust estimators down-weight them via M-estimators and IRLS. RESfM casts this
-as supervised classification. We contrast supervised classification against
-\emph{label-free} statistical removal (MAD~\cite{mad}) and soft reweighting, and show their
+\noindent\textbf{Outlier rejection.} Correspondence outliers that \emph{survive} RANSAC/
+two-view filtering---from repetitive structure, wide viewpoint, and illumination
+change---are the central difficulty in internet-scale SfM. Classical pipelines suppress
+them with M-estimators and robust BA; RESfM casts rejection as supervised classification. We
+contrast supervised classification against \emph{label-free} statistical removal via the
+median absolute deviation (MAD)~\cite{mad} and against soft reweighting, and show their
 relative merit is contamination-dependent.
 
 \noindent\textbf{Robust bundle adjustment.} Following~\cite{resfm}, we apply a robust BA
@@ -122,10 +135,11 @@ uniformly across mechanisms.
 
 \section{Method}
 \subsection{Background}
-The input is a measurement matrix $M\in\mathbb{R}^{2n\times m}$ of $m$ tracked points across
-$n$ cameras, built by concatenating pairwise RANSAC-verified SIFT matches. The equivariant
-network maps $M$ to per-camera poses and, via the RESfM head, a per-observation outlier
-score $s\in[0,1]$; a reprojection error $e$ is available for every observation once an
+The input is a (sparse) point-track tensor $M$ of $m$ tracks across $n$ cameras, built by
+concatenating pairwise RANSAC-verified SIFT matches. The sets-of-sets permutation-equivariant
+network~\cite{resfm,esfm} maps $M$ to per-camera poses and, via RESfM's classification
+module, a \emph{per-point} outlier score $s\in[0,1]$ (points in the same track may receive
+different scores); a reprojection error $e$ is available for every observation once an
 initial reconstruction exists. All mechanisms below consume $s$ (and, for \mad{}, $e$),
 produce a per-observation weight $w$ (or a hard keep/drop decision), and feed the result to
 the identical robust-BA stage (Fig.~\ref{fig:method}).
@@ -134,9 +148,9 @@ the identical robust-BA stage (Fig.~\ref{fig:method}).
 We compare four mechanisms, illustrated as weight-vs-signal transfer functions in
 Fig.~\ref{fig:method}:
 \begin{itemize}\itemsep2pt
-\item\textbf{remove} (the RESfM analogue): drop observation if $s>\tau$; keep with $w{=}1$
-otherwise. We use RESfM's per-dataset thresholds $\tau{=}0.6$ (1DSfM/MegaDepth) and
-$\tau{=}0.8$ (Strecha/BlendedMVS).
+\item\textbf{remove} (the RESfM analogue): drop a point if $s>\tau$; keep with $w{=}1$
+otherwise. We use RESfM's default $\tau{=}0.6$ and its $\tau{=}0.8$ for the low-outlier,
+single-camera Strecha/BlendedMVS sets~\cite{resfm}.
 \item\textbf{weight}: soft, $w=1-s$, no removal.
 \item\textbf{hybrid}: three-band---keep ($s$ below a low percentile), soft-weight (middle),
 drop ($s$ above a high percentile).
@@ -175,9 +189,11 @@ Networks are trained on 27 MegaDepth scenes; MegaDepth test is therefore in-dist
 while 1DSfM/Strecha/BlendedMVS are cross-dataset (out-of-distribution).
 
 \subsection{Protocol, baselines, and track provenance}
-All networks train for $20{,}000$ epochs (batch $4$, lr $10^{-3}$, seed $20$), matching
-RESfM. We report two architectures: shallow ($1{\times}3$, RESfM's released architecture)
-and deep ($2{\times}3$).
+Following RESfM's public training code and default configuration, all networks train for
+$20{,}000$ epochs with seed $20$ (the seed reported by RESfM~\cite{resfm}); batch size,
+learning rate, image subsampling, and validation-based early stopping follow that released
+configuration and are held identical across all arms. We report two architectures: shallow
+($1{\times}3$) and deep ($2{\times}3$).
 
 \noindent\textbf{Fair-comparison anchor.} Our controlled baseline is
 \emph{RESfM-from-scratch}: trained by us with the \emph{identical} setup as our arms (same
@@ -292,16 +308,20 @@ on 5 of 10 scenes. We emphasize the \emph{median}: the 1DSfM mean ($5.50$ vs.\ $
 $\sim\!92\%$ driven by a single pathological scene (Tower of London) and is not a robust
 figure.
 
-\subsection{Why supervision fails under high contamination}
-RESfM's labels (Appendix~C of~\cite{resfm}) require (1) an associated COLMAP reconstruction
-per training scene, (2) triangulation from those poses, and (3) a $4$-pixel reprojection
-cutoff. This is viable on well-reconstructed in-distribution data (MegaDepth), but on
-heavily-contaminated scenes COLMAP itself degrades, so trustworthy $4$-pixel labels cannot
-be produced---a chicken-and-egg that bounds supervised methods precisely in the regime where
-robustness matters. \mad{} needs neither labels nor COLMAP: it recomputes the outlier test
-per-scene from reprojection statistics, which is why it wins 1DSfM. We stress that RESfM's
-own 1DSfM result is a domain-shift story on \emph{its} tracks, not a labeling failure; its
-strong in-distribution MegaDepth result confirms its MegaDepth labels are sound.
+\subsection{Why label-free removal wins under high contamination}
+Two factors explain the gap. First, \emph{domain shift}: RESfM's classifier is trained only
+on in-distribution MegaDepth, and a decision boundary learned there does not transfer to the
+different outlier statistics of out-of-distribution internet collections. We stress that
+this is domain shift, not a labeling failure---RESfM's strong in-distribution MegaDepth
+result confirms its labels are sound. Second, and more fundamentally, we argue that
+\emph{supervision itself is hard to obtain in this regime}: RESfM's labeling (Appendix~C
+of~\cite{resfm}) assumes an associated COLMAP reconstruction and ground-truth poses for
+every training scene. Such reconstructions are readily obtained for curated, well-behaved
+data---which is why RESfM trains on MegaDepth---but are exactly what one lacks on the
+challenging, contaminated collections where robustness is most needed. \mad{} requires
+neither labels nor a COLMAP reconstruction: it recomputes the outlier test per-scene from
+reprojection statistics, so it is unaffected by domain shift and applicable wherever a
+partial reconstruction exists---which is why it wins 1DSfM.
 
 \subsection{Threshold sensitivity}
 To rule out an under-tuned baseline, we sweep the remove threshold
@@ -337,7 +357,9 @@ identical tracks) supervised RESfM wins on both metrics at every configuration, 
 not claim SOTA there. (3)~OOD tracks are self-constructed; OOD numbers are controlled within
 our pipeline and are not comparable to RESfM's published OOD numbers. (4)~Two
 symmetric-structure scenes (Ellis Island, Tower of London) fail for all methods and inflate
-1DSfM means; we report medians alongside.
+1DSfM means; we report medians alongside. These are exactly the cases in which excess
+outlier removal can disconnect the viewing graph---a failure mode RESfM itself
+reports (e.g., Tower of London registers only $94$ of $467$ cameras)~\cite{resfm}.
 
 \section{Conclusion}
 The optimal outlier-handling mechanism in deep SfM is contamination-dependent: aggressive,
@@ -345,7 +367,7 @@ label-free removal wins the high-contamination regime, soft reweighting wins the
 low-contamination regime, and supervised classification retains the clean, in-distribution
 regime. Our \mad{} variant---MAD-based removal plus head reweighting, requiring no labels
 and no COLMAP---is the strongest arm on heavily-contaminated 1DSfM, halving the supervised
-baseline's median error, precisely where COLMAP-supervised labeling is least reliable. These
+baseline's median error, precisely where COLMAP-based supervision is hardest to obtain. These
 results argue that robust deep SfM should treat outlier handling as adaptive rather than a
 single learned mechanism.
 
