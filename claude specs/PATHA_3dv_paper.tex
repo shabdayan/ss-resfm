@@ -355,12 +355,15 @@ the sparsely-sampled $3$--$29\%$ band. MegaDepth (squares) is in-distribution.}
 \begin{table}[t]\centering\small
 \caption{\textbf{Per-scene selection} (mean translation, deg). Contamination-keyed
 selection (madweight if scene outlier rate ${\ge}10\%$, else weight) does not improve over
-per-dataset selection; the per-scene oracle (best of all four mechanisms) does, but needs a
-signal beyond contamination.}
+per-dataset selection. The last column is an \emph{oracle} that selects the best of the four
+mechanisms per scene \emph{using ground-truth error}---an upper bound and headroom analysis,
+not a deployable method. It matches RESfM-released on MegaDepth (0.20 vs 0.21) rather than
+beating it and still loses Strecha, and the signal it needs is not per-scene contamination;
+realizing it without ground truth is left to future work.}
 \label{tab:selector}
 \begin{tabular}{lcccc}
 \toprule
-Dataset & weight-all & madwt-all & contam-keyed & oracle (all 4)\\
+Dataset & weight-all & madwt-all & contam-keyed & oracle (GT, UB)\\
 \midrule
 MegaDepth  & \textbf{0.459} & 0.511 & 0.511 & \textit{0.204}\\
 1DSfM      & 15.89 & \textbf{5.50} & 5.50 & \textit{4.58}\\
