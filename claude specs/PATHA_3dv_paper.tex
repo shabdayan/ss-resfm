@@ -401,6 +401,26 @@ $5.50\!\to\!4.58$---but the signal it needs is not per-scene contamination, whic
 datasets rather than scenes within them. A deployable per-scene selector therefore requires a
 richer signal than contamination alone; we leave it to future work.
 
+\noindent\textbf{Why a cheap unsupervised selector fails.} Beyond contamination, we tested
+three ground-truth-free selection signals against the oracle's per-scene choice on 1DSfM
+(10 scenes, four mechanisms): (i)~final reprojection error; (ii)~held-out cross-validation
+reprojection (re-triangulate each point from $80\%$ of its cameras, score on the held-out
+$20\%$); and (iii)~cycle consistency of the reconstruction's relative rotations against
+independent five-point essentials from the raw matches. None recovers the oracle. Both
+reprojection proxies are \emph{degenerate}: aggressive removal minimizes any reprojection
+metric by retaining only easy points, so they select \texttt{remove} on every scene---a
+$6/10$ score that merely reflects the base rate at which removal wins on contaminated 1DSfM,
+carrying no per-scene information---and held-out reprojection is fooled by the self-consistent
+folded reconstructions (on Tower of London the folded \texttt{remove} solution has the
+\emph{lowest} held-out error yet is not oracle-best). Cycle consistency scores $1/10$, worse
+than the majority baseline: on contaminated collections the pairwise essentials that would
+serve as an external reference are themselves unreliable. Reprojection-based selection is thus
+degenerate and geometric-consistency references are compromised exactly where they are needed,
+so realizing the oracle's headroom appears to require a \emph{learned} selector---which would
+inherit the very domain-shift limitation that motivates our self-supervised design. At the
+regime (per-dataset) level, however, contamination already selects the right mechanism, which
+is the practical recommendation we adopt.
+
 \subsection{Threshold sensitivity}
 To rule out an under-tuned baseline, we sweep the remove threshold
 $\tau\in\{0.4,\dots,0.8\}$ (RESfM searches the same range). The optimum shifts with
