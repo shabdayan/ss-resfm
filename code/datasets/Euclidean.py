@@ -125,9 +125,12 @@ def get_raw_data(conf, scan, phase, stage=1):
     Ps_gt_np = dataset['Ps_gt']
     Ns_np = dataset['Ns']
     names_list = dataset['namesList']
-    # Some datasets (Olsson/Euclidean) store namesList as shape (1, N); flatten to
-    # (N,) so per-camera indexing (names_list[valid_cam_indices]) works uniformly.
+    # Some datasets (Olsson/Euclidean) store namesList as shape (1, N) and nest each
+    # entry as a 1-element array (e.g. array(['images/x.JPG'])); flatten to (N,) and
+    # coerce every entry to a plain str, so per-camera indexing
+    # (names_list[valid_cam_indices]) and downstream img_list[i].strip() work uniformly.
     names_list = np.asarray(names_list).reshape(-1)
+    names_list = np.array([str(np.asarray(n).reshape(-1)[0]) for n in names_list])
     outliers_np = dataset.get('outliers2', np.zeros((M_np.shape[0] // 2, M_np.shape[1])))
 
     # === Initialize info dictionary ===
