@@ -339,6 +339,40 @@ neither labels nor a COLMAP reconstruction: it recomputes the outlier test per-s
 reprojection statistics, so it is unaffected by domain shift and applicable wherever a
 partial reconstruction exists---which is why it wins 1DSfM.
 
+\subsection{Which robust statistic? MAD vs.\ STD vs.\ Huber}
+\mad{} removes outliers by a robust statistic of the reprojection error, and the choice of
+statistic matters. We ablate the removal criterion while holding the self-supervised head
+reweighting fixed (Table~\ref{tab:madstat}): MAD (median${}+\alpha\cdot1.4826\,$MAD; robust,
+$50\%$ breakdown), a Huber M-estimate of scale (IRLS), and non-robust STD
+(mean${}+\alpha\sigma$), all at $\alpha{=}2$. On heavily-contaminated 1DSfM \textbf{MAD wins
+decisively} ($5.50$ vs.\ Huber $10.85$ vs.\ STD $12.26$ mean): the non-robust mean/$\sigma$
+threshold is inflated by the very outliers it should catch and under-removes, Huber's softer
+scale under-removes too, whereas MAD's high-breakdown estimate sets a tight, correct
+threshold. On clean Strecha/BlendedMVS the ordering reverses---STD is marginally best
+precisely because its inflated threshold trips on almost nothing, i.e.\ $\approx$ no removal,
+which is the right behavior when there are no outliers; MAD/Huber remove slightly
+unnecessarily. On contaminated but in-distribution MegaDepth the three tie ($0.45$--$0.55$).
+This reinforces the complementarity---robust removal is essential under high contamination and
+superfluous on clean data---and we use MAD in \mad{}.
+
+\begin{table}[t]\centering\small
+\caption{\textbf{Removal-statistic ablation} for \mad{} (mean\,/\,median translation, deg;
+head reweighting held fixed). MAD dominates on contaminated 1DSfM; on clean data the least
+aggressive statistic (STD${\approx}$no removal) is best; MegaDepth ties. Best per row in
+\textbf{bold}.}
+\label{tab:madstat}
+\begin{tabular}{lccc}
+\toprule
+Dataset (out\%) & MAD (\mad{}) & Huber & STD\\
+\midrule
+1DSfM (31.9)     & \textbf{5.50/2.32} & 10.85/6.56 & 12.26/4.75\\
+MegaDepth (25.6) & 0.511/0.154 & \textbf{0.454}/0.178 & 0.547/0.234\\
+Strecha (2.7)    & 2.66/1.05 & 2.76/1.19 & \textbf{2.07/0.11}\\
+BlendedMVS (3.6) & 0.121/0.047 & 0.183/0.150 & \textbf{0.116/0.002}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{Per-scene complementarity and the limits of contamination-based selection}
 The complementarity above is stated at the dataset level. Because individual scenes span
 a wide contamination range (1DSfM $29$--$56\%$, MegaDepth $0.2$--$47\%$), we test whether
