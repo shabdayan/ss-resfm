@@ -52,7 +52,21 @@ def detect_outliers_statistical(reprojection_errors, weight_method='mad', alpha=
         mean = torch.mean(reprojection_errors)
         std = torch.std(reprojection_errors)
         threshold = mean + alpha * std
-    
+
+    elif weight_method == 'huber':
+        # Huber M-estimate of scale via a few IRLS iterations (robust, sits
+        # between MAD and STD in sensitivity), thresholded like the others:
+        # median + alpha * scale.
+        r = reprojection_errors
+        med = torch.median(r)
+        scale = 1.4826 * torch.median(torch.abs(r - med)) + 1e-9  # MAD initialisation
+        c = 1.345  # standard Huber tuning constant (95% efficiency)
+        for _ in range(5):
+            z = torch.abs(r - med) / scale
+            w = torch.clamp(c / z.clamp(min=1e-9), max=1.0)  # Huber weights
+            scale = torch.sqrt((w * (r - med) ** 2).sum() / w.sum().clamp(min=1.0))
+        threshold = med + alpha * scale
+
     # outlier_mask = reprojection_errors > threshold
     outlier_mask = (reprojection_errors > threshold).to(torch.float32)
 
@@ -139,28 +153,73 @@ def get_raw_data(conf, scan, phase, stage=1):
     # percentile bands). Per-scene head-score thresholds: score > high -> REMOVE,
     # score < low -> full weight, in-between -> soft-weight by (1-score).
     hybrid_remove_weight = conf.get_bool('test.hybrid_remove_weight', default=False)
+    # mad_remove_head_weight: MAD (reprojection-error statistics) removes the
+    # confident outliers; the head score soft-weights the survivors by (1-score).
+    # Requires the TEST pass to have saved both 'outliers_pred' (head) and
+    # 'outliers_mad' (MAD mask) in the npz (train.py test.mad_remove_head_weight).
+    mad_remove_head_weight = conf.get_bool('test.mad_remove_head_weight', default=False)
+    # std_/huber_remove_head_weight: ablations of madweight that keep the head
+    # soft-weight identical but swap the robust statistic used for removal
+    # (STD = non-robust; Huber = robust IRLS scale). Require the TEST pass to have
+    # saved 'outliers_std'/'outliers_huber' respectively.
+    std_remove_head_weight = conf.get_bool('test.std_remove_head_weight', default=False)
+    huber_remove_head_weight = conf.get_bool('test.huber_remove_head_weight', default=False)
     # === Fine-tuning: Load predicted outliers ===
     if phase is Phases.FINE_TUNE and output_mode == 3:
         print(f"Fine-tuning phase: loading predicted outliers for scan {scan}")
         print("Loading outliers from:", path_to_outliers(conf, Phases.TEST, epoch=None, scan=scan))
-        outliers_mask_np = np.load(path_to_outliers(conf, Phases.TEST, epoch=None, scan=scan) + ".npz")['outliers_pred']
-        if hybrid_remove_weight:
+        _npz = np.load(path_to_outliers(conf, Phases.TEST, epoch=None, scan=scan) + ".npz")
+        outliers_mask_np = _npz['outliers_pred']
+        if mad_remove_head_weight:
+            # MAD removes confident outliers; head soft-weights the survivors.
+            madmask = np.asarray(_npz['outliers_mad'])
+            outliers_mask = torch.from_numpy(madmask > 0.5)
+            remove_outliers_pred = True
+            frozen_weights = torch.from_numpy(outliers_mask_np).float()  # head scores
+            print(f"[mad+headweight] mad_remove_frac={float((madmask > 0.5).mean()):.3f}")
+        elif std_remove_head_weight:
+            # STD removes confident outliers (non-robust threshold); head soft-weights survivors.
+            stdmask = np.asarray(_npz['outliers_std'])
+            outliers_mask = torch.from_numpy(stdmask > 0.5)
+            remove_outliers_pred = True
+            frozen_weights = torch.from_numpy(outliers_mask_np).float()  # head scores
+            print(f"[std+headweight] std_remove_frac={float((stdmask > 0.5).mean()):.3f}")
+        elif huber_remove_head_weight:
+            # Huber (robust IRLS scale) removes confident outliers; head soft-weights survivors.
+            hubmask = np.asarray(_npz['outliers_huber'])
+            outliers_mask = torch.from_numpy(hubmask > 0.5)
+            remove_outliers_pred = True
+            frozen_weights = torch.from_numpy(outliers_mask_np).float()  # head scores
+            print(f"[huber+headweight] huber_remove_frac={float((hubmask > 0.5).mean()):.3f}")
+        elif hybrid_remove_weight:
             # Adaptive 3-band: remove confident outliers, soft-weight the ambiguous,
             # keep confident inliers at full weight. Thresholds are per-scene
             # percentiles of the head-score distribution (default 20/80).
             s = torch.from_numpy(outliers_mask_np).float()
             lo_pct = conf.get_float('test.hybrid_low_pct', default=20.0)
             hi_pct = conf.get_float('test.hybrid_high_pct', default=80.0)
-            flat = s.flatten()
-            low_thr = torch.quantile(flat, lo_pct / 100.0)
-            high_thr = torch.quantile(flat, hi_pct / 100.0)
-            outliers_mask = s > high_thr            # remove confident outliers
-            remove_outliers_pred = True
-            fw = s.clone()                           # weight survivors by (1-score)
-            fw[s < low_thr] = 0.0                     # confident inliers -> full weight
-            frozen_weights = fw
-            print(f"[hybrid] low_thr={float(low_thr):.3f} high_thr={float(high_thr):.3f} "
-                  f"remove_frac={float((s > high_thr).float().mean()):.3f}")
+            # np.quantile, not torch.quantile: torch.quantile raises "input tensor
+            # is too large" past ~16M elements, which crashes on big scenes (large
+            # 1DSfM / MegaDepth); numpy has no such limit.
+            flat_np = np.asarray(outliers_mask_np).reshape(-1)
+            low_thr = float(np.quantile(flat_np, lo_pct / 100.0))
+            high_thr = float(np.quantile(flat_np, hi_pct / 100.0))
+            if high_thr - low_thr < 1e-6:
+                # Degenerate head-score distribution: the head scores ~0 almost
+                # everywhere (a clean scene it's confident about), so the 20/80
+                # percentiles collapse to the same value and the 3-band scheme
+                # produced NaN loss. Fall back to a no-op: keep all points at full
+                # weight, no removal (== plain reprojection for this scene).
+                frozen_weights = torch.zeros_like(s)
+                print(f"[hybrid] degenerate score dist (low={low_thr:.3f} high={high_thr:.3f}) -> no-op")
+            else:
+                outliers_mask = s > high_thr            # remove confident outliers
+                remove_outliers_pred = True
+                fw = s.clone()                           # weight survivors by (1-score)
+                fw[s < low_thr] = 0.0                     # confident inliers -> full weight
+                frozen_weights = fw
+                print(f"[hybrid] low_thr={low_thr:.3f} high_thr={high_thr:.3f} "
+                      f"remove_frac={float((s > high_thr).float().mean()):.3f}")
         elif weight_not_remove:
             # Keep continuous frozen scores as per-point weights; do NOT remove.
             frozen_weights = torch.from_numpy(outliers_mask_np).float()

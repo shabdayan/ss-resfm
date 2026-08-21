@@ -117,7 +117,55 @@ def epoch_evaluation(data_loader, model, conf, epoch, phase, save_predictions=Fa
                     # metrics from raw outputs. Intermediate epochs are not saved.
                     if pred_cam is not None and epoch is None:
                         dataset_utils.save_cameras(outputs, conf, curr_epoch=epoch, phase=phase)
-                    if conf.get_string('test.outlier_source', default='') == 'mad' \
+                    if conf.get_bool('test.mad_remove_head_weight', default=False) \
+                            and pred_cam is not None and pred_outliers is not None and phase is Phases.TEST:
+                        # MAD-remove + head-weight variant: save BOTH the head scores
+                        # (outliers_pred, to soft-weight survivors at fine-tune) AND a
+                        # MAD binary mask (outliers_mad, for removal) in one npz, so
+                        # get_raw_data can remove by MAD and weight by the head.
+                        from datasets.Euclidean import detect_outliers_statistical
+                        from utils import geo_utils
+                        rep_mad = geo_utils.reprojection_error_with_points(
+                            outputs['Ps'], outputs['pts3D_pred'].T, outputs['xs'])
+                        valid_mad = ~np.isnan(rep_mad)
+                        flags_mad = detect_outliers_statistical(
+                            torch.from_numpy(rep_mad[valid_mad]).float(), weight_method='mad',
+                            alpha=conf.get_float('test.mad_alpha', default=2.0))
+                        mad_mask = np.zeros(rep_mad.shape, dtype=np.float32)
+                        mad_mask[valid_mad] = flags_mad.numpy()
+                        outliersOutputs['outliers_mad'] = mad_mask
+                        dataset_utils.save_outliers(outliersOutputs, conf, curr_epoch=epoch, phase=phase)
+                    elif conf.get_bool('test.std_remove_head_weight', default=False) \
+                            and pred_cam is not None and pred_outliers is not None and phase is Phases.TEST:
+                        # STD-remove + head-weight ablation: save head scores + STD mask.
+                        from datasets.Euclidean import detect_outliers_statistical
+                        from utils import geo_utils
+                        rep_std = geo_utils.reprojection_error_with_points(
+                            outputs['Ps'], outputs['pts3D_pred'].T, outputs['xs'])
+                        valid_std = ~np.isnan(rep_std)
+                        flags_std = detect_outliers_statistical(
+                            torch.from_numpy(rep_std[valid_std]).float(), weight_method='std',
+                            alpha=conf.get_float('test.mad_alpha', default=2.0))
+                        std_mask = np.zeros(rep_std.shape, dtype=np.float32)
+                        std_mask[valid_std] = flags_std.numpy()
+                        outliersOutputs['outliers_std'] = std_mask
+                        dataset_utils.save_outliers(outliersOutputs, conf, curr_epoch=epoch, phase=phase)
+                    elif conf.get_bool('test.huber_remove_head_weight', default=False) \
+                            and pred_cam is not None and pred_outliers is not None and phase is Phases.TEST:
+                        # Huber-remove + head-weight ablation: save head scores + Huber mask.
+                        from datasets.Euclidean import detect_outliers_statistical
+                        from utils import geo_utils
+                        rep_hub = geo_utils.reprojection_error_with_points(
+                            outputs['Ps'], outputs['pts3D_pred'].T, outputs['xs'])
+                        valid_hub = ~np.isnan(rep_hub)
+                        flags_hub = detect_outliers_statistical(
+                            torch.from_numpy(rep_hub[valid_hub]).float(), weight_method='huber',
+                            alpha=conf.get_float('test.mad_alpha', default=2.0))
+                        hub_mask = np.zeros(rep_hub.shape, dtype=np.float32)
+                        hub_mask[valid_hub] = flags_hub.numpy()
+                        outliersOutputs['outliers_huber'] = hub_mask
+                        dataset_utils.save_outliers(outliersOutputs, conf, curr_epoch=epoch, phase=phase)
+                    elif conf.get_string('test.outlier_source', default='') == 'mad' \
                             and pred_cam is not None and phase is Phases.TEST:
                         # U-ESFM: outliers come from per-scene reprojection-error
                         # statistics (MAD), not a learned classifier. Save a binary
