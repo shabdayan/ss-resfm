@@ -230,7 +230,11 @@ configuration and are held identical across all arms. We report two architecture
 \noindent\textbf{Fair-comparison anchor.} Our controlled baseline is
 \emph{RESfM-from-scratch}: trained by us with the \emph{identical} setup as our arms (same
 27 scenes, sampling, epochs, seed), so only the outlier mechanism differs. We additionally
-report \emph{RESfM-released} (authors' weights) and \emph{RESfM (paper)}.
+report \emph{RESfM-released} (authors' weights) and \emph{RESfM (paper)}.\footnote{The
+ESFM row likewise follows the unified $20$k-epoch protocol. ESFM's own released
+multi-scene (calibrated) recipe trains for $30$k epochs plus a $500$-epoch per-scene
+fine-tune; we deliberately hold the schedule fixed across all rows so that the outlier
+mechanism remains the only controlled variable.}
 
 \noindent\textbf{Track provenance.} MegaDepth tracks, preprocessing, and the 36 test scenes
 are \emph{identical} to RESfM, so MegaDepth is directly comparable to published numbers. The
