@@ -44,6 +44,8 @@ JOBS=(
  "resfm_deep_multids_v2|confs/multiscene_resfm_deep_multids_v2.conf|resfm_deep_multids_v2"
  "uesfm_sa_rf_100k|confs/multiscene_uesfm_sa_rf_100k.conf|uesfm_27scenes_sa_rf_100k|99999"
  "resfm_shallow_100k|confs/multiscene_resfm_shallow_100k.conf|resfm_shallow_27scenes_100k|99999"
+ "uesfm_multids_v2_100k|confs/multiscene_uesfm_sa_rf_multids_v2_100k.conf|uesfm_multids_v2_sa_rf_100k|99999"
+ "uesfm_multids_v2_deep_100k|confs/multiscene_uesfm_deep_multids_v2_100k.conf|uesfm_multids_v2_deep_100k|99999"
 )
 for row in "${JOBS[@]}"; do
   IFS='|' read -r exp conf resdir final <<< "$row"
