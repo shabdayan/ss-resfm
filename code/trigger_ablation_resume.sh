@@ -6,7 +6,7 @@
 # Usage (armed via bsub -w "ended(<train_job>)"):
 #   trigger_ablation_resume.sh <conf_rel_path> <exp_version> <results_dir_rel> [retry]
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
-CONF="$1"; EXP="$2"; RESULTS_REL="$3"; RETRY_COUNT=${4:-0}; PREV_JID=${5:-}
+CONF="$1"; EXP="$2"; RESULTS_REL="$3"; RETRY_COUNT=${4:-0}; PREV_JID=${5:-}; FINAL_EP=${6:-19999}
 # Queue policy (2026-08-26): default resubmission goes to waic-medium, but a job
 # that died on the medium queue's 4h RUNLIMIT is relaunched on waic-risk (no
 # run limit) so long stretches can complete there when risk has slots.
@@ -20,11 +20,11 @@ MODELS="${REPO_ROOT}/${RESULTS_REL}/models"
 # models/ can be EARLY (validation plateaus before epoch 19000), which otherwise
 # makes the epoch check below fail forever -> infinite resubmit loop. Check the
 # final marker first and stop unconditionally if training actually reached 20k.
-if [ -e "${REPO_ROOT}/${RESULTS_REL}/models_all/Model_Ep19999.pt" ]; then
-    echo "TRIGGER[${EXP}]: training complete (models_all/Model_Ep19999.pt present). Not resubmitting."
+if [ -e "${REPO_ROOT}/${RESULTS_REL}/models_all/Model_Ep${FINAL_EP}.pt" ]; then
+    echo "TRIGGER[${EXP}]: training complete (models_all/Model_Ep${FINAL_EP}.pt present). Not resubmitting."
     exit 0
 fi
-TARGET_EPOCH=19000  # 20000-epoch run; require the best checkpoint to be late-stage
+TARGET_EPOCH=$((FINAL_EP - 999))  # require the best checkpoint to be late-stage
 MAX_RETRIES=10
 PY=/home/projects/bagon/ortalda/MVG/final-project/u-esfm/.venv38-resfm/bin/python
 
@@ -57,5 +57,5 @@ fi
 bsub -q waic-medium -gpu "num=1:j_exclusive=yes:gmem=80G" -J "${EXP}_trigger" -w "ended(${NEWID})" \
     -oo "${REPO_ROOT}/lsf_output/multiscene/${EXP}_trigger_%J.out" \
     -eo "${REPO_ROOT}/lsf_output/multiscene/${EXP}_trigger_%J.err" \
-    "bash ${REPO_ROOT}/trigger_ablation_resume.sh ${CONF} ${EXP} ${RESULTS_REL} $((RETRY_COUNT+1)) ${NEWID}"
+    "bash ${REPO_ROOT}/trigger_ablation_resume.sh ${CONF} ${EXP} ${RESULTS_REL} $((RETRY_COUNT+1)) ${NEWID} ${FINAL_EP}"
 echo "TRIGGER[${EXP}]: re-armed on training job ${NEWID}."

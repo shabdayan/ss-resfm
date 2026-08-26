@@ -42,10 +42,13 @@ JOBS=(
  "resfm_shallow_multids_v2|confs/multiscene_resfm_shallow_multids_v2.conf|resfm_shallow_multids_v2"
  "uesfm_deep_multids_v2|confs/multiscene_uesfm_deep_multids_v2.conf|uesfm_multids_v2_deep_adaptive_reportfaithful"
  "resfm_deep_multids_v2|confs/multiscene_resfm_deep_multids_v2.conf|resfm_deep_multids_v2"
+ "uesfm_sa_rf_100k|confs/multiscene_uesfm_sa_rf_100k.conf|uesfm_27scenes_sa_rf_100k|99999"
+ "resfm_shallow_100k|confs/multiscene_resfm_shallow_100k.conf|resfm_shallow_27scenes_100k|99999"
 )
 for row in "${JOBS[@]}"; do
-  IFS='|' read -r exp conf resdir <<< "$row"
-  [ -e "results/multiscene/$resdir/models_all/Model_Ep19999.pt" ] && continue   # done
+  IFS='|' read -r exp conf resdir final <<< "$row"
+  final=${final:-19999}                                                          # per-job final epoch (default 20k runs)
+  [ -e "results/multiscene/$resdir/models_all/Model_Ep${final}.pt" ] && continue # done
   echo "$QNAMES" | grep -qx "$exp" && continue                                    # already queued/running
   SUB=$(bsub -q "$QUEUE" -J "$exp" -oo "lsf_output/multiscene/${exp}_%J.out" -eo "lsf_output/multiscene/${exp}_%J.err" \
     -gpu "num=1:j_exclusive=yes:gmem=80G" -R "rusage[mem=64000]" \
@@ -54,6 +57,6 @@ for row in "${JOBS[@]}"; do
   [ -z "$JID" ] && { echo "resume $exp: FAILED to submit"; continue; }
   bsub -q "$QUEUE" -gpu "num=1:j_exclusive=yes:gmem=80G" -J "${exp}_trigger" -w "ended(${JID})" \
     -oo "lsf_output/multiscene/${exp}_trigger_%J.out" -eo "lsf_output/multiscene/${exp}_trigger_%J.err" \
-    "bash $REPO/trigger_ablation_resume.sh $conf $exp results/multiscene/$resdir 0 $JID" >/dev/null
+    "bash $REPO/trigger_ablation_resume.sh $conf $exp results/multiscene/$resdir 0 $JID $final" >/dev/null
   echo "resume $exp -> $JID (+fresh babysitter)"
 done
