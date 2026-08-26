@@ -10,7 +10,7 @@
 # checkpoint is injected via the conf's pretrainedPath.
 #
 # Usage:
-#   ./run_multiscene_eval.sh [--queue waic-risk] [--scans "0238,0060"] [--dry_run]
+#   ./run_multiscene_eval.sh [--queue waic-medium] [--scans "0238,0060"] [--dry_run]
 #
 # Per-arm evaluation (completed multi-scene arms; see RUN_MULTISCENE.md):
 #   --template <conf.template>   eval conf template (model block must match the arm)
@@ -32,7 +32,7 @@ TEMPLATE="${REPO_ROOT}/confs/uesfm_eval.conf.template"
 CONF_DIR="${REPO_ROOT}/confs/multiscene_eval_generated"
 PY="${EVAL_PYTHON:-${REPO_ROOT}/../.venv/bin/python}"
 
-QUEUE="waic-risk"
+QUEUE="waic-medium"
 DRY_RUN=false
 SEED=20  # paper/RESfM-code default; use --seed N for the multi-seed median protocol
 JOBPREFIX="ueval"  # LSF job-name prefix; override with --jobprefix so distinct fleets
@@ -97,7 +97,7 @@ for SCAN in $SCENES; do
             -J "${JOBPREFIX}_s${SEED}_${SCAN}" \
             -oo "${REPO_ROOT}/lsf_output/multiscene_eval/${SCAN}_s${SEED}_%J.out" \
             -eo "${REPO_ROOT}/lsf_output/multiscene_eval/${SCAN}_s${SEED}_%J.err" \
-            -gpu "num=1:j_exclusive=yes:gmem=40G" \
+            -gpu "num=1:j_exclusive=yes:gmem=80G" \
             -R "rusage[mem=50000]" \
             "${CMD}"
     fi
