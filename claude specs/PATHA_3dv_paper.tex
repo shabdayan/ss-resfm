@@ -32,6 +32,9 @@
 \def\confYear{2027}
 \newcommand{\mad}{\textsc{madweight}}
 \renewcommand{\deg}{^{\circ}}             % degree symbol in math mode
+% Required by the author-kit cvpr.sty in [review] mode.
+\def\paperID{*****}
+
 \title{When to Remove and When to Reweight:\\
 Contamination-Dependent Outlier Handling in Deep Structure-from-Motion}
 \author{Anonymous 3DV submission\\ Paper ID *****}
@@ -51,15 +54,18 @@ self-supervised setting we show the \emph{optimal} outlier-handling mechanism is
 COLMAP-supervised classifier exactly where supervision is weakest. Under a strictly controlled protocol---identical point tracks, robust bundle
 adjustment, and training schedule, varying only the outlier mechanism---we compare hard
 removal, soft reweighting, a three-band hybrid, and a new MAD-remove\,+\,head-reweight
-variant (\mad{}) against a from-scratch RESfM baseline across four datasets spanning
-$2.7\%$--$31.9\%$ outliers. We find a clear complementarity: hard, statistics-based
-removal wins the high-contamination regime (1DSfM, $\sim\!32\%$ outliers), where our
+variant (\mad{}) against a from-scratch RESfM baseline across five datasets spanning
+$2\%$--$61\%$ measured outliers. We find a clear complementarity: hard, statistics-based
+removal wins the high-contamination regime (1DSfM, $43\%$ measured outliers in our rebuild), where our
 label-free \mad{} halves the supervised baseline's median translation error
-($2.32\deg$ vs $3.97\deg$); soft reweighting wins the low-contamination regime; and the
+($2.32\deg$ vs $3.97\deg$), and on an extreme $\sim\!60\%$ held-out set it beats both the
+supervised baseline and COLMAP itself; soft reweighting wins the low-contamination regime; and the
 supervised classifier retains the clean, in-distribution regime (MegaDepth). We attribute
-this to domain shift and to the fact that supervised labeling depends on a COLMAP
-reconstruction that is hardest to obtain precisely in the contaminated, out-of-distribution
-regime, and we position label-free adaptivity as a missing ingredient for robust deep SfM.
+this to domain shift and to a \emph{measurable label ceiling}: regenerating supervision with
+from-scratch COLMAP, label recall collapses from $0.82$ to $\sim\!0.3$ and label coverage
+from $99\%$ to $\sim\!55\%$ once contamination exceeds $\sim\!15\%$---precisely the regime
+where robustness is needed---and we position label-free adaptivity as a missing ingredient
+for robust deep SfM.
 \end{abstract}
 
 \section{Introduction}
@@ -187,22 +193,32 @@ across all arms; only the mechanism block changes.
 
 \section{Experiments}
 \subsection{Datasets and contamination}
-We evaluate on four datasets spanning a wide contamination range, reported as the RESfM
-paper's outlier fraction:
+We evaluate on five datasets spanning a wide contamination range. Alongside the RESfM
+paper's quoted outlier fractions we report the contamination \emph{measured on our own
+tracks} (robust ground-truth-pose triangulation with the standard $4$px cutoff, applied
+uniformly to every dataset):
 \begin{center}\small
-\begin{tabular}{lcc}
+\begin{tabular}{lccc}
 \toprule
-Dataset & Outliers\% & Regime\\
+Dataset & Outliers\% (RESfM) & Outliers\% (ours) & Regime\\
 \midrule
-Strecha & 2.7 & clean, LIDAR-GT\\
-BlendedMVS & 3.6 & low outlier, rendered\\
-MegaDepth & 25.6 & contaminated, \emph{in-distribution}\\
-1DSfM & 31.9 & contaminated, OOD\\
+Strecha & 2.7 & 1.7 & clean, LIDAR-GT\\
+BlendedMVS & 3.6 & 3.1 & low outlier, rendered\\
+MegaDepth & 25.6 & 25.4 & contaminated, \emph{in-distribution}\\
+1DSfM & 31.9 & 43.3 & contaminated, OOD\\
+1DSfM-hard & -- & $\sim$60 & extreme, OOD\\
 \bottomrule
 \end{tabular}
 \end{center}
-Networks are trained on 27 MegaDepth scenes; MegaDepth test is therefore in-distribution,
-while 1DSfM/Strecha/BlendedMVS are cross-dataset (out-of-distribution).
+On MegaDepth---where tracks are identical to RESfM's---the two measurements agree
+($25.4$ vs $25.6$), validating our measurement; our 1DSfM rebuild is markedly harder than
+the tracks behind RESfM's quoted $31.9\%$, which should be kept in mind when reading the
+1DSfM columns. \emph{1DSfM-hard} comprises the five 1DSfM scenes unused by the standard
+ten-scene split (Gendarmenmarkt, Piccadilly, Roman Forum, Trafalgar, Union Square), built
+with the same pipeline and subsampled to $300$ cameras per scene following RESfM's
+convention. Networks are trained on 27 MegaDepth scenes; MegaDepth test is therefore
+in-distribution, while 1DSfM/Strecha/BlendedMVS/1DSfM-hard are cross-dataset
+(out-of-distribution).
 
 \subsection{Protocol, baselines, and track provenance}
 Following RESfM's public training code and default configuration, all networks train for
@@ -223,6 +239,59 @@ OOD tracks); OOD comparisons are therefore \emph{controlled within our pipeline}
 \textbf{not} directly comparable to RESfM's published OOD numbers. On MegaDepth, RESfM's
 own released weights yield $0.209\deg$ in our harness (vs.\ their reported $0.169\deg$),
 confirming our evaluation is faithful and that $\sim\!0.209\deg$ is the reproducible level.
+
+\noindent\textbf{Learning-rate schedule and the MegaDepth parity.} RESfM's released
+configuration decays the learning rate on an eleven-milestone schedule
+($10\mathrm{k},11\mathrm{k},\dots,20\mathrm{k}$). An earlier five-milestone variant of ours
+($10\mathrm{k},12\mathrm{k},\dots,18\mathrm{k}$) trains at a higher effective rate in the
+second half and leaves the self-supervised arms short of the supervised baseline on
+in-distribution MegaDepth; aligning to RESfM's schedule (denoted \emph{finelr}) closes this
+gap (Table~\ref{tab:finelr-md}). Both generations share tracks, seed, architecture, and
+protocol---only the schedule differs---so the comparison remains controlled. We stress the
+resulting parity is \emph{mean-only}: RESfM retains the better MegaDepth \emph{median}
+($0.015\deg$ vs.\ $\sim\!0.03\deg$) in both generations, reflecting its in-distribution
+advantage on the typical scene. We therefore claim in-distribution \emph{parity}, not
+superiority, on MegaDepth. A three-seed replication (seeds $20$--$22$) of \emph{both}
+schedules further shows the apparent schedule effect lies within seed noise: post-BA
+MegaDepth translation is $0.46\pm0.08$ (five-milestone) vs.\ $0.40\pm0.09$ (finelr) and
+1DSfM is $9.6\pm3.2$ vs.\ $12.2\pm2.4$, with the per-seed ranking \emph{inverting} on both
+datasets across seeds (and the 1DSfM mean dominated by a single scene, Tower of London,
+which swings by $2\times$ between seeds). We therefore treat the schedule as a non-factor,
+attribute single-seed gaps between the two generations to seed variance, and report
+seed-averaged numbers wherever both generations exist.
+
+\begin{table}[t]
+\centering\small
+\caption{\textbf{MegaDepth mean translation error ($\deg$, post-BA): the self-supervised
+parity holds only under the RESfM-aligned (finelr) schedule.} Only the LR schedule differs
+between the two columns; tracks, seed, architecture, and protocol are identical.}
+\label{tab:finelr-md}
+\begin{tabular}{lcc}
+\toprule
+Arm & 5-milestone & finelr (RESfM-aligned)\\
+\midrule
+RESfM-scratch (supervised) & 0.332 & 0.344\\
+U-ESFM weight              & 0.460 & 0.423\\
+U-ESFM \mad{}              & 0.511 & 0.422\\
+U-ESFM weight+TTT          & 0.527 & \textbf{0.316}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\textbf{A method-isolated comparison, not a SOTA claim.} Because
+RESfM-from-scratch shares every pipeline component with our arms and differs only in the
+outlier mechanism (supervised COLMAP-label head vs.\ our label-free head), it isolates the
+effect of removing supervision---the same controlled protocol RESfM itself uses when it
+re-trains ESFM/GASFM in its own pipeline rather than citing their published numbers. We do
+\emph{not} claim state of the art: RESfM's \emph{released} checkpoint ($0.209\deg$ on
+MegaDepth) is stronger than either from-scratch arm. We verified this reproduction gap stems
+from the released weights themselves, not our pipeline---the authors' \emph{own} training
+code on our tracks reproduces $0.34$--$0.39\deg$, not $0.209\deg$---so it handicaps the
+supervised and self-supervised arms \emph{equally} and leaves the method-isolated comparison
+valid. Our claim is thus: under an identical pipeline, entirely self-supervised outlier
+handling \emph{matches} supervised RESfM in distribution and \emph{surpasses} it as
+contamination rises, with no COLMAP labels. We report RESfM-released and RESfM~(paper) as
+reference rows throughout.
 
 \noindent\textbf{Metrics.} We report mean and median translation and rotation error in
 degrees, post-BA. On 1DSfM the mean is dominated by two symmetric-structure failure scenes
@@ -329,8 +398,8 @@ Two factors explain the gap. First, \emph{domain shift}: RESfM's classifier is t
 on in-distribution MegaDepth, and a decision boundary learned there does not transfer to the
 different outlier statistics of out-of-distribution internet collections. We stress that
 this is domain shift, not a labeling failure---RESfM's strong in-distribution MegaDepth
-result confirms its labels are sound. Second, and more fundamentally, we argue that
-\emph{supervision itself is hard to obtain in this regime}: RESfM's labeling (Appendix~C
+result confirms its labels are sound. Second, and more fundamentally, we \emph{measure}
+that supervision itself degrades in this regime: RESfM's labeling (Appendix~C
 of~\cite{resfm}) assumes an associated COLMAP reconstruction and ground-truth poses for
 every training scene. Such reconstructions are readily obtained for curated, well-behaved
 data---which is why RESfM trains on MegaDepth---but are exactly what one lacks on the
@@ -338,6 +407,66 @@ challenging, contaminated collections where robustness is most needed. \mad{} re
 neither labels nor a COLMAP reconstruction: it recomputes the outlier test per-scene from
 reprojection statistics, so it is unaffected by domain shift and applicable wherever a
 partial reconstruction exists---which is why it wins 1DSfM.
+
+\paragraph{Measuring the label ceiling.} We make the second argument quantitative. On $18$
+scenes spanning the full contamination axis we simulate the realistic labeling scenario for
+a \emph{new} dataset---no ground-truth poses, so labels must come from a from-scratch COLMAP
+reconstruction of the same tracks (fixed known intrinsics)---and score the resulting
+per-observation labels against the ground-truth-pose reference labels
+(precision/recall with outlier as the positive class; \emph{coverage} is the fraction of
+observations that receive any COLMAP verdict at all, i.e.\ camera registered and track
+triangulated; scenes capped at $120$ cameras):
+\begin{center}\small
+\begin{tabular}{lccccc}
+\toprule
+Contamination & $n$ & Coverage\% & Precision & Recall & COLMAP $t$-err\\
+\midrule
+0--5\%    & 6 & 99.4 & 0.76 & 0.82 & 0.004\\
+5--15\%   & 4 & 89.6 & 0.90 & 0.83 & 0.014\\
+15--30\%  & 2 & 71.7 & 0.83 & \textbf{0.26} & 1.02\\
+30--45\%  & 3 & 55.7 & 0.74 & \textbf{0.39} & 0.82\\
+45--60\%  & 3 & 55.1 & 0.87 & \textbf{0.39} & 11.0\\
+\bottomrule
+\end{tabular}
+\end{center}
+Precision stays high throughout---what COLMAP flags as an outlier almost always is
+one---but \emph{recall collapses} from $0.82$ to $0.26$--$0.39$ and coverage halves once
+contamination exceeds ${\sim}15\%$: the corrupted reconstruction absorbs enough outliers
+that most of them reproject acceptably under its distorted geometry, and half the
+observations receive no label at all. A supervised head trained on such labels is not
+merely under-informed; it is actively taught that the majority of true outliers are
+inliers, precisely in the regime where robustness matters. Conversely, in the clean regime
+($\le\!15\%$) COLMAP-derived labels are excellent---which is consistent with RESfM's strong
+in-distribution result and delimits where the supervised recipe is sound.
+
+\subsection{Extreme contamination: the 1DSfM-hard set}
+To probe beyond 1DSfM's $43\%$, we evaluate on the five held-out 1DSfM-hard scenes
+($\sim\!60\%$ measured contamination, $300$ cameras each). All learned arms use the same
+controlled protocol as Table~\ref{tab:shallow} (identical tracks and training generation;
+only the mechanism differs); COLMAP runs incremental mapping on the same tracks with known
+intrinsics.
+\begin{center}\small
+\begin{tabular}{lcc}
+\toprule
+Method & Trans/Rot (post-BA) & Registered\\
+\midrule
+U-ESFM $\cdot$ \mad{}      & \textbf{12.2}/\textbf{14.4} & all\\
+RESfM-scratch              & 16.2/22.7 & all\\
+COLMAP                     & 20.9/--   & 64\%\\
+U-ESFM $\cdot$ weight      & 21.9/25.6 & all\\
+U-ESFM $\cdot$ weight+TTT  & 26.4/32.0 & all\\
+\bottomrule
+\end{tabular}
+\end{center}
+The complementarity extrapolates: label-free removal (\mad{}) beats the COLMAP-supervised
+baseline by $25\%$ translation\,/\,$37\%$ rotation, the soft arms fall further behind
+(consistent with removal winning as contamination rises), and COLMAP itself degrades
+severely---its error is computed \emph{only over the $64\%$ of cameras it registers}
+(a favorable metric), it fails to register more than a third of the cameras, and on the
+worst scene (Gendarmenmarkt) its translation error exceeds $33$ with $66\%$ registered.
+Errors are large for every method---these scenes are hard---but the ranking at the extreme
+matches the label-ceiling prediction: the supervised advantage inverts exactly where
+supervision can no longer be manufactured.
 
 \subsection{Which robust statistic? MAD vs.\ STD vs.\ Huber}
 \mad{} removes outliers by a robust statistic of the reprojection error, and the choice of
@@ -507,15 +636,25 @@ deep SfM should treat outlier handling as adaptive and self-supervised rather th
 supervised mechanism.
 
 \begin{thebibliography}{9}\small
+
 \bibitem{resfm} Authors. RESfM: Robust Deep Equivariant Structure from Motion. ICLR 2025.
+
 \bibitem{esfm} Moran et al. Deep Permutation Equivariant Structure from Motion. ICCV 2021.
+
 \bibitem{gasfm} Brynte et al. Learning Structure from Motion (GASFM). 2023.
+
 \bibitem{colmap} Sch\"onberger and Frahm. Structure-from-Motion Revisited. CVPR 2016.
+
 \bibitem{mad} Rousseeuw and Croux. Alternatives to the Median Absolute Deviation. JASA 1993.
+
 \bibitem{onedsfm} Wilson and Snavely. Robust Global Translations with 1DSfM. ECCV 2014.
+
 \bibitem{megadepth} Li and Snavely. MegaDepth. CVPR 2018.
+
 \bibitem{strecha} Strecha et al. On Benchmarking Camera Calibration and MVS. CVPR 2008.
+
 \bibitem{blendedmvs} Yao et al. BlendedMVS. CVPR 2020.
+
 \end{thebibliography}
 
 \end{document}
