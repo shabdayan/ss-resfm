@@ -78,6 +78,11 @@ def main():
                     'U-ESFM (ours)', 'mad_prune+ESFMLoss_ft')
     ours += collect(args.resfm_root, [int(s) for s in args.resfm_seeds.split(',')],
                     'RESfM (reproduced)', 'classifier_prune+ESFMLoss_ft')
+    # True vanilla baseline (TASK_esfm_vanilla_baseline): ESFM endpoint of the
+    # comparison interval. The relabeled deep_esfm_plain_loss run must never
+    # appear as "ESFM" — it belongs to the R11 ablation table only.
+    ours += collect('results/multiscene/esfm_vanilla_eval', [20],
+                    'ESFM (reproduced)', 'no_prune+ESFMLoss_ft')
     ours = pd.DataFrame(ours)
     if ours.empty:
         print('WARNING: no measured rows found — check --uesfm_root/--resfm_root.')

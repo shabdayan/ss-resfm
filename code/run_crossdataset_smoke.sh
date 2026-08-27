@@ -33,7 +33,9 @@ while [[ $# -gt 0 ]]; do case $1 in
 esac; done
 
 # Checkpoints (Part 2 inventory; provenance-clean, best-validation models)
-CKPT_ESFM="${REPO_ROOT}/results/multiscene/uesfm_27scenes_shallow_reproj/models/Model_Ep19999.pt"
+# TRUE vanilla ESFM (TASK_esfm_vanilla_baseline); the old shallow_reproj path
+# is the relabeled deep_esfm_plain_loss run (R11 ablation only, not ESFM).
+CKPT_ESFM="${REPO_ROOT}/results/multiscene/esfm_vanilla_27scenes/models/Model_Ep8000.pt"
 CKPT_RESFM="${REPO_ROOT}/pretrained/pretrained_model.pt"
 CKPT_UESFM="${REPO_ROOT}/results/multiscene/uesfm_27scenes_sos_adaptive_1gpu_any80g/models/Model_Ep16500.pt"
 
@@ -74,9 +76,12 @@ for DSPEC in $DATASETS; do
               -e "s|    output_mode = 3|    output_mode = ${OM}|"
               -e "s|func_tuning = ESFMLoss|func_tuning = ${FT}|")
     if [ "$SWAP" = "deep" ]; then
-      # config 1 (ESFM row) uses OUR trained baseline: DeepSetOfSetOutliersNet at 1x3
-      SED_ARGS+=(-e 's|type = "SetOfSet.SetOfSetOutliersNet"|type = "SetOfSet.DeepSetOfSetOutliersNet"|')
-      ARCH="esfm_outliers_deep"
+      # config 1 (ESFM row): the TRUE vanilla class, plus vanilla flags
+      SED_ARGS+=(-e 's|type = "SetOfSet.SetOfSetOutliersNet"|type = "SetOfSet.SetOfSetNet"|'
+                 -e 's|    dropout_rate = 0.1|    dropout_rate = 0.0|'
+                 -e 's|    use_layer_norm = True|    use_layer_norm = False|'
+                 -e 's|    use_residual = True|    use_residual = False|')
+      ARCH="esfm_orig"
     else
       ARCH="esfm_outliers"
     fi
