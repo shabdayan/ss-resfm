@@ -7,15 +7,10 @@
 #   trigger_ablation_resume.sh <conf_rel_path> <exp_version> <results_dir_rel> [retry]
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
 CONF="$1"; EXP="$2"; RESULTS_REL="$3"; RETRY_COUNT=${4:-0}; PREV_JID=${5:-}; FINAL_EP=${6:-19999}; NGPU=${7:-1}
-# Queue policy (2026-08-26): default resubmission goes to waic-medium, but a job
-# that died on the medium queue's 4h RUNLIMIT is relaunched on waic-risk (no
-# run limit) so long stretches can complete there when risk has slots.
-RESUB_QUEUE="waic-medium"
-[ "$NGPU" -gt 2 ] && RESUB_QUEUE="waic-short"   # medium caps ngpus at 2
-if [ -n "$PREV_JID" ] && bhist -l "$PREV_JID" 2>/dev/null | grep -q "TERM_RUNLIMIT"; then
-    echo "TRIGGER[${EXP}]: previous job ${PREV_JID} hit RUNLIMIT -> resubmitting on waic-risk."
-    RESUB_QUEUE="waic-risk"
-fi
+# Queue policy (2026-08-27): ALL training resubmissions go to waic-risk
+# (evaluation jobs use waic-medium; see run_multiscene_eval.sh).
+RESUB_QUEUE="waic-risk"
+MEMR=64000; [ "$NGPU" -gt 1 ] && MEMR=48000
 MODELS="${REPO_ROOT}/${RESULTS_REL}/models"
 # True completion marker: the final-epoch checkpoint. The best-val checkpoint in
 # models/ can be EARLY (validation plateaus before epoch 19000), which otherwise
@@ -44,10 +39,10 @@ if [ "$RETRY_COUNT" -ge "$MAX_RETRIES" ]; then
 fi
 
 echo "TRIGGER[${EXP}]: incomplete (epoch ${EPOCH} < ${TARGET_EPOCH}); resubmitting (retry $((RETRY_COUNT+1))/${MAX_RETRIES})."
-SUB=$(bsub -q "${RESUB_QUEUE}" -J "${EXP}" \
+SUB=$(bsub -q "${RESUB_QUEUE}" -J "${EXP}" -n "${NGPU}" -R "affinity[core(4)]" \
     -oo "${REPO_ROOT}/lsf_output/multiscene/${EXP}_resume_%J.out" \
     -eo "${REPO_ROOT}/lsf_output/multiscene/${EXP}_resume_%J.err" \
-    -gpu "num=${NGPU}:j_exclusive=yes:gmem=80G" -R "rusage[mem=64000]" -R "span[hosts=1]" \
+    -gpu "num=${NGPU}:j_exclusive=yes:gmem=80G" -R "rusage[mem=${MEMR}]" -R "span[hosts=1]" \
     "cd ${REPO_ROOT}; ${PY} multiple_scenes_learning.py --conf ${CONF} --phase TRAINING --exp_version ${EXP} --wandb 1")
 echo "$SUB"
 NEWID=$(echo "$SUB" | grep -oE "Job <[0-9]+>" | grep -oE "[0-9]+")

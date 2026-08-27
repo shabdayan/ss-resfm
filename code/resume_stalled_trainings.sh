@@ -7,7 +7,7 @@
 set -u
 REPO="$(cd "$(dirname "$0")" && pwd)"; cd "$REPO"
 PY="$REPO/../.venv38-resfm/bin/python"
-QUEUE="waic-medium"   # was waic-risk; medium won the 2026-08-26 dual-queue race 94-0
+QUEUE="waic-risk"   # policy 2026-08-27: ALL training jobs -> waic-risk; eval jobs -> waic-medium
 QNAMES=$(bjobs -w 2>/dev/null | awk '{print $7}')
 # Congestion guard: under heavy load bjobs can return nothing even though jobs
 # exist; treating that as "empty queue" caused mass duplicate resubmission
@@ -50,6 +50,7 @@ JOBS=(
  "resfm_shallow_100k_mg4|confs/multiscene_resfm_shallow_100k_mg4.conf|resfm_shallow_27scenes_100k_mg4|99999|4"
  "uesfm_multids_v2_100k_mg4|confs/multiscene_uesfm_sa_rf_multids_v2_100k_mg4.conf|uesfm_multids_v2_sa_rf_100k_mg4|99999|4"
  "uesfm_multids_v2_deep_100k_mg4|confs/multiscene_uesfm_deep_multids_v2_100k_mg4.conf|uesfm_multids_v2_deep_100k_mg4|99999|4"
+ "uesfm_sa_rf_100k_mg2|confs/multiscene_uesfm_sa_rf_100k_mg2.conf|uesfm_27scenes_sa_rf_100k_mg2|99999|2"
 )
 for row in "${JOBS[@]}"; do
   IFS='|' read -r exp conf resdir final ngpu <<< "$row"
@@ -57,9 +58,10 @@ for row in "${JOBS[@]}"; do
   ngpu=${ngpu:-1}                                                                # per-job GPU count (Fabric DDP shards scenes across ranks)
   [ -e "results/multiscene/$resdir/models_all/Model_Ep${final}.pt" ] && continue # done
   echo "$QNAMES" | grep -qx "$exp" && continue                                    # already queued/running
-  SUBQ="$QUEUE"; [ "$ngpu" -gt 2 ] && SUBQ="waic-short"                    # medium caps ngpus at 2
-  SUB=$(bsub -q "$SUBQ" -J "$exp" -oo "lsf_output/multiscene/${exp}_%J.out" -eo "lsf_output/multiscene/${exp}_%J.err" \
-    -gpu "num=${ngpu}:j_exclusive=yes:gmem=80G" -R "rusage[mem=64000]" -R "span[hosts=1]" \
+  SUBQ="$QUEUE"
+  MEMR=64000; [ "$ngpu" -gt 1 ] && MEMR=48000                              # multi-GPU: ~39-45G per rank (each rank loads the full dataset)
+  SUB=$(bsub -q "$SUBQ" -J "$exp" -n "$ngpu" -R "affinity[core(4)]" -oo "lsf_output/multiscene/${exp}_%J.out" -eo "lsf_output/multiscene/${exp}_%J.err" \
+    -gpu "num=${ngpu}:j_exclusive=yes:gmem=80G" -R "rusage[mem=${MEMR}]" -R "span[hosts=1]" \
     "cd $REPO; TORCHDYNAMO_DISABLE=1 $PY multiple_scenes_learning.py --conf $conf --phase TRAINING --exp_version $exp --wandb 1")
   JID=$(echo "$SUB" | grep -oE "Job <[0-9]+>" | grep -oE "[0-9]+")
   [ -z "$JID" ] && { echo "resume $exp: FAILED to submit"; continue; }
