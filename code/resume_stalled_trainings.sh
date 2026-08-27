@@ -46,19 +46,25 @@ JOBS=(
  "resfm_shallow_100k|confs/multiscene_resfm_shallow_100k.conf|resfm_shallow_27scenes_100k|99999"
  "uesfm_multids_v2_100k|confs/multiscene_uesfm_sa_rf_multids_v2_100k.conf|uesfm_multids_v2_sa_rf_100k|99999"
  "uesfm_multids_v2_deep_100k|confs/multiscene_uesfm_deep_multids_v2_100k.conf|uesfm_multids_v2_deep_100k|99999"
+ "uesfm_sa_rf_100k_mg4|confs/multiscene_uesfm_sa_rf_100k_mg4.conf|uesfm_27scenes_sa_rf_100k_mg4|99999|4"
+ "resfm_shallow_100k_mg4|confs/multiscene_resfm_shallow_100k_mg4.conf|resfm_shallow_27scenes_100k_mg4|99999|4"
+ "uesfm_multids_v2_100k_mg4|confs/multiscene_uesfm_sa_rf_multids_v2_100k_mg4.conf|uesfm_multids_v2_sa_rf_100k_mg4|99999|4"
+ "uesfm_multids_v2_deep_100k_mg4|confs/multiscene_uesfm_deep_multids_v2_100k_mg4.conf|uesfm_multids_v2_deep_100k_mg4|99999|4"
 )
 for row in "${JOBS[@]}"; do
-  IFS='|' read -r exp conf resdir final <<< "$row"
+  IFS='|' read -r exp conf resdir final ngpu <<< "$row"
   final=${final:-19999}                                                          # per-job final epoch (default 20k runs)
+  ngpu=${ngpu:-1}                                                                # per-job GPU count (Fabric DDP shards scenes across ranks)
   [ -e "results/multiscene/$resdir/models_all/Model_Ep${final}.pt" ] && continue # done
   echo "$QNAMES" | grep -qx "$exp" && continue                                    # already queued/running
-  SUB=$(bsub -q "$QUEUE" -J "$exp" -oo "lsf_output/multiscene/${exp}_%J.out" -eo "lsf_output/multiscene/${exp}_%J.err" \
-    -gpu "num=1:j_exclusive=yes:gmem=80G" -R "rusage[mem=64000]" \
+  SUBQ="$QUEUE"; [ "$ngpu" -gt 2 ] && SUBQ="waic-short"                    # medium caps ngpus at 2
+  SUB=$(bsub -q "$SUBQ" -J "$exp" -oo "lsf_output/multiscene/${exp}_%J.out" -eo "lsf_output/multiscene/${exp}_%J.err" \
+    -gpu "num=${ngpu}:j_exclusive=yes:gmem=80G" -R "rusage[mem=64000]" -R "span[hosts=1]" \
     "cd $REPO; TORCHDYNAMO_DISABLE=1 $PY multiple_scenes_learning.py --conf $conf --phase TRAINING --exp_version $exp --wandb 1")
   JID=$(echo "$SUB" | grep -oE "Job <[0-9]+>" | grep -oE "[0-9]+")
   [ -z "$JID" ] && { echo "resume $exp: FAILED to submit"; continue; }
   bsub -q "$QUEUE" -gpu "num=1:j_exclusive=yes:gmem=80G" -J "${exp}_trigger" -w "ended(${JID})" \
     -oo "lsf_output/multiscene/${exp}_trigger_%J.out" -eo "lsf_output/multiscene/${exp}_trigger_%J.err" \
-    "bash $REPO/trigger_ablation_resume.sh $conf $exp results/multiscene/$resdir 0 $JID $final" >/dev/null
+    "bash $REPO/trigger_ablation_resume.sh $conf $exp results/multiscene/$resdir 0 $JID $final $ngpu" >/dev/null
   echo "resume $exp -> $JID (+fresh babysitter)"
 done
