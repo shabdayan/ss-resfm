@@ -134,3 +134,20 @@ out head pathology; A2 shows per-scene-adaptive inference settings fix the
 low-contamination side of the tail. The actionable candidates are
 contamination-linked percentiles (implemented, conf-gated) and
 threshold-from-score-distribution removal.
+
+## A1-addendum (TASK_esfm_vanilla_baseline Step 5) — vanilla ESFM calibration
+
+`esfm_vanilla` (SetOfSetNet, 663,562 params, no outlier handling; best ckpt
+Ep8000/20k) on all 36 scenes, matched environment:
+**Rot 7.32 / Trans 0.809 / Nr 276** vs published ESFM 6.77 / 0.780 / 240.
+
+Classification: **SYSTEMATIC, +0.55° — consistent in sign and magnitude with
+the RESfM endpoint's +0.60°.** Both endpoints now show the same uniform
+BA-environment offset; the previous −1.71° anomaly is fully explained by the
+mislabeled architecture (that run is `deep_esfm_plain_loss`, R11 ablation
+only). The pipeline is uniformly calibrated.
+
+**Corrected calibrated interval (single ruler, Rot / Trans means):**
+vanilla ESFM 7.32 / 0.809 → **U-ESFM 3.47 / 0.358** → RESfM(repro) 1.89 / 0.209.
+U-ESFM removes 53% of vanilla ESFM's rotation error (72% of the ESFM→RESfM
+interval measured from the ESFM end: 3.85° of 5.43°) without labels.
