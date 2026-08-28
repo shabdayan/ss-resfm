@@ -52,6 +52,7 @@ JOBS=(
  "uesfm_multids_v2_deep_100k_mg4|confs/multiscene_uesfm_deep_multids_v2_100k_mg4.conf|uesfm_multids_v2_deep_100k_mg4|99999|4"
  "uesfm_sa_rf_100k_mg2|confs/multiscene_uesfm_sa_rf_100k_mg2.conf|uesfm_27scenes_sa_rf_100k_mg2|99999|2"
  "resfm_deep_multids_v2_100k|confs/multiscene_resfm_deep_multids_v2_100k.conf|resfm_deep_multids_v2_100k|99999"
+ "resfm_shallow_multids_v3_100k|confs/multiscene_resfm_shallow_multids_v3_100k.conf|resfm_shallow_multids_v3_100k|99999"
  "resfm_shallow_s21|confs/multiscene_resfm_shallow_s21.conf|resfm_shallow_27scenes_s21"
  "resfm_shallow_s22|confs/multiscene_resfm_shallow_s22.conf|resfm_shallow_27scenes_s22"
  "resfm_shallow_menv|confs/multiscene_resfm_shallow_menv.conf|resfm_shallow_27scenes_menv|19999|1|/home/projects/bagon/ortalda/MVG/final-project/u-esfm/.conda_resfm_authors/bin/python"
