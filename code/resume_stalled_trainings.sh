@@ -55,6 +55,16 @@ JOBS=(
  "resfm_shallow_multids_v3_100k|confs/multiscene_resfm_shallow_multids_v3_100k.conf|resfm_shallow_multids_v3_100k|99999"
  "resfm_shallow_s21|confs/multiscene_resfm_shallow_s21.conf|resfm_shallow_27scenes_s21"
  "resfm_shallow_s22|confs/multiscene_resfm_shallow_s22.conf|resfm_shallow_27scenes_s22"
+ "uesfm_sa_rf_earlylr|confs/multiscene_uesfm_sa_rf_earlylr.conf|uesfm_27scenes_sa_rf_earlylr"
+ "uesfm_sa_rf_lowlr|confs/multiscene_uesfm_sa_rf_lowlr.conf|uesfm_27scenes_sa_rf_lowlr"
+ "resfm_shallow_faithful_lr1e4|confs/multiscene_resfm_shallow_faithful_lr1e4.conf|resfm_shallow_27scenes_faithful_lr1e4"
+ "uesfm_sa_rf_finelr_menv|confs/multiscene_uesfm_sa_rf_finelr_menv.conf|uesfm_27scenes_sa_rf_finelr_menv|19999|1|/home/projects/bagon/ortalda/MVG/final-project/u-esfm/.conda_resfm_authors/bin/python"
+ "uesfm_multids_v2_finelr|confs/multiscene_uesfm_multids_v2_finelr.conf|uesfm_multids_v2_sa_rf_finelr"
+ "uesfm_multids_v2_finelr_menv|confs/multiscene_uesfm_multids_v2_finelr_menv.conf|uesfm_multids_v2_sa_rf_finelr_menv|19999|1|/home/projects/bagon/ortalda/MVG/final-project/u-esfm/.conda_resfm_authors/bin/python"
+ "resfm_multids_v2_finelr|confs/multiscene_resfm_multids_v2_finelr.conf|resfm_shallow_multids_v2_finelr"
+ "resfm_multids_v2_finelr_menv|confs/multiscene_resfm_multids_v2_finelr_menv.conf|resfm_shallow_multids_v2_finelr_menv|19999|1|/home/projects/bagon/ortalda/MVG/final-project/u-esfm/.conda_resfm_authors/bin/python"
+ "resfm_shallow_faithful_menv|confs/multiscene_resfm_shallow_faithful_menv.conf|resfm_shallow_27scenes_faithful_menv|19999|1|/home/projects/bagon/ortalda/MVG/final-project/u-esfm/.conda_resfm_authors/bin/python"
+ "resfm_shallow_faithful|confs/multiscene_resfm_shallow_faithful.conf|resfm_shallow_27scenes_faithful"
  "resfm_shallow_menv|confs/multiscene_resfm_shallow_menv.conf|resfm_shallow_27scenes_menv|19999|1|/home/projects/bagon/ortalda/MVG/final-project/u-esfm/.conda_resfm_authors/bin/python"
 )
 for row in "${JOBS[@]}"; do
