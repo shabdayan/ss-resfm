@@ -265,11 +265,9 @@ MegaDepth translation is $0.46\pm0.08$ (five-milestone) vs.\ $0.40\pm0.09$ (fine
 datasets across seeds (and the 1DSfM mean dominated by a single scene, Tower of London,
 which swings by $2\times$ between seeds). We therefore treat the schedule as a non-factor,
 attribute single-seed gaps between the two generations to seed variance, and report
-seed-averaged numbers wherever both generations exist. The insensitivity has a simple
-mechanism: across all seeds and generations the self-supervised best checkpoint falls at
-epoch $7$--$9.5$k --- \emph{before} the first milestone ($10$k) where the schedules diverge
---- so the schedule is causally inert for U-ESFM (supervised best checkpoints fall
-mid-decay, $15$--$17.5$k).
+seed-averaged numbers wherever both generations exist (mechanically so for U-ESFM: its best
+checkpoint, epoch $7$--$9.5$k across all seeds, \emph{precedes} the first milestone where
+the schedules diverge).
 
 \begin{table}[t]
 \centering\small
