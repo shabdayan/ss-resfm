@@ -51,6 +51,7 @@ JOBS=(
  "uesfm_multids_v2_100k_mg4|confs/multiscene_uesfm_sa_rf_multids_v2_100k_mg4.conf|uesfm_multids_v2_sa_rf_100k_mg4|99999|4"
  "uesfm_multids_v2_deep_100k_mg4|confs/multiscene_uesfm_deep_multids_v2_100k_mg4.conf|uesfm_multids_v2_deep_100k_mg4|99999|4"
  "uesfm_sa_rf_100k_mg2|confs/multiscene_uesfm_sa_rf_100k_mg2.conf|uesfm_27scenes_sa_rf_100k_mg2|99999|2"
+ "resfm_deep_multids_v2_100k|confs/multiscene_resfm_deep_multids_v2_100k.conf|resfm_deep_multids_v2_100k|99999"
 )
 for row in "${JOBS[@]}"; do
   IFS='|' read -r exp conf resdir final ngpu <<< "$row"
@@ -59,7 +60,7 @@ for row in "${JOBS[@]}"; do
   [ -e "results/multiscene/$resdir/models_all/Model_Ep${final}.pt" ] && continue # done
   echo "$QNAMES" | grep -qx "$exp" && continue                                    # already queued/running
   SUBQ="$QUEUE"
-  MEMR=64000; [ "$ngpu" -gt 1 ] && MEMR=48000                              # multi-GPU: ~39-45G per rank (each rank loads the full dataset)
+  MEMR=64000; [ "$ngpu" -gt 1 ] && MEMR=60000                              # multi-GPU: ~39-45G per rank (each rank loads the full dataset)
   SUB=$(bsub -q "$SUBQ" -J "$exp" -n "$ngpu" -R "affinity[core(4)]" -oo "lsf_output/multiscene/${exp}_%J.out" -eo "lsf_output/multiscene/${exp}_%J.err" \
     -gpu "num=${ngpu}:j_exclusive=yes:gmem=80G" -R "rusage[mem=${MEMR}]" -R "span[hosts=1]" \
     "cd $REPO; TORCHDYNAMO_DISABLE=1 $PY multiple_scenes_learning.py --conf $conf --phase TRAINING --exp_version $exp --wandb 1")
