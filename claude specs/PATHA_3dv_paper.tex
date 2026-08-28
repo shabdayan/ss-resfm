@@ -265,7 +265,13 @@ MegaDepth translation is $0.46\pm0.08$ (five-milestone) vs.\ $0.40\pm0.09$ (fine
 datasets across seeds (and the 1DSfM mean dominated by a single scene, Tower of London,
 which swings by $2\times$ between seeds). We therefore treat the schedule as a non-factor,
 attribute single-seed gaps between the two generations to seed variance, and report
-seed-averaged numbers wherever both generations exist.
+seed-averaged numbers wherever both generations exist. The schedule-insensitivity has a
+simple mechanism: across all seeds and both generations, the self-supervised model's
+best-validation checkpoint falls at epoch $7{,}000$--$9{,}500$ --- \emph{before} the first
+learning-rate milestone (epoch $10$k) at which the two schedules begin to differ --- so the
+deployed checkpoint is trained under identical hyperparameters in both generations, and the
+schedule is causally inert for the self-supervised arm (the supervised baseline, whose best
+checkpoints fall mid-decay at epochs $15$k--$17.5$k, is in principle schedule-sensitive).
 
 \begin{table}[t]
 \centering\small
