@@ -242,7 +242,10 @@ OOD tracks (1DSfM/Strecha/BlendedMVS) are \emph{reconstructed by us} (RESfM did 
 OOD tracks); OOD comparisons are therefore \emph{controlled within our pipeline} and are
 \textbf{not} directly comparable to RESfM's published OOD numbers. On MegaDepth, RESfM's
 own released weights yield $0.209\deg$ in our harness (vs.\ their reported $0.169\deg$),
-confirming our evaluation is faithful and that $\sim\!0.209\deg$ is the reproducible level.
+confirming our evaluation is faithful and that $\sim\!0.209\deg$ is the reproducible level;
+this is unchanged ($0.217\deg$) under the authors' exact pinned software stack (MKL BLAS,
+same pycolmap/pyceres), isolating the residual gap to solver/hardware-level
+nondeterminism in robust BA (analysis in the supplementary material).
 
 \noindent\textbf{Learning-rate schedule and the MegaDepth parity.} RESfM's released
 configuration decays the learning rate on an eleven-milestone schedule

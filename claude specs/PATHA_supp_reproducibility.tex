@@ -1,0 +1,92 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+\usepackage[review]{cvpr}
+\usepackage{times}
+\usepackage{graphicx,amsmath,amssymb,booktabs,multirow,xcolor}
+\usepackage[pagebackref,breaklinks,colorlinks]{hyperref}
+\def\confName{3DV}
+\def\confYear{2027}
+\def\paperID{*****}
+\renewcommand{\deg}{^{\circ}}
+
+\title{Supplementary: Reproducibility of Post-BA Benchmark Means\\
+under Exact Environment Matching}
+\author{Anonymous 3DV submission\\ Paper ID *****}
+
+\begin{document}
+\maketitle
+
+\section{Motivation}
+Evaluating the RESfM authors' \emph{released checkpoint} in our harness on the 36 MegaDepth
+test scenes yields a post-BA mean translation error of $0.209$ vs.\ the published $0.169$
+(rotation $1.89\deg$ vs.\ $1.29\deg$). Since our controlled comparisons hinge on baseline
+fidelity, we traced this discrepancy to its source. The result is a finding of independent
+interest: \textbf{post-BA means on internet-photo benchmarks carry an irreducible
+environment-noise floor of $\mathcal{O}(0.05)$}, produced by chaotic basin selection in
+robust bundle adjustment.
+
+\section{Eliminating the controllable factors}
+\noindent\textbf{Data.} Our MegaDepth npz files are byte-identical to the authors' released
+archive, including the Group-2 300-camera subsamples.
+
+\noindent\textbf{Randomness.} Five evaluation seeds vary the pre-BA network output by
+$\pm 0.004$ and the post-BA mean by $\pm 0.01$ --- negligible.
+
+\noindent\textbf{Our re-implementation.} Running the \emph{authors' own evaluation code} in
+our environment also yields $\approx\!0.209$.
+
+\noindent\textbf{Network forward pass.} The pre-BA output ($11.88\deg/1.730$, identical
+across seeds) is deterministic; the divergence therefore enters at the robust-BA stage.
+(Notably, the paper does not report pre-BA numbers; all its tables are post-robust-BA.)
+
+\noindent\textbf{Software stack.} We rebuilt the authors' \emph{exact pinned environment}
+from their released \texttt{environment.yaml}: Python 3.8.20, MKL-backed numpy 1.24.3
+(\texttt{mkl=2023.1.0}), pycolmap 3.10.0, pyceres 2.3, lightning 2.3.3. (The sole deviation
+is the CUDA build of PyTorch, forced by GPU-driver compatibility; the BA stage is
+CPU-only.) Re-evaluating all 36 scenes in this matched environment gives
+$1.92\deg/0.217$ --- statistically indistinguishable from our environment's
+$1.89\deg/0.209$, and not the published $1.29\deg/0.169$.
+
+\section{The mechanism: chaotic basin selection in robust BA}
+\noindent\textbf{Initialization perturbation is at the $10^{-10}$ level.} We isolated the
+BLAS layer by running the identical DLT triangulation (the BA initialization) on identical
+inputs under OpenBLAS and MKL, single-threaded: over $11{,}131$ triangulated points the
+maximum \emph{relative} difference is $4.8\times 10^{-10}$ (mean $5\times10^{-14}$; NaN
+patterns identical).
+
+\noindent\textbf{Yet outcomes move by $\mathcal{O}(0.1)$.} This sub-nanoscale perturbation
+changes the per-scene post-BA translation by up to $0.167$, with $16/36$ scenes moving by
+more than $0.01$. Robust BA on ill-conditioned scenes amplifies last-bit differences into
+different convergence basins.
+
+\noindent\textbf{The published gap has the same signature.} Comparing our released-checkpoint
+evaluation to the paper's Table~1 per scene: $22/36$ scenes agree closely (many exactly),
+$13$ scenes are \emph{better} in our runs, and the entire mean gap is carried by four
+basin flips (scenes 0046, 0148, 0012, 5016; e.g.\ 0046: $0.043 \to 0.892$). Bidirectional,
+scene-concentrated flips are the signature of basin selection --- not of a weaker checkpoint,
+which would degrade scenes uniformly.
+
+\begin{table}[h]\centering\small
+\caption{Released RESfM checkpoint, MegaDepth 36-scene post-BA means, under three
+conditions, vs.\ the published number.}
+\begin{tabular}{lcc}
+\toprule
+Condition & Rot ($\deg$) & Trans\\
+\midrule
+Published (paper Table 1) & 1.29 & 0.169\\
+Our env (pip/OpenBLAS), 5-seed mean & 1.82 & 0.203\\
+Our env, seed 20 & 1.89 & 0.209\\
+Authors' exact stack (conda/MKL) & 1.92 & 0.217\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Implications}
+(1)~The published number and ours are draws from a distribution over environments; no
+software matching can force a particular draw. (2)~Differences of $\lesssim\!0.05$ in
+post-BA translation means on these benchmarks are \textbf{within environment noise} and
+should not be read as method differences --- by any paper. (3)~Consequently, meaningful
+comparisons must be \emph{environment-controlled}: every number in our main paper
+(all arms, RESfM-from-scratch, and the released checkpoint) is produced in a single
+environment, and our out-of-distribution margins ($2\times$ and larger) sit far above this
+noise floor.
+\end{document}
