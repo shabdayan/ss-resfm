@@ -6,11 +6,11 @@
 # Usage (armed via bsub -w "ended(<train_job>)"):
 #   trigger_ablation_resume.sh <conf_rel_path> <exp_version> <results_dir_rel> [retry]
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
-CONF="$1"; EXP="$2"; RESULTS_REL="$3"; RETRY_COUNT=${4:-0}; PREV_JID=${5:-}; FINAL_EP=${6:-19999}; NGPU=${7:-1}
+CONF="$1"; EXP="$2"; RESULTS_REL="$3"; RETRY_COUNT=${4:-0}; PREV_JID=${5:-}; FINAL_EP=${6:-19999}; NGPU=${7:-1}; PYEXE=${8:-}
 # Queue policy (2026-08-27): ALL training resubmissions go to waic-risk
 # (evaluation jobs use waic-medium; see run_multiscene_eval.sh).
 RESUB_QUEUE="waic-risk"
-MEMR=64000; [ "$NGPU" -gt 1 ] && MEMR=48000
+MEMR=64000; [ "$NGPU" -gt 1 ] && MEMR=60000
 MODELS="${REPO_ROOT}/${RESULTS_REL}/models"
 # True completion marker: the final-epoch checkpoint. The best-val checkpoint in
 # models/ can be EARLY (validation plateaus before epoch 19000), which otherwise
@@ -23,6 +23,7 @@ fi
 TARGET_EPOCH=$((FINAL_EP - 999))  # require the best checkpoint to be late-stage
 MAX_RETRIES=10
 PY=/home/projects/bagon/ortalda/MVG/final-project/u-esfm/.venv38-resfm/bin/python
+[ -n "$PYEXE" ] && PY="$PYEXE"
 
 CKPT=$(ls -1v "${MODELS}"/Model_Ep*.pt 2>/dev/null | tail -1)
 EPOCH=0
@@ -53,5 +54,5 @@ fi
 bsub -q waic-medium -gpu "num=1:j_exclusive=yes:gmem=80G" -J "${EXP}_trigger" -w "ended(${NEWID})" \
     -oo "${REPO_ROOT}/lsf_output/multiscene/${EXP}_trigger_%J.out" \
     -eo "${REPO_ROOT}/lsf_output/multiscene/${EXP}_trigger_%J.err" \
-    "bash ${REPO_ROOT}/trigger_ablation_resume.sh ${CONF} ${EXP} ${RESULTS_REL} $((RETRY_COUNT+1)) ${NEWID} ${FINAL_EP} ${NGPU}"
+    "bash ${REPO_ROOT}/trigger_ablation_resume.sh ${CONF} ${EXP} ${RESULTS_REL} $((RETRY_COUNT+1)) ${NEWID} ${FINAL_EP} ${NGPU} ${PYEXE}"
 echo "TRIGGER[${EXP}]: re-armed on training job ${NEWID}."

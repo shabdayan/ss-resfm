@@ -52,22 +52,26 @@ JOBS=(
  "uesfm_multids_v2_deep_100k_mg4|confs/multiscene_uesfm_deep_multids_v2_100k_mg4.conf|uesfm_multids_v2_deep_100k_mg4|99999|4"
  "uesfm_sa_rf_100k_mg2|confs/multiscene_uesfm_sa_rf_100k_mg2.conf|uesfm_27scenes_sa_rf_100k_mg2|99999|2"
  "resfm_deep_multids_v2_100k|confs/multiscene_resfm_deep_multids_v2_100k.conf|resfm_deep_multids_v2_100k|99999"
+ "resfm_shallow_s21|confs/multiscene_resfm_shallow_s21.conf|resfm_shallow_27scenes_s21"
+ "resfm_shallow_s22|confs/multiscene_resfm_shallow_s22.conf|resfm_shallow_27scenes_s22"
+ "resfm_shallow_menv|confs/multiscene_resfm_shallow_menv.conf|resfm_shallow_27scenes_menv|19999|1|/home/projects/bagon/ortalda/MVG/final-project/u-esfm/.conda_resfm_authors/bin/python"
 )
 for row in "${JOBS[@]}"; do
-  IFS='|' read -r exp conf resdir final ngpu <<< "$row"
+  IFS='|' read -r exp conf resdir final ngpu pyexe <<< "$row"
   final=${final:-19999}                                                          # per-job final epoch (default 20k runs)
   ngpu=${ngpu:-1}                                                                # per-job GPU count (Fabric DDP shards scenes across ranks)
+  pyexe=${pyexe:-$PY}                                                             # per-job python (matched-env runs)
   [ -e "results/multiscene/$resdir/models_all/Model_Ep${final}.pt" ] && continue # done
   echo "$QNAMES" | grep -qx "$exp" && continue                                    # already queued/running
   SUBQ="$QUEUE"
   MEMR=64000; [ "$ngpu" -gt 1 ] && MEMR=60000                              # multi-GPU: ~39-45G per rank (each rank loads the full dataset)
   SUB=$(bsub -q "$SUBQ" -J "$exp" -n "$ngpu" -R "affinity[core(4)]" -oo "lsf_output/multiscene/${exp}_%J.out" -eo "lsf_output/multiscene/${exp}_%J.err" \
     -gpu "num=${ngpu}:j_exclusive=yes:gmem=80G" -R "rusage[mem=${MEMR}]" -R "span[hosts=1]" \
-    "cd $REPO; TORCHDYNAMO_DISABLE=1 $PY multiple_scenes_learning.py --conf $conf --phase TRAINING --exp_version $exp --wandb 1")
+    "cd $REPO; TORCHDYNAMO_DISABLE=1 $pyexe multiple_scenes_learning.py --conf $conf --phase TRAINING --exp_version $exp --wandb 1")
   JID=$(echo "$SUB" | grep -oE "Job <[0-9]+>" | grep -oE "[0-9]+")
   [ -z "$JID" ] && { echo "resume $exp: FAILED to submit"; continue; }
   bsub -q "$QUEUE" -gpu "num=1:j_exclusive=yes:gmem=80G" -J "${exp}_trigger" -w "ended(${JID})" \
     -oo "lsf_output/multiscene/${exp}_trigger_%J.out" -eo "lsf_output/multiscene/${exp}_trigger_%J.err" \
-    "bash $REPO/trigger_ablation_resume.sh $conf $exp results/multiscene/$resdir 0 $JID $final $ngpu" >/dev/null
+    "bash $REPO/trigger_ablation_resume.sh $conf $exp results/multiscene/$resdir 0 $JID $final $ngpu $pyexe" >/dev/null
   echo "resume $exp -> $JID (+fresh babysitter)"
 done
