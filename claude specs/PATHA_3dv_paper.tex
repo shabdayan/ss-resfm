@@ -57,8 +57,8 @@ plain removal beats the supervised baseline on every seed ($13.0\pm2.6\deg$ vs.\
 $16.2\deg$) and both beat COLMAP, while at $43\%$ it nearly halves the supervised median
 on every seed ($1.4$--$1.8\deg$ vs.\ $2.9\deg$). Reweighting wins the low-contamination regime, beating
 the supervised baseline $2.6$--$3.8\times$ on clean out-of-distribution data. Supervision
-retains the clean, in-distribution regime (self-supervised arms within
-$\sim\!15$--$20\%$). We trace this to a structural circularity: outlier labels
+retains the in-distribution regime and the cleanest OOD mean (self-supervised arms within
+$\sim\!15$--$20\%$ in distribution). We trace this to a structural circularity: outlier labels
 require a trusted reconstruction of the very scenes whose contamination makes
 reconstruction hard (for \emph{any} gold-standard labeler, not just COLMAP), and we
 measure the resulting \emph{label ceiling}: regenerating supervision from scratch, label
@@ -613,8 +613,9 @@ excess removal can disconnect the viewing graph~\cite{resfm}.
 SS-RESfM shows that deep SfM outlier handling can be made \emph{entirely
 self-supervised} (no ground-truth or COLMAP labels) while staying within
 $\sim\!15$--$20\%$ of the supervised baseline in distribution, winning the clean-OOD
-splits, and matching it at extreme contamination, where both beat COLMAP and supervision
-itself can no longer be manufactured. The optimal mechanism is contamination-dependent:
+splits, and beating it at high contamination (plain removal below the baseline on every
+seed at both $43\%$, on the representative median, and $61\%$), where both beat COLMAP
+and supervision itself can no longer be manufactured. The optimal mechanism is contamination-dependent:
 removal at high contamination, reweighting at low. Robust deep SfM should treat outlier
 handling as adaptive and self-supervised rather than a single supervised mechanism. Code,
 configurations, and the rebuilt OOD tracks will be made publicly available upon
