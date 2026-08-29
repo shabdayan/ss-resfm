@@ -19,13 +19,19 @@ weight     = [2.003, 0.100, 0.423, 12.787, 21.941]   # soft reweight (SS-RESfM)
 wttt       = [1.977, 0.136, 0.390, 16.128, 26.435]   # soft reweight + TTT (SS-RESfM; MD = mean of 3 eval repeats)
 madweight  = [2.498, 0.146, 0.422, 12.392, 12.211]   # label-free MAD-remove + head-weight (SS-RESfM)
 resfm      = [0.006, 0.379, 0.344, 11.032, 16.218]   # supervised from-scratch baseline (twin config)
+# rotation means (deg), same order [Strecha, BMVS, MD, 1DSfM, 1DSfM-hard]
+weight_r   = [7.48, 6.65, 3.04, 8.39, 25.6]
+wttt_r     = [7.41, 7.91, 2.51, 11.19, 32.0]
+madweight_r= [14.62, 9.60, 3.49, 8.31, 14.4]
+resfm_r    = [0.02, 36.10, 2.01, 9.79, 22.7]
 
 # Okabe-Ito (CVD-safe): blue, sky, vermillion; baseline neutral gray dashed
 C_W, C_T, C_M, C_R = "#0072B2", "#56B4E9", "#D55E00", "#555555"
 INK, MUTED, GRID = "#1a1a1a", "#666666", "#dddddd"
 
-fig, ax = plt.subplots(figsize=(7.2, 4.6))
-ax.set_yscale("log")
+fig, (ax, ax2) = plt.subplots(2, 1, figsize=(7.2, 8.6), sharex=True,
+                              gridspec_kw={"hspace": 0.12})
+ax.set_yscale("log"); ax2.set_yscale("log")
 
 def plot(series, color, label, ls="-", marker="o"):
     ax.plot(x, series, ls=ls, color=color, lw=2.0, marker=marker, ms=8,
@@ -50,6 +56,26 @@ for i in range(5):
     ax.scatter([i], [vals[best_c]], s=200, facecolors="none",
                edgecolors=best_c, linewidths=1.8, zorder=4, clip_on=False)
 
+# rotation panel
+def plot2(series, color, ls="-", marker="o"):
+    ax2.plot(x, series, ls=ls, color=color, lw=2.0, marker=marker, ms=8,
+             markerfacecolor=color, markeredgecolor="white", markeredgewidth=1.2,
+             zorder=3, clip_on=False)
+plot2(resfm_r, C_R, ls="--", marker="s")
+plot2(weight_r, C_W); plot2(wttt_r, C_T); plot2(madweight_r, C_M)
+for i in range(5):
+    vals2 = {C_W: weight_r[i], C_T: wttt_r[i], C_M: madweight_r[i], C_R: resfm_r[i]}
+    bc = min(vals2, key=vals2.get)
+    ax2.scatter([i], [vals2[bc]], s=200, facecolors="none", edgecolors=bc,
+                linewidths=1.8, zorder=4, clip_on=False)
+ax2.axvspan(-0.35, 1.5, color="#f2f7fb", zorder=0)
+ax2.axvspan(2.5, 4.35, color="#fdf3ee", zorder=0)
+ax2.set_ylabel("Rotation error (deg, log scale)", fontsize=10, color=INK)
+for s in ["top", "right"]: ax2.spines[s].set_visible(False)
+for s in ["left", "bottom"]: ax2.spines[s].set_color(GRID)
+ax2.grid(axis="y", color=GRID, lw=0.8, zorder=0); ax2.set_axisbelow(True)
+ax2.tick_params(colors=MUTED)
+
 # regime annotations (shaded bands; labels pinned to the bottom to avoid collisions)
 ax.axvspan(-0.35, 1.5, color="#f2f7fb", zorder=0)
 ax.axvspan(2.5, 4.35, color="#fdf3ee", zorder=0)
@@ -58,8 +84,8 @@ ax.text(0.5, 0.0045, "low contamination", ha="center", va="bottom",
 ax.text(3.45, 0.0045, "high contamination", ha="center", va="bottom",
         fontsize=9, color=MUTED, style="italic")
 
-ax.set_xticks(x); ax.set_xticklabels(labels, fontsize=9, color=INK)
-ax.set_xlim(-0.35, 4.35)
+ax2.set_xticks(x); ax2.set_xticklabels(labels, fontsize=9, color=INK)
+ax.set_xlim(-0.35, 4.35); ax2.set_xlim(-0.35, 4.35)
 ax.set_ylabel("Translation error (deg, log scale)", fontsize=10, color=INK)
 ax.yaxis.set_major_locator(FixedLocator([0.01, 0.1, 0.3, 1, 3, 10, 30]))
 ax.yaxis.set_major_formatter(FixedFormatter(["0.01", "0.1", "0.3", "1", "3", "10", "30"]))
