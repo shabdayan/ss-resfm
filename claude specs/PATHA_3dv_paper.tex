@@ -232,7 +232,10 @@ in-distribution, while 1DSfM/1DSfM-hard/Strecha/BlendedMVS/Olsson are cross-data
 
 \subsection{Protocol, baselines, and track provenance}\label{sec:protocol}
 Following RESfM's public training code and default configuration, all networks train for
-$20{,}000$ epochs with seed $20$ (the seed reported by RESfM~\cite{resfm}); batch size,
+$20{,}000$ epochs with seed $20$ (the seed reported by RESfM~\cite{resfm}) as the primary
+seed; the self-supervised arms are additionally replicated with seeds $21$/$22$, and cells
+marked $^{\ddagger}$ report mean$\pm$std over the three seeds (the supervised baseline's
+seed replicates were still training at submission, as noted per table). Batch size,
 image subsampling, the eleven-milestone learning-rate decay schedule
 ($10\mathrm{k},11\mathrm{k},\dots,20\mathrm{k}$, $\gamma{=}0.9$), and validation-based
 early stopping follow that released configuration and are held identical across all arms.
@@ -384,8 +387,8 @@ to $36\deg$), and at extreme contamination, where supervision itself can no long
 manufactured (\S\ref{sec:whyremoval}). \emph{Within} the self-supervised family, the
 removal-vs-weighting ordering is monotone in contamination: weighting is best at
 $2$--$3\%$, the two tie in distribution, and removal dominates from $43\%$ upward
-(\mad{} $12.4$ vs.\ weight $12.8$, plain remove $8.9$, Table~\ref{tab:matrix}; $12.2$
-vs.\ $21.9$ at $60\%$). This mechanism-level flip, the answer to our central
+(\mad{} $12.4$ vs.\ weight $12.8$, plain remove $8.9$, Table~\ref{tab:matrix};
+$13.0\pm2.6$ vs.\ $\sim\!22$ at $60\%$). This mechanism-level flip, the answer to our central
 question, is stable across schedules and seeds.
 
 \subsection{Why label-free removal wins under high contamination}\label{sec:whyremoval}
@@ -399,8 +402,9 @@ of~\cite{resfm}) assumes a COLMAP reconstruction and ground-truth poses per trai
 scene: readily obtained for curated data, but exactly what one lacks on the contaminated
 collections where robustness is most needed. \mad{} requires neither: it recomputes the
 outlier test per-scene from reprojection statistics, so it is unaffected by domain shift
-and applicable wherever a partial reconstruction exists, which is why it prevails at
-extreme contamination.
+and applicable wherever a partial reconstruction exists. This is why the removal family
+prevails at extreme contamination (\S\ref{sec:extreme}); \mad{} shares that robustness
+while requiring no learned threshold at all.
 
 \paragraph{Measuring the label ceiling.} We make the second argument quantitative. On $18$
 scenes spanning the full contamination axis we simulate the realistic labeling scenario for
