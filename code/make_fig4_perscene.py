@@ -70,11 +70,6 @@ ax.tick_params(colors=MUTED)
 ax.legend(loc="lower right",frameon=False,fontsize=11)
 ax.set_title("Per-scene mechanism flip",
              fontsize=15,color=INK,fontweight="bold",loc="left",pad=8)
-fig.text(0.5,-0.04,
-   "Each point is one scene. On OOD data (circles), soft weight wins at low contamination and a removal mechanism "
-   "wins at high\ncontamination; the crossover lies in the shaded 3-29% band the datasets leave sparsely sampled. "
-   "MegaDepth (squares) is in-distribution.",
-   ha="center",fontsize=7.6,color=MUTED)
 plt.tight_layout()
 out="../claude specs/PATHA_fig4_perscene"
 fig.savefig(out+".pdf",bbox_inches="tight"); fig.savefig(out+".png",dpi=200,bbox_inches="tight")

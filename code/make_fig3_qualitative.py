@@ -73,13 +73,6 @@ for ax, (root, name, err, col) in zip(axes, ARMS):
     for s in ax.spines.values(): s.set_color("#dddddd")
     ax.legend(loc="upper right", frameon=False, fontsize=11)
 
-fig.suptitle(f"1DSfM  ·  {SCENE}  (32.6% outliers)  —  BA-aligned camera centers vs ground truth",
-             fontsize=11.5, color=INK, y=1.02, fontweight="bold")
-fig.text(0.5, -0.03,
-         "Open markers = GT camera centers; small faint dots = well-placed estimates; large dots + connectors = "
-         "gross-drift cameras (>0.5·scene scale off GT).\nLabel-free madweight leaves far fewer gross-drift "
-         "cameras than the supervised from-scratch baseline. Cameras aligned to GT; same PCA view for both.",
-         ha="center", fontsize=7.8, color=MUTED)
 
 plt.tight_layout()
 out = "../claude specs/PATHA_fig3_qualitative"
