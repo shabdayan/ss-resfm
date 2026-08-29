@@ -211,9 +211,11 @@ across all arms; only the mechanism block changes.
 We evaluate on six datasets spanning a wide contamination range. Alongside the RESfM
 paper's quoted outlier fractions we report the contamination \emph{measured on our own
 tracks} (robust ground-truth-pose triangulation with the standard $4$px cutoff, applied
-uniformly to every dataset):
-\begin{center}\footnotesize
-\setlength{\tabcolsep}{2pt}%
+uniformly to every dataset); see Table~\ref{tab:datasets}.
+\begin{table}[t]\centering\footnotesize
+\caption{\textbf{Datasets}: RESfM-quoted vs.\ our measured contamination, and regime.}
+\label{tab:datasets}
+\setlength{\tabcolsep}{1.2pt}%
 \begin{tabular}{lccc}
 \toprule
 Dataset & Out\% (RESfM) & Out\% (ours) & Regime\\
@@ -226,7 +228,7 @@ MegaDepth~\cite{megadepth} & 25.6 & 25.4 & contam., \emph{in-dist.}\\
 Olsson~\cite{olsson} & -- & 0.5 & outlier-free\\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 On MegaDepth (where tracks are identical to RESfM's) the two measurements agree
 ($25.4$ vs $25.6$), validating our measurement; our 1DSfM rebuild is markedly harder than
 the tracks behind RESfM's quoted $31.9\%$, which should be kept in mind when reading the
@@ -422,8 +424,12 @@ reconstruction of the same tracks with fixed known intrinsics) and score the res
 per-observation labels against the ground-truth-pose reference labels
 (precision/recall with outlier as the positive class; \emph{coverage} is the fraction of
 observations that receive any COLMAP verdict at all, i.e.\ camera registered and track
-triangulated; scenes capped at $120$ cameras):
-\begin{center}\footnotesize
+triangulated; scenes capped at $120$ cameras); Table~\ref{tab:ceiling} reports the
+result.
+\begin{table}[t]\centering\footnotesize
+\caption{\textbf{The label ceiling}: quality of COLMAP-regenerated supervision vs.\
+contamination.}
+\label{tab:ceiling}
 \setlength{\tabcolsep}{3.5pt}%
 \begin{tabular}{lccccc}
 \toprule
@@ -436,7 +442,7 @@ Contam. & $n$ & Cover\% & Prec. & Recall & COLMAP $t$-err\\
 45--60\%  & 3 & 55.1 & 0.87 & \textbf{0.39} & 11.0\\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 Precision stays high throughout, but \emph{recall collapses} from $0.82$ to
 $0.26$--$0.39$ and coverage halves once contamination exceeds ${\sim}15\%$: the corrupted
 reconstruction absorbs enough outliers that most reproject acceptably under its distorted
@@ -450,8 +456,12 @@ sound.
 To probe beyond 1DSfM's $43\%$, we evaluate on the five held-out 1DSfM-hard scenes
 ($\sim\!60\%$ measured contamination, $300$ cameras each). The learned arms are those of
 Table~\ref{tab:main} (this restates its 1DSfM-hard column alongside rotation), and
-COLMAP runs incremental mapping on the same tracks with known intrinsics.
-\begin{center}\small
+COLMAP runs incremental mapping on the same tracks with known intrinsics
+(Table~\ref{tab:hard}).
+\begin{table}[t]\centering\small
+\caption{\textbf{1DSfM-hard} ($\sim\!60\%$ outliers, seed 20): translation/rotation
+and registered fraction.}
+\label{tab:hard}
 \begin{tabular}{lcc}
 \toprule
 Method & Trans/Rot (post-BA) & Registered\\
@@ -464,7 +474,7 @@ weight & 21.9/25.6 & all\\
 weight+TTT & 26.4/32.0 & all\\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 The mechanism-level ordering extrapolates: over seeds $20$--$22$, plain remove attains
 $13.0\pm2.6$ translation (below the supervised $16.2$, seed 20, on every seed; medians
 $11.9\pm0.6$ vs.\ $13.1$), \mad{} at $17.0\pm4.4$ statistically matches it, the soft
