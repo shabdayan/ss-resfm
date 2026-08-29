@@ -38,7 +38,7 @@ proj = lambda C: (C - mu) @ V
 scale3d = np.percentile(np.linalg.norm(Cg0 - np.median(Cg0, 0), axis=1), 85)
 GROSS = 0.5 * scale3d
 
-fig, axes = plt.subplots(1, 2, figsize=(9.6, 4.9))
+fig, axes = plt.subplots(1, 2, figsize=(8.2, 4.3))
 # common square limits from GT extent — tight so the coherent structure fills the
 # panel and gross-error cameras shoot off the edges (the visual signal of drift)
 allg = proj(Cg0)
@@ -66,12 +66,12 @@ for ax, (root, name, err, col) in zip(axes, ARMS):
     ax.scatter(Pp[:n][gross][:, 0], Pp[:n][gross][:, 1], s=26, color=col,
                edgecolors="white", lw=0.5, label=f"gross drift  (n={ng})", zorder=4)
     ax.set_title(f"{name}\ntranslation error {err:.2f}$\\degree$   ·   {ng} gross-drift cams",
-                 fontsize=10.5, color=col if col != "#555555" else INK, pad=8)
+                 fontsize=13, color=col if col != "#555555" else INK, pad=8)
     ax.set_xlim(*xlim); ax.set_ylim(*ylim)
     ax.set_aspect("equal", adjustable="box")
     ax.set_xticks([]); ax.set_yticks([])
     for s in ax.spines.values(): s.set_color("#dddddd")
-    ax.legend(loc="upper right", frameon=False, fontsize=8.5)
+    ax.legend(loc="upper right", frameon=False, fontsize=11)
 
 fig.suptitle(f"1DSfM  ·  {SCENE}  (32.6% outliers)  —  BA-aligned camera centers vs ground truth",
              fontsize=11.5, color=INK, y=1.02, fontweight="bold")
