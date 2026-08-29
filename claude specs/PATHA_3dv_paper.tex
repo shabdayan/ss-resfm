@@ -589,10 +589,10 @@ of the phenomenon, not a turnkey adaptive method; an unsupervised selector is fu
 (2)~Supervised RESfM retains in-distribution MegaDepth (the self-supervised arms come
 within $\sim\!15$--$20\%$, no closer) and the clean Strecha mean, and RESfM-released
 remains stronger than either from-scratch arm on MegaDepth, so we claim no SOTA. (3)~Versus supervision, \mad{} has no stable winner at moderate or extreme
-($17.0\pm4.4$ vs.\ $16.2$) contamination; the removal family's $43\%$ wins hold across
-our three seeds but against a single-seed baseline (its replicates were still training at
-submission), and the fully seed-robust claims remain the mechanism ordering and the
-clean-OOD wins.
+($17.0\pm4.4$ vs.\ $16.2$) contamination; plain remove leads on every evaluated seed at
+both $43\%$ and $\sim\!60\%$, but against a single-seed baseline (its replicates were
+still training at submission), and the fully seed-robust claims remain the mechanism
+ordering and the clean-OOD wins.
 (4)~OOD tracks are self-constructed; OOD numbers are controlled within our pipeline
 and not comparable to RESfM's published OOD numbers. (5)~Two symmetric-structure scenes
 (Ellis Island, Tower of London) fail for all methods and inflate 1DSfM means; we report
