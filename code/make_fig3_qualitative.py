@@ -65,7 +65,7 @@ for ax, (root, name, err, col) in zip(axes, ARMS):
     # gross-drift predicted cameras: emphasized
     ax.scatter(Pp[:n][gross][:, 0], Pp[:n][gross][:, 1], s=26, color=col,
                edgecolors="white", lw=0.5, label=f"gross drift  (n={ng})", zorder=4)
-    ax.set_title(f"{name}\ntranslation error {err:.2f}$\\degree$   ·   {ng} gross-drift cams",
+    ax.set_title(f"{name}\ntranslation error {err:.2f}   ·   {ng} gross-drift cams",
                  fontsize=13, color=col if col != "#555555" else INK, pad=8)
     ax.set_xlim(*xlim); ax.set_ylim(*ylim)
     ax.set_aspect("equal", adjustable="box")

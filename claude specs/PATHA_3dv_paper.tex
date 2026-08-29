@@ -60,9 +60,9 @@ and training schedule, varying only the outlier mechanism) we compare label-free
 statistical removal (\mad{}) and soft reweighting against a from-scratch RESfM baseline
 across six datasets spanning $0.5\%$--$61\%$ measured outliers. The optimal mechanism
 \emph{flips with contamination}. Removal wins the high-contamination regime: at $61\%$
-plain removal beats the supervised baseline on every seed ($13.0\pm2.6\deg$ vs.\
-$16.2\deg$) and both beat COLMAP, while at $43\%$ it nearly halves the supervised median
-on every seed ($1.4$--$1.8\deg$ vs.\ $2.9\deg$). Reweighting wins the low-contamination regime, beating
+plain removal beats the supervised baseline on every seed ($13.0\pm2.6$ vs.\
+$16.2$) and both beat COLMAP, while at $43\%$ it nearly halves the supervised median
+on every seed ($1.4$--$1.8$ vs.\ $2.9$). Reweighting wins the low-contamination regime, beating
 the supervised baseline $2.6$--$3.8\times$ on clean out-of-distribution data. Supervision
 retains the in-distribution regime and the cleanest OOD mean (self-supervised arms within
 $\sim\!15$--$20\%$ in distribution). We trace this to a structural circularity: outlier labels
@@ -273,9 +273,9 @@ OOD tracks (1DSfM/1DSfM-hard/Strecha/BlendedMVS/Olsson) are \emph{built by us} f
 publicly released images and ground truth (feature extraction, matching, and track
 formation with our pipeline; RESfM did not release OOD tracks); OOD comparisons are therefore \emph{controlled within our pipeline} and are
 \textbf{not} directly comparable to RESfM's published OOD numbers. On MegaDepth, RESfM's
-own released weights yield $0.209\deg$ in our harness (vs.\ their reported $0.169\deg$),
-confirming our evaluation is faithful and that $\sim\!0.209\deg$ is the reproducible level;
-this is unchanged ($0.217\deg$) under the authors' exact pinned software stack (MKL BLAS,
+own released weights yield $0.209$ in our harness (vs.\ their reported $0.169$),
+confirming our evaluation is faithful and that $\sim\!0.209$ is the reproducible level;
+this is unchanged ($0.217$) under the authors' exact pinned software stack (MKL BLAS,
 same pycolmap/pyceres), isolating the residual gap to solver/hardware-level
 nondeterminism in robust BA (analysis in the supplementary material). All reported results come from this
 single pipeline and software stack; a stack-replication study (supplementary) shows the
@@ -293,10 +293,10 @@ throughout.
 RESfM-from-scratch shares every pipeline component with our arms and differs only in the
 outlier mechanism, it isolates the effect of removing supervision, the same controlled
 protocol RESfM itself uses when it re-trains ESFM/GASFM in its own pipeline. We do
-\emph{not} claim state of the art: RESfM's \emph{released} checkpoint ($0.209\deg$ on
+\emph{not} claim state of the art: RESfM's \emph{released} checkpoint ($0.209$ on
 MegaDepth) is stronger than either from-scratch arm. This reproduction gap stems from the
 released weights themselves, not our pipeline (the authors' \emph{own} training code on
-our tracks reproduces $0.34$--$0.39\deg$, not $0.209\deg$), so it handicaps the
+our tracks reproduces $0.34$--$0.39$, not $0.209$), so it handicaps the
 supervised and self-supervised arms \emph{equally}. We report RESfM-released and
 RESfM~(paper) as reference rows throughout.
 
@@ -366,7 +366,7 @@ vs.\ $36\deg$ supervised) and mildly favor the self-supervised arms on 1DSfM
 
 \begin{table*}[t]\centering\small
 \caption{\textbf{Main controlled comparison (RESfM-aligned schedule).} Mean\,/\,median
-translation error (deg, post-BA), seed 20. All rows share tracks, architecture, schedule,
+translation error (post-BA), seed 20. All rows share tracks, architecture, schedule,
 robust BA, and seed; only the outlier mechanism and its supervision differ. Reference rows
 (means) below the rule; upper block = SS-RESfM arms. Best per column in \textbf{bold}. $^{\dagger}$mean$\pm$std over
 three evaluation repeats (TTT is run-to-run nondeterministic; supplementary).
@@ -507,8 +507,8 @@ the mechanism.
 \begin{table}[t]\centering\scriptsize
 \setlength{\tabcolsep}{2.5pt}%
 \caption{\textbf{Full shallow mechanism matrix} (RESfM-aligned schedule, seed 20;
-$^{\ddagger}$mean$\pm$std over seeds 20--22). Mean\,/\,median translation (deg,
-post-BA); Olsson column: means. Best per column in \textbf{bold}.}
+$^{\ddagger}$mean$\pm$std over seeds 20--22). Mean\,/\,median translation
+(post-BA); Olsson column: means. Best per column in \textbf{bold}.}
 \label{tab:matrix}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{lccccc}
@@ -583,7 +583,7 @@ ground truth is future work.
 
 \begin{table}[t]\centering\footnotesize
 \setlength{\tabcolsep}{3pt}%
-\caption{\textbf{Per-scene selection} (mean translation, deg; RESfM-aligned schedule).
+\caption{\textbf{Per-scene selection} (mean translation; RESfM-aligned schedule).
 Contamination-keyed selection collapses to per-dataset choice. The oracle uses
 ground-truth error over five mechanisms: an upper bound, not a deployable method.}
 \label{tab:selector}
@@ -601,15 +601,15 @@ BlendedMVS & $\mathbf{0.100}$ & 0.146 & 0.100 & $\mathit{0.083}$\\
 
 \subsection{Qualitative}
 Fig.~\ref{fig:qual} overlays BA-aligned camera centers on ground truth for 1DSfM
-NYC\_Library. Label-free \mad{} ($2.94\deg$) leaves far fewer gross-drift cameras than the
-supervised from-scratch baseline ($6.28\deg$), which shows more and larger gross drifts.
+NYC\_Library. Label-free \mad{} ($2.94$) leaves far fewer gross-drift cameras than the
+supervised from-scratch baseline ($6.28$), which shows more and larger gross drifts.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{PATHA_fig3_qualitative.pdf}
 \caption{\textbf{Qualitative 1DSfM (NYC\_Library, 32.6\% outliers).} BA-aligned camera
 centers vs.\ GT (open markers); large dots\,+\,connectors mark gross-drift cameras. \mad{}
-(left, $2.94\deg$) has fewer and shorter drifts than RESfM-from-scratch (right, $6.28\deg$).}
+(left, $2.94$) has fewer and shorter drifts than RESfM-from-scratch (right, $6.28$).}
 \label{fig:qual}
 \end{figure}
 

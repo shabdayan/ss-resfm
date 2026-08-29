@@ -95,7 +95,7 @@ ax2.text(0.72, 0.03, "high contamination", transform=ax2.transAxes, ha="center",
 ax.set_xticks(x); ax.set_xticklabels(labels, fontsize=10, color=INK)
 ax2.set_xticks(x); ax2.set_xticklabels(labels, fontsize=10, color=INK)
 ax.set_xlim(-0.35, 5.6); ax2.set_xlim(-0.35, 5.6)
-ax.set_ylabel("Translation error (deg, log scale)", fontsize=14, color=INK)
+ax.set_ylabel("Translation error (log scale)", fontsize=14, color=INK)
 ax.yaxis.set_major_locator(FixedLocator([0.01, 0.1, 0.3, 1, 3, 10, 30]))
 ax.yaxis.set_major_formatter(FixedFormatter(["0.01", "0.1", "0.3", "1", "3", "10", "30"]))
 ax.tick_params(colors=MUTED)

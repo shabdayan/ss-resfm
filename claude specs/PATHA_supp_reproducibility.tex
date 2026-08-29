@@ -23,8 +23,8 @@ Environment Sensitivity and Reproducibility of Post-BA SfM Benchmarks}
 This supplementary substantiates four specific statements in the main paper; a reviewer
 following any of its pointers can go directly to the listed section.
 \begin{itemize}\itemsep2pt
-\item \emph{Protocol, ``Track provenance'':} ``$\sim\!0.209\deg$ is the reproducible level
-[for the released RESfM checkpoint] \ldots\ unchanged ($0.217\deg$) under the authors'
+\item \emph{Protocol, ``Track provenance'':} ``$\sim\!0.209$ is the reproducible level
+[for the released RESfM checkpoint] \ldots\ unchanged ($0.217$) under the authors'
 exact pinned software stack'' (Secs.~\ref{sec:repro}--\ref{sec:mech}).
 \item \emph{Protocol:} ``a stack-replication study (supplementary) shows the no-TTT arms
 are insensitive to it, while test-time fine-tuned means inherit solver-level
@@ -32,7 +32,7 @@ nondeterminism'' (Sec.~\ref{sec:ttt}).
 \item \emph{Table~2, $\dagger$ footnote:} ``TTT is run-to-run nondeterministic''
 (Sec.~\ref{sec:ttt}).
 \item \emph{Reading any post-BA mean in this literature:} differences
-$\lesssim\!0.05\deg$ are within environment noise (Sec.~\ref{sec:implications}).
+$\lesssim\!0.05$ are within environment noise (Sec.~\ref{sec:implications}).
 \end{itemize}
 In addition, Sec.~\ref{sec:perscene} tabulates the per-scene results behind the main
 paper's dataset-level numbers, Sec.~\ref{sec:impl} gives the complete training and
@@ -110,15 +110,15 @@ checkpoints under the authors' pinned stack (MKL numpy, pycolmap 3.10.0, pyceres
 changing nothing else, and additionally repeated the TTT evaluation \emph{within} our own
 stack. The supervised baseline is essentially unchanged across stacks: MegaDepth
 $0.344\!\to\!0.350$ mean, $0.070\!\to\!0.088$ median, only $7/36$ scenes moving more than
-$0.05^{\circ}$ (max $\pm0.37^{\circ}$, bidirectional). This matches the released-checkpoint
+$0.05$ (max $\pm0.37$, bidirectional). This matches the released-checkpoint
 result above. The SS-RESfM weight+TTT arm, by contrast, varies \emph{regardless of stack}:
 three evaluations of the same checkpoint (ours, a same-stack repeat, the authors' stack)
 give MegaDepth means $0.316$, $0.401$, $0.453$ ($\sim\!18$--$20/36$ scenes shifting per
-repeat, up to $\pm2.9^{\circ}$, largely the same scenes, medians $0.12$--$0.19$). The
+repeat, up to $\pm2.9$, largely the same scenes, medians $0.12$--$0.19$). The
 attribution is therefore \emph{not} the software stack but test-time fine-tuning itself:
 it runs an optimization at evaluation time, so the chaotic basin selection documented
 above re-enters the result on every run. Consequently the paper reports all results from
-the single declared pipeline, treats TTT \emph{means} as carrying $\sim\!\pm0.07^{\circ}$
+the single declared pipeline, treats TTT \emph{means} as carrying $\sim\!\pm0.07$
 run-to-run variance, and rests its environment- and run-independent claims on the
 deterministic no-TTT cells (which reproduce exactly on repeat).
 
@@ -145,7 +145,7 @@ analysis in the main paper; on MegaDepth the four arms are close on most scenes 
 dataset-level gap is dominated by a handful of high-error scenes.
 
 \begin{table}[t]\centering\scriptsize
-\caption{\textbf{Per-scene 1DSfM results.} Post-BA mean translation error (degrees) per scene, seed 20, for the three SS-RESfM arms and supervised RESfM (all from-scratch, RESfM-aligned schedule). Best per scene in \textbf{bold}.}
+\caption{\textbf{Per-scene 1DSfM results.} Post-BA translation error per scene (mean over the scene's cameras), seed 20, for the three SS-RESfM arms and supervised RESfM (all from-scratch, RESfM-aligned schedule). Best per scene in \textbf{bold}.}
 \label{tab:supp_perscene_1dsfm}
 \setlength{\tabcolsep}{4pt}%
 \resizebox{\linewidth}{!}{%
@@ -168,7 +168,7 @@ Yorkminster & $\mathbf{5.79}$ & 30.87 & 10.79 & 8.77\\
 \end{table}
 
 \begin{table}[t]\centering\scriptsize
-\caption{\textbf{Per-scene MegaDepth results.} Post-BA mean translation error (degrees) per scene, seed 20. Best per scene in bold. weight+TTT values are single draws of a run-to-run nondeterministic evaluation (Sec.~\ref{sec:ttt}).}
+\caption{\textbf{Per-scene MegaDepth results.} Post-BA translation error per scene (mean over the scene's cameras), seed 20. Best per scene in bold. weight+TTT values are single draws of a run-to-run nondeterministic evaluation (Sec.~\ref{sec:ttt}).}
 \label{tab:supp_perscene_md1}
 \setlength{\tabcolsep}{4pt}%
 \begin{tabular}{lcccc}
