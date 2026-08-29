@@ -45,6 +45,10 @@ JOBS=(
  "resfm_shallow_faithful_lr1e4|confs/multiscene_resfm_shallow_faithful_lr1e4.conf|resfm_shallow_27scenes_faithful_lr1e4"
  "resfm_finelr_lr1e4|confs/multiscene_resfm_shallow_finelr_lr1e4.conf|resfm_shallow_27scenes_finelr_lr1e4"
  "esfm_star|confs/multiscene_esfm_star.conf|esfm_star_27scenes"
+ "resfm_shallow_finelr_s23|confs/multiscene_resfm_shallow_finelr_s23.conf|resfm_shallow_27scenes_finelr_s23"
+ "uesfm_sa_rf_finelr_s23|confs/multiscene_uesfm_sa_rf_finelr_s23.conf|uesfm_27scenes_sa_rf_finelr_s23"
+ "resfm_shallow_finelr_s24|confs/multiscene_resfm_shallow_finelr_s24.conf|resfm_shallow_27scenes_finelr_s24"
+ "uesfm_sa_rf_finelr_s24|confs/multiscene_uesfm_sa_rf_finelr_s24.conf|uesfm_27scenes_sa_rf_finelr_s24"
  "resfm_shallow_finelr_s21|confs/multiscene_resfm_shallow_finelr_s21.conf|resfm_shallow_27scenes_finelr_s21"
  "resfm_shallow_finelr_s22|confs/multiscene_resfm_shallow_finelr_s22.conf|resfm_shallow_27scenes_finelr_s22"
  "resfm_multids_v2_af|confs/multiscene_resfm_multids_v2_af.conf|resfm_multids_v2_af"
@@ -57,6 +61,7 @@ JOBS=(
  "resfm_multids_v2_af_lr1e4_s22|confs/multiscene_resfm_multids_v2_af_lr1e4_s22.conf|resfm_multids_v2_af_lr1e4_s22"
  "uesfm_multids_v2_af_s22|confs/multiscene_uesfm_multids_v2_af_s22.conf|uesfm_multids_v2_af_s22"
  "resfm_shallow_faithful|confs/multiscene_resfm_shallow_faithful.conf|resfm_shallow_27scenes_faithful"
+ "resfm_deep_multids_v2_ln|confs/multiscene_resfm_deep_multids_v2_ln.conf|resfm_deep_multids_v2_ln"
 )
 for row in "${JOBS[@]}"; do
   IFS='|' read -r exp conf resdir final ngpu pyexe <<< "$row"
