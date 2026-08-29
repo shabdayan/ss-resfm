@@ -138,11 +138,11 @@ post-BA mean translation errors underlying the main paper's dataset-level means 
 medians (seed 20, the declared pipeline): the ten 1DSfM scenes and the 36 MegaDepth test
 scenes, for the three self-supervised arms (madweight, weight, weight+TTT) and the
 supervised RESfM baseline trained from scratch under the identical
-recipe. The per-scene view makes two aggregate statements concrete: on 1DSfM the
-self-supervised wins are broad-based rather than carried by a single scene (with
-Ellis\_Island and Tower\_of\_London hard for every arm), while on MegaDepth the four arms
-are close on most scenes and the dataset-level gap is dominated by a handful of
-high-error scenes.
+recipe. The per-scene view makes two aggregate statements concrete: on 1DSfM no single
+arm dominates, the best mechanism flips scene by scene (with Ellis\_Island and
+Tower\_of\_London hard for every arm), consistent with the per-scene complementarity
+analysis in the main paper; on MegaDepth the four arms are close on most scenes and the
+dataset-level gap is dominated by a handful of high-error scenes.
 
 \begin{table}[t]\centering\scriptsize
 \caption{\textbf{Per-scene 1DSfM results.} Post-BA mean translation error (degrees) per scene, seed 20, for the three SS-RESfM arms and supervised RESfM (all from-scratch, RESfM-aligned schedule). Best per scene in \textbf{bold}.}
