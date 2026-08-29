@@ -34,6 +34,13 @@
 \renewcommand{\deg}{^{\circ}}             % degree symbol in math mode
 % Required by the author-kit cvpr.sty in [review] mode.
 \def\paperID{524}
+% Tighten the gap between the Abstract heading and its text (12pt -> 4pt).
+\makeatletter
+\def\abstract{%
+   \iftoggle{cvprpagenumbers}{}{\thispagestyle{empty}}%
+   \centerline{\large\bf Abstract}%
+   \vspace*{4pt}\noindent\it\ignorespaces}
+\makeatother
 
 \title{SS-RESfM: Self-Supervised Outlier Handling\\
 Across Contamination Regimes in Deep Structure-from-Motion}
@@ -42,7 +49,7 @@ Across Contamination Regimes in Deep Structure-from-Motion}
 \begin{document}
 \maketitle
 
-\begin{abstract}\vspace{-8pt}
+\begin{abstract}
 State-of-the-art deep equivariant Structure-from-Motion (RESfM) rejects outlier
 correspondences with a \emph{supervised} classifier trained on COLMAP-derived labels. We
 present \textbf{SS-RESfM}, an \emph{entirely self-supervised} alternative: the outlier
