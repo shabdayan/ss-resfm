@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FixedLocator, FixedFormatter
 
 # datasets ordered by contamination (measured on our tracks)
-labels = ["Strecha\n1.7%", "BlendedMVS\n3.1%", "MegaDepth\n25.4%\n(in-dist.)",
+labels = ["Strecha\n1.7%", "BMVS\n3.1%", "MegaDepth\n25.4%\n(in-dist.)",
           "1DSfM\n43.3%", "1DSfM-hard\n~60%"]
 x = list(range(5))
 
@@ -29,7 +29,7 @@ resfm_r    = [0.02, 36.10, 2.01, 9.79, 22.7]
 C_W, C_T, C_M, C_R = "#0072B2", "#56B4E9", "#D55E00", "#555555"
 INK, MUTED, GRID = "#1a1a1a", "#666666", "#dddddd"
 
-fig, (ax, ax2) = plt.subplots(1, 2, figsize=(13.2, 4.4),
+fig, (ax, ax2) = plt.subplots(1, 2, figsize=(13.2, 4.3),
                               gridspec_kw={"wspace": 0.3})
 ax.set_yscale("log"); ax2.set_yscale("log")
 
@@ -38,10 +38,10 @@ def plot(series, color, label, ls="-", marker="o"):
             markerfacecolor=color, markeredgecolor="white", markeredgewidth=1.2,
             label=label, zorder=3, clip_on=False)
 
-plot(resfm,     C_R, "RESfM-from-scratch (supervised)", ls="--", marker="s")
-plot(weight,    C_W, "SS-RESfM · weight (soft)")
-plot(wttt,      C_T, "SS-RESfM · weight+TTT")
-plot(madweight, C_M, "SS-RESfM · madweight (label-free removal)")
+plot(resfm,     C_R, "RESfM (supervised)", ls="--", marker="s")
+plot(weight,    C_W, "weight")
+plot(wttt,      C_T, "weight+TTT")
+plot(madweight, C_M, "madweight")
 
 # direct end-labels at 1DSfM-hard
 for series, color, txt, dy in [(madweight, C_M, "madweight", -3), (resfm, C_R, "RESfM", -1),
@@ -83,10 +83,14 @@ ax2.tick_params(colors=MUTED)
 # regime annotations (shaded bands; labels pinned to the bottom to avoid collisions)
 ax.axvspan(-0.35, 1.5, color="#f2f7fb", zorder=0)
 ax.axvspan(2.5, 5.6, color="#fdf3ee", zorder=0)
-ax.text(0.5, 0.0045, "low contamination", ha="center", va="bottom",
-        fontsize=11, color=MUTED, style="italic")
-ax.text(3.45, 0.0045, "high contamination", ha="center", va="bottom",
-        fontsize=11, color=MUTED, style="italic")
+ax.text(0.28, 0.03, "low contamination", transform=ax.transAxes, ha="center",
+        fontsize=10, color=MUTED, style="italic")
+ax2.text(0.22, 0.03, "low contamination", transform=ax2.transAxes, ha="center",
+        fontsize=10, color=MUTED, style="italic")
+ax.text(0.72, 0.03, "high contamination", transform=ax.transAxes, ha="center",
+        fontsize=10, color=MUTED, style="italic")
+ax2.text(0.72, 0.03, "high contamination", transform=ax2.transAxes, ha="center",
+        fontsize=10, color=MUTED, style="italic")
 
 ax.set_xticks(x); ax.set_xticklabels(labels, fontsize=10, color=INK)
 ax2.set_xticks(x); ax2.set_xticklabels(labels, fontsize=10, color=INK)
@@ -105,8 +109,9 @@ ax.set_axisbelow(True)
 ax2.set_title("Rotation", fontsize=13, color=INK, fontweight="bold", pad=10, loc="left")
 ax.set_title("Translation",
              fontsize=14, color=INK, fontweight="bold", pad=12, loc="left")
-ax.legend(loc="upper left", frameon=False, fontsize=11, ncol=1,
-          bbox_to_anchor=(0.02, 0.99))
+h, l = ax.get_legend_handles_labels()
+ax2.legend(h, l, loc="lower center", frameon=False, fontsize=9.5, ncol=2,
+           bbox_to_anchor=(0.5, 0.07))
 
 
 plt.tight_layout()
