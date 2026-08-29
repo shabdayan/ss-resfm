@@ -22,14 +22,14 @@ following any of its pointers can go directly to the listed section.
 \begin{itemize}\itemsep2pt
 \item \emph{Protocol, ``Track provenance'':} ``$\sim\!0.209\deg$ is the reproducible level
 [for the released RESfM checkpoint] \ldots\ unchanged ($0.217\deg$) under the authors'
-exact pinned software stack'' --- Secs.~\ref{sec:repro}--\ref{sec:mech}.
+exact pinned software stack'' (Secs.~\ref{sec:repro}--\ref{sec:mech}).
 \item \emph{Protocol:} ``a stack-replication study (supplementary) shows the no-TTT arms
 are insensitive to it, while test-time fine-tuned means inherit solver-level
-nondeterminism'' --- Sec.~\ref{sec:ttt}.
-\item \emph{Table~2, $\dagger$ footnote:} ``TTT is run-to-run nondeterministic'' ---
-Sec.~\ref{sec:ttt}.
+nondeterminism'' (Sec.~\ref{sec:ttt}).
+\item \emph{Table~2, $\dagger$ footnote:} ``TTT is run-to-run nondeterministic''
+(Sec.~\ref{sec:ttt}).
 \item \emph{Reading any post-BA mean in this literature:} differences
-$\lesssim\!0.05\deg$ are within environment noise --- Sec.~\ref{sec:implications}.
+$\lesssim\!0.05\deg$ are within environment noise (Sec.~\ref{sec:implications}).
 \end{itemize}
 In addition, Sec.~\ref{sec:perscene} tabulates the per-scene results behind the main
 paper's dataset-level numbers, Sec.~\ref{sec:impl} gives the complete training and
@@ -65,7 +65,7 @@ Authors' exact stack (conda/MKL) & 1.92 & 0.217\\
 archive, including the Group-2 300-camera subsamples.
 
 \noindent\textbf{Randomness.} Five evaluation seeds vary the pre-BA network output by
-$\pm 0.004$ and the post-BA mean by $\pm 0.01$ --- negligible.
+$\pm 0.004$ and the post-BA mean by $\pm 0.01$; negligible.
 
 \noindent\textbf{Our re-implementation.} Running the \emph{authors' own evaluation code} in
 our environment also yields $\approx\!0.209$.
@@ -79,7 +79,7 @@ from their released \texttt{environment.yaml}: Python 3.8.20, MKL-backed numpy 1
 (\texttt{mkl=2023.1.0}), pycolmap 3.10.0, pyceres 2.3, lightning 2.3.3. (The sole deviation
 is the CUDA build of PyTorch, forced by GPU-driver compatibility; the BA stage is
 CPU-only.) Re-evaluating all 36 scenes in this matched environment gives
-$1.92\deg/0.217$ --- statistically indistinguishable from our environment's
+$1.92\deg/0.217$, statistically indistinguishable from our environment's
 $1.89\deg/0.209$, and not the published $1.29\deg/0.169$.
 
 \section{Mechanism: chaotic basin selection in robust BA}\label{sec:mech}
@@ -98,16 +98,16 @@ different convergence basins.
 evaluation to the paper's Table~1 per scene: $22/36$ scenes agree closely (many exactly),
 $13$ scenes are \emph{better} in our runs, and the entire mean gap is carried by four
 basin flips (scenes 0046, 0148, 0012, 5016; e.g.\ 0046: $0.043 \to 0.892$). Bidirectional,
-scene-concentrated flips are the signature of basin selection --- not of a weaker checkpoint,
+scene-concentrated flips are the signature of basin selection, not of a weaker checkpoint,
 which would degrade scenes uniformly.
 
 \section{Stack replication and TTT run-to-run variance}\label{sec:ttt}
 Beyond the released checkpoint, we re-evaluated both from-scratch main-comparison
 checkpoints under the authors' pinned stack (MKL numpy, pycolmap 3.10.0, pyceres 2.3),
 changing nothing else, and additionally repeated the TTT evaluation \emph{within} our own
-stack. The supervised baseline is essentially unchanged across stacks---MegaDepth
+stack. The supervised baseline is essentially unchanged across stacks: MegaDepth
 $0.344\!\to\!0.350$ mean, $0.070\!\to\!0.088$ median, only $7/36$ scenes moving more than
-$0.05^{\circ}$ (max $\pm0.37^{\circ}$, bidirectional)---matching the released-checkpoint
+$0.05^{\circ}$ (max $\pm0.37^{\circ}$, bidirectional). This matches the released-checkpoint
 result above. The SS-RESfM weight+TTT arm, by contrast, varies \emph{regardless of stack}:
 three evaluations of the same checkpoint (ours, a same-stack repeat, the authors' stack)
 give MegaDepth means $0.316$, $0.401$, $0.453$ ($\sim\!18$--$20/36$ scenes shifting per
@@ -123,7 +123,7 @@ deterministic no-TTT cells (which reproduce exactly on repeat).
 (1)~The published number and ours are draws from a distribution over environments; no
 software matching can force a particular draw. (2)~Differences of $\lesssim\!0.05$ in
 post-BA translation means on these benchmarks are \textbf{within environment noise} and
-should not be read as method differences --- by any paper. (3)~Consequently, meaningful
+should not be read as method differences, by any paper. (3)~Consequently, meaningful
 comparisons must be \emph{environment-controlled}: every number in the main paper
 (all arms, RESfM-from-scratch, and the released checkpoint) is produced in a single
 environment, and the out-of-distribution margins ($2\times$ and larger) sit far above this
@@ -273,7 +273,7 @@ fraction of track observations that receive a COLMAP-derived label at all (cover
 the precision and recall of those labels against ground truth. The aggregate trend in the
 main paper is visible scene by scene: below ${\sim}10\%$ contamination the labels are
 near-complete and high-recall, while every scene above ${\sim}15\%$ contamination shows
-recall collapsing toward ${\sim}0.3$ with coverage dropping toward ${\sim}0.55$ --- the
+recall collapsing toward ${\sim}0.3$ with coverage dropping toward ${\sim}0.55$: the
 supervision signal degrades exactly where outlier handling matters most.
 
 \begin{table}[t]\centering\scriptsize
