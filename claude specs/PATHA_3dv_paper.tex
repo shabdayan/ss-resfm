@@ -293,17 +293,17 @@ its appendix). The one declared exception is 1DSfM, whose mean is dominated by t
 symmetric-structure failure scenes (Ellis Island, Tower of London) that fail for
 \emph{all} methods; there we treat the median as the representative figure.
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\linewidth]{PATHA_fig1_complementarity.pdf}
+\includegraphics[width=0.92\textwidth]{PATHA_fig1_complementarity.pdf}
 \caption{\textbf{The optimal outlier mechanism flips with contamination.} Translation
-(top) and rotation (bottom) means (log scale) of the self-supervised arms vs.\ supervised
+(left) and rotation (right) means (log scale) of the self-supervised arms vs.\ supervised
 RESfM, five of the six datasets ordered by measured contamination
 (Table~\ref{tab:main} data). Circled = best per dataset. The rotation panel mirrors the
 translation ordering, with the self-supervised arms also taking 1DSfM and the supervised
 BlendedMVS failure even more pronounced ($36\deg$).}
 \label{fig:complement}
-\end{figure}
+\end{figure*}
 
 \begin{figure*}[t]
 \centering
@@ -343,7 +343,7 @@ $9.1\pm2.8$, remain failure-scene-dominated): a label-free win at $43\%$
 robustly, \mad{} ($17.0\pm4.4$ over seeds $20$--$22$) statistically matches the
 supervised baseline ($16.2$, seed 20), and plain remove goes further: $13.0\pm2.6$,
 below the baseline on \emph{every} seed, with tight medians ($11.9\pm0.6$ vs.\
-$13.1$); all label-free arms are far ahead of COLMAP (\S\ref{sec:extreme}). Rotation means (Fig.~\ref{fig:complement}, bottom) follow the same ordering on
+$13.1$); all label-free arms are far ahead of COLMAP (\S\ref{sec:extreme}). Rotation means (Fig.~\ref{fig:complement}, right) follow the same ordering on
 MegaDepth/Strecha/BlendedMVS/Olsson (e.g.\ BlendedMVS $6.6$--$9.6\deg$ self-supervised
 vs.\ $36\deg$ supervised) and mildly favor the self-supervised arms on 1DSfM
 ($8.3$--$8.4\deg$ vs.\ $9.8\deg$) even where translation favors the baseline. 
@@ -600,10 +600,9 @@ both $43\%$ and $\sim\!60\%$, but against a single-seed baseline (its replicates
 still training at submission), and the fully seed-robust claims remain the mechanism
 ordering and the clean-OOD wins.
 (4)~OOD tracks are self-constructed; OOD numbers are controlled within our pipeline
-and not comparable to RESfM's published OOD numbers. (5)~Two symmetric-structure scenes
-(Ellis Island, Tower of London) fail for all methods and inflate 1DSfM means; we report
-medians alongside. These are exactly the cases where excess removal can disconnect the
-viewing graph, a failure mode RESfM itself reports~\cite{resfm}.
+and not comparable to RESfM's published OOD numbers. (5)~Two symmetric-structure scenes (Ellis Island, Tower of London) fail for all
+methods and inflate 1DSfM means (we report medians alongside); these are the cases where
+excess removal can disconnect the viewing graph~\cite{resfm}.
 
 \section{Conclusion}
 SS-RESfM shows that deep SfM outlier handling can be made \emph{entirely

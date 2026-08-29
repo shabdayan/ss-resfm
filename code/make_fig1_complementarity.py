@@ -29,12 +29,12 @@ resfm_r    = [0.02, 36.10, 2.01, 9.79, 22.7]
 C_W, C_T, C_M, C_R = "#0072B2", "#56B4E9", "#D55E00", "#555555"
 INK, MUTED, GRID = "#1a1a1a", "#666666", "#dddddd"
 
-fig, (ax, ax2) = plt.subplots(2, 1, figsize=(7.2, 8.6), sharex=True,
-                              gridspec_kw={"hspace": 0.12})
+fig, (ax, ax2) = plt.subplots(1, 2, figsize=(13.2, 4.4),
+                              gridspec_kw={"wspace": 0.18})
 ax.set_yscale("log"); ax2.set_yscale("log")
 
 def plot(series, color, label, ls="-", marker="o"):
-    ax.plot(x, series, ls=ls, color=color, lw=2.0, marker=marker, ms=8,
+    ax.plot(x, series, ls=ls, color=color, lw=2.0, marker=marker, ms=9,
             markerfacecolor=color, markeredgecolor="white", markeredgewidth=1.2,
             label=label, zorder=3, clip_on=False)
 
@@ -47,7 +47,7 @@ plot(madweight, C_M, "SS-RESfM · madweight (label-free removal)")
 for series, color, txt in [(madweight, C_M, "madweight"), (resfm, C_R, "RESfM"),
                            (weight, C_W, "weight"), (wttt, C_T, "weight+TTT")]:
     ax.annotate(txt, xy=(4, series[4]), xytext=(8, 0), textcoords="offset points",
-                color=color, fontsize=9, fontweight="bold", va="center")
+                color=color, fontsize=11, fontweight="bold", va="center")
 
 # mark the winner per dataset with a subtle ring on the lowest point
 for i in range(5):
@@ -58,7 +58,7 @@ for i in range(5):
 
 # rotation panel
 def plot2(series, color, ls="-", marker="o"):
-    ax2.plot(x, series, ls=ls, color=color, lw=2.0, marker=marker, ms=8,
+    ax2.plot(x, series, ls=ls, color=color, lw=2.0, marker=marker, ms=9,
              markerfacecolor=color, markeredgecolor="white", markeredgewidth=1.2,
              zorder=3, clip_on=False)
 plot2(resfm_r, C_R, ls="--", marker="s")
@@ -70,7 +70,7 @@ for i in range(5):
                 linewidths=1.8, zorder=4, clip_on=False)
 ax2.axvspan(-0.35, 1.5, color="#f2f7fb", zorder=0)
 ax2.axvspan(2.5, 4.35, color="#fdf3ee", zorder=0)
-ax2.set_ylabel("Rotation error (deg, log scale)", fontsize=10, color=INK)
+ax2.set_ylabel("Rotation error (deg, log scale)", fontsize=14, color=INK)
 for s in ["top", "right"]: ax2.spines[s].set_visible(False)
 for s in ["left", "bottom"]: ax2.spines[s].set_color(GRID)
 ax2.grid(axis="y", color=GRID, lw=0.8, zorder=0); ax2.set_axisbelow(True)
@@ -80,13 +80,14 @@ ax2.tick_params(colors=MUTED)
 ax.axvspan(-0.35, 1.5, color="#f2f7fb", zorder=0)
 ax.axvspan(2.5, 4.35, color="#fdf3ee", zorder=0)
 ax.text(0.5, 0.0045, "low contamination", ha="center", va="bottom",
-        fontsize=9, color=MUTED, style="italic")
+        fontsize=11, color=MUTED, style="italic")
 ax.text(3.45, 0.0045, "high contamination", ha="center", va="bottom",
-        fontsize=9, color=MUTED, style="italic")
+        fontsize=11, color=MUTED, style="italic")
 
-ax2.set_xticks(x); ax2.set_xticklabels(labels, fontsize=9, color=INK)
+ax.set_xticks(x); ax.set_xticklabels(labels, fontsize=10, color=INK)
+ax2.set_xticks(x); ax2.set_xticklabels(labels, fontsize=10, color=INK)
 ax.set_xlim(-0.35, 4.35); ax2.set_xlim(-0.35, 4.35)
-ax.set_ylabel("Translation error (deg, log scale)", fontsize=10, color=INK)
+ax.set_ylabel("Translation error (deg, log scale)", fontsize=14, color=INK)
 ax.yaxis.set_major_locator(FixedLocator([0.01, 0.1, 0.3, 1, 3, 10, 30]))
 ax.yaxis.set_major_formatter(FixedFormatter(["0.01", "0.1", "0.3", "1", "3", "10", "30"]))
 ax.tick_params(colors=MUTED)
@@ -97,18 +98,12 @@ for s in ["left", "bottom"]:
 ax.grid(axis="y", color=GRID, lw=0.8, zorder=0)
 ax.set_axisbelow(True)
 
-ax.set_title("The optimal outlier mechanism flips with contamination",
-             fontsize=12, color=INK, fontweight="bold", pad=12, loc="left")
-ax.legend(loc="upper left", frameon=False, fontsize=9, ncol=1,
+ax2.set_title("Rotation", fontsize=13, color=INK, fontweight="bold", pad=10, loc="left")
+ax.set_title("Translation",
+             fontsize=14, color=INK, fontweight="bold", pad=12, loc="left")
+ax.legend(loc="upper left", frameon=False, fontsize=11, ncol=1,
           bbox_to_anchor=(0.02, 0.99))
 
-# caption note
-fig.text(0.5, -0.02,
-         "Circled point = best method per dataset. weight wins low-outlier BlendedMVS; "
-         "label-free madweight wins extreme 1DSfM-hard;\nsupervised RESfM retains clean "
-         "Strecha, in-distribution MegaDepth, and moderate 1DSfM. "
-         "Shallow (1x3), RESfM-aligned schedule, seed 20.",
-         ha="center", fontsize=7.5, color=MUTED)
 
 plt.tight_layout()
 out = "../claude specs/PATHA_fig1_complementarity"

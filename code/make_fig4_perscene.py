@@ -5,7 +5,9 @@ log10(weight_err / min removal_err). y>0 = a removal-family mechanism wins; y<0 
 soft weight wins. The best mechanism flips from weight (low contamination) to
 removal (high contamination) at the scene level. Colorblind-safe (Okabe-Ito).
 """
-import matplotlib; matplotlib.use("Agg")
+import matplotlib
+import matplotlib as _mpl; matplotlib.use("Agg")
+_mpl.rcParams.update({"font.size": 13})
 import matplotlib.pyplot as plt
 import glob, numpy as np, pandas as pd
 
@@ -42,7 +44,7 @@ for ds,scenes in SC.items():
         pts[ds].append((c,adv))
 
 INK,MUTED="#1a1a1a","#666666"
-fig,ax=plt.subplots(figsize=(7.6,4.7))
+fig,ax=plt.subplots(figsize=(6.8,4.5))
 ax.set_xscale("log")
 ax.axhspan(0,10,color="#fdf3ee",zorder=0)      # removal-wins half
 ax.axhspan(-10,0,color="#eef4fb",zorder=0)     # weight-wins half
@@ -57,17 +59,17 @@ for ds in ["megadepth","strecha","blendedmvs","1dsfm"]:
                alpha=0.95 if ds!="megadepth" else 0.7,zorder=3,clip_on=False)
 ax.set_ylim(-2.0,2.0)
 ax.set_xlim(0.4,65)
-ax.set_xlabel("per-scene outlier rate (%, log scale)",fontsize=10,color=INK)
-ax.set_ylabel(r"advantage $\log_{10}\!\frac{\mathrm{weight\ err}}{\mathrm{removal\ err}}$",fontsize=10,color=INK)
-ax.text(0.5,1.75,"removal wins",fontsize=10,color="#D55E00",style="italic",fontweight="bold")
-ax.text(0.5,-1.9,"weight wins",fontsize=10,color="#0072B2",style="italic",fontweight="bold")
+ax.set_xlabel("per-scene outlier rate (%, log scale)",fontsize=12,color=INK)
+ax.set_ylabel(r"advantage $\log_{10}\!\frac{\mathrm{weight\ err}}{\mathrm{removal\ err}}$",fontsize=12,color=INK)
+ax.text(0.5,1.75,"removal wins",fontsize=12,color="#D55E00",style="italic",fontweight="bold")
+ax.text(0.5,-1.9,"weight wins",fontsize=12,color="#0072B2",style="italic",fontweight="bold")
 ax.text(9,-1.9,"OOD flip zone\n(no OOD scenes here)",ha="center",fontsize=7.5,color=MUTED)
 for sp in ["top","right"]: ax.spines[sp].set_visible(False)
 for sp in ["left","bottom"]: ax.spines[sp].set_color("#cccccc")
 ax.tick_params(colors=MUTED)
 ax.legend(loc="lower right",frameon=False,fontsize=8.5)
 ax.set_title("Per-scene: the best mechanism flips with the scene's own contamination",
-             fontsize=11.5,color=INK,fontweight="bold",loc="left",pad=10)
+             fontsize=13,color=INK,fontweight="bold",loc="left",pad=10)
 fig.text(0.5,-0.04,
    "Each point is one scene. On OOD data (circles), soft weight wins at low contamination and a removal mechanism "
    "wins at high\ncontamination; the crossover lies in the shaded 3-29% band the datasets leave sparsely sampled. "
