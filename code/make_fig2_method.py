@@ -96,9 +96,10 @@ ax_mad = panel(3, C_MAD, "madweight  (SS-RESfM, ours)", "MAD-remove (reproj $e$)
 
 # highlighted reproj-e branch: only madweight consumes the reprojection-error e
 fig.text(0.52, 0.672,
-         "Only  madweight  uses the reprojection-error branch $e$  (→ MAD removal).\n"
+         "Only  madweight  uses the reprojection-error branch $e$ — for its MAD removal step;\n"
+         "its surviving points are then weighted by the head score $s$ ($w{=}1{-}s$).\n"
          "remove / weight / hybrid use the head score $s$ alone.",
-         ha="center", va="center", fontsize=9, color=C_MAD)
+         ha="center", va="center", fontsize=8.5, color=C_MAD)
 # short arrow tying the callout to the 'reproj e' branch in the signal box
 arr = ConnectionPatch(xyA=(0.455, 0.715), coordsA=fig.transFigure,
                       xyB=(45, 6.1), coordsB=axp.transData,
