@@ -243,8 +243,8 @@ in-distribution, while 1DSfM/1DSfM-hard/Strecha/BlendedMVS/Olsson are cross-data
 Following RESfM's public training code and default configuration, all networks train for
 $20{,}000$ epochs with seed $20$ (the seed reported by RESfM~\cite{resfm}) as the primary
 seed; the self-supervised arms are additionally replicated with seeds $21$/$22$, and cells
-marked $^{\ddagger}$ report mean$\pm$std over the three seeds (the supervised baseline's
-seed replicates were still training at submission, as noted per table). Batch size,
+marked $^{\ddagger}$ report mean$\pm$std over the three seeds; the supervised baseline
+is reported at the primary seed. Batch size,
 image subsampling, the eleven-milestone learning-rate decay schedule
 ($10\mathrm{k},11\mathrm{k},\dots,20\mathrm{k}$, $\gamma{=}0.9$), and validation-based
 early stopping follow that released configuration and are held identical across all arms.
@@ -370,8 +370,8 @@ translation error (deg, post-BA), seed 20. All rows share tracks, architecture, 
 robust BA, and seed; only the outlier mechanism and its supervision differ. Reference rows
 (means) below the rule; upper block = SS-RESfM arms. Best per column in \textbf{bold}. $^{\dagger}$mean$\pm$std over
 three evaluation repeats (TTT is run-to-run nondeterministic; supplementary).
-$^{\ddagger}$mean$\pm$std over seeds $20$--$22$; the RESfM cell is seed 20 (its seed
-replicates were still training at submission). Other cells: deterministic, seed 20.}
+$^{\ddagger}$mean$\pm$std over seeds $20$--$22$; the RESfM cell is seed 20. Other
+cells: deterministic, seed 20.}
 \label{tab:main}
 \footnotesize\setlength{\tabcolsep}{3pt}%
 \begin{tabular}{lcccccc}
@@ -621,9 +621,8 @@ of the phenomenon, not a turnkey adaptive method; an unsupervised selector is fu
 within $\sim\!15$--$20\%$, no closer) and the clean Strecha mean, and RESfM-released
 remains stronger than either from-scratch arm on MegaDepth, so we claim no SOTA. (3)~Versus supervision, \mad{} has no stable winner at moderate or extreme
 ($17.0\pm4.4$ vs.\ $16.2$) contamination; plain remove leads on every evaluated seed at
-both $43\%$ and $\sim\!60\%$, but against a single-seed baseline (its replicates were
-still training at submission), and the fully seed-robust claims remain the mechanism
-ordering and the clean-OOD wins.
+both $43\%$ and $\sim\!60\%$, but against a single-seed baseline, and the fully
+seed-robust claims remain the mechanism ordering and the clean-OOD wins.
 (4)~OOD tracks are self-constructed; OOD numbers are controlled within our pipeline
 and not comparable to RESfM's published OOD numbers. (5)~Two symmetric-structure scenes (Ellis Island, Tower of London) fail for all
 methods and inflate 1DSfM means (we report medians alongside); these are the cases where
