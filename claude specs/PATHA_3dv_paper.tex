@@ -204,17 +204,17 @@ paper's quoted outlier fractions we report the contamination \emph{measured on o
 tracks} (robust ground-truth-pose triangulation with the standard $4$px cutoff, applied
 uniformly to every dataset):
 \begin{center}\footnotesize
-\setlength{\tabcolsep}{3pt}%
+\setlength{\tabcolsep}{2pt}%
 \begin{tabular}{lccc}
 \toprule
 Dataset & Out\% (RESfM) & Out\% (ours) & Regime\\
 \midrule
-Strecha & 2.7 & 1.7 & clean, LIDAR GT\\
-BlendedMVS & 3.6 & 3.1 & low-outlier, rendered\\
-MegaDepth & 25.6 & 25.4 & contam., \emph{in-dist.}\\
-1DSfM & 31.9 & 43.3 & contam., OOD\\
+Strecha~\cite{strecha} & 2.7 & 1.7 & clean, LIDAR GT\\
+BlendedMVS~\cite{blendedmvs} & 3.6 & 3.1 & low-outlier\\
+MegaDepth~\cite{megadepth} & 25.6 & 25.4 & contam., \emph{in-dist.}\\
+1DSfM~\cite{onedsfm} & 31.9 & 43.3 & contam., OOD\\
 1DSfM-hard & -- & $\sim$60 & extreme, OOD\\
-Olsson & -- & 0.5 & outlier-free benchmark\\
+Olsson~\cite{olsson} & -- & 0.5 & outlier-free\\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -627,9 +627,11 @@ publication.
 
 \bibitem{megadepth} Li and Snavely. MegaDepth: Learning Single-View Depth Prediction from Internet Photos. CVPR 2018.
 
-\bibitem{strecha} Strecha et al. On Benchmarking Camera Calibration and Multi-View Stereo for High-Resolution Imagery. CVPR 2008.
+\bibitem{strecha} Strecha, von Hansen, Van Gool, Fua, and Thoennessen. On Benchmarking Camera Calibration and Multi-View Stereo for High-Resolution Imagery. CVPR 2008.
 
 \bibitem{blendedmvs} Yao et al. BlendedMVS: A Large-Scale Dataset for Generalized Multi-View Stereo Networks. CVPR 2020.
+
+\bibitem{olsson} Olsson and Enqvist. Stable Structure from Motion for Unordered Image Collections. SCIA 2011.
 
 \end{thebibliography}
 
