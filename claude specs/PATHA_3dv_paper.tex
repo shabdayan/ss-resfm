@@ -136,7 +136,8 @@ GASFM~\cite{gasfm} uses a graph-attention variant. Both assume outliers were alr
 by two-view geometric verification. RESfM~\cite{resfm} targets contaminated internet
 collections with a \emph{sets-of-sets} architecture plus a supervised per-point
 inlier/outlier classification module and a robust BA, reporting accuracy close to its own
-clean-track upper bound (``ESFM$^\ast$'') and on par with classical Theia/GLOMAP.
+clean-track upper bound (``ESFM$^\ast$'') and on par with classical Theia/GLOMAP
+(often with better translation recovery, while registering fewer images).
 End-to-end pointmap and pose-regression pipelines (VGGSfM, MASt3R, DUSt3R) target far
 smaller image sets. We propose no new architecture; we reuse the RESfM/ESFM backbone and
 study the outlier-handling stage in isolation.
@@ -572,7 +573,9 @@ main-table recipe) retrains both methods on progressively diversified pools: Meg
 $\to$ $+$ETH3D ($39$ scenes, added data ${\sim}8\%$ contaminated) $\to$ $+$VGG/T\&T ($52$
 scenes, adding a ${\sim}16\%$-contaminated mid-band). The supervised baseline's clean-OOD
 accuracy degrades \emph{monotonically} with diversity (Strecha
-$0.006\!\to\!0.77\!\to\!2.83$), while the clean addition yielded no high-contamination
+$0.006\!\to\!0.77\!\to\!2.83$); in distribution the same diversification is nearly
+free (MegaDepth $0.33\!\to\!0.32\!\to\!0.44$, the first step within noise), so the
+collapse is specific to clean OOD generalization, not a general capacity cost. Meanwhile the clean addition yielded no high-contamination
 gain and only the contaminated mid-band coincided with one (1DSfM $11.0/11.5/8.8$;
 differences within single-seed noise on this benchmark, so consistent with, though not
 established by, these runs). If it holds, the implication is pointed: the data that
