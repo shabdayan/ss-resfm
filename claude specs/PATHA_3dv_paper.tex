@@ -408,7 +408,9 @@ Two factors explain why the supervised advantage erodes as contamination rises.
 First, \emph{domain shift}: the classifier is trained only on in-distribution MegaDepth,
 and its decision boundary does not transfer to the outlier statistics of
 out-of-distribution internet collections (a domain-shift effect, not a labeling failure:
-the strong in-distribution result confirms the labels are sound). Second, and more
+MegaDepth's labels derive from its curated reference reconstructions, the
+trusted-reconstruction condition under which, per Table~\ref{tab:ceiling}, supervision
+is sound, and the strong in-distribution result is consistent with this). Second, and more
 fundamentally, supervision itself degrades in this regime: RESfM's labeling (Appendix~C
 of~\cite{resfm}) assumes a COLMAP reconstruction and ground-truth poses per training
 scene: readily obtained for curated data, but exactly what one lacks on the contaminated
@@ -523,22 +525,34 @@ RESfM (sup.) & \textbf{0.34/0.07} & 11.03/2.93 & \textbf{0.006/0.005} & 0.38/0.3
 \mad{} removes by a robust statistic of the reprojection error; we ablate the statistic
 holding the head reweighting fixed: MAD (median${}+\alpha\cdot1.4826\,$MAD, $50\%$
 breakdown), a Huber M-estimate of scale (IRLS), and non-robust STD
-(mean${}+\alpha\sigma$), all at $\alpha{=}2$. On contaminated 1DSfM, across seeds
-$20$--$22$, MAD's median is stable ($4.4$--$7.0$), Huber's is volatile
-($3.8$--$12.4$; better than STD on average but not dependably), and non-robust STD is
-consistently poor ($9.0$--$13.3$): its mean/$\sigma$ threshold is inflated by the very
-outliers it should catch and under-removes. The $50\%$-breakdown statistic is thus the
-only reliably robust choice at high contamination. On clean Strecha/BlendedMVS all three are
-comparable (BlendedMVS means $0.11$--$0.15$): little is removed either way, the right behavior
-without outliers. Robust removal is essential under contamination and superfluous on clean
-data, reinforcing the complementarity; we use MAD in \mad{}.
+(mean${}+\alpha\sigma$), all at $\alpha{=}2$. Table~\ref{tab:madstat} reports the
+ablation over seeds $20$--$22$: only MAD's 1DSfM median is stable; Huber's collapses on
+one seed, and non-robust STD is consistently poor, its mean/$\sigma$ threshold inflated
+by the very outliers it should catch. On clean data all three are comparable: little is
+removed either way, the right behavior without outliers. The $50\%$-breakdown statistic
+is the only reliably robust choice, and we use MAD in \mad{}.
+
+\begin{table}[t]\centering\scriptsize
+\setlength{\tabcolsep}{2.5pt}%
+\caption{\textbf{Removal-statistic ablation} (head reweighting fixed). Only MAD's
+median is seed-stable.}
+\label{tab:madstat}
+\begin{tabular}{lccc}
+\toprule
+Statistic & 1DSfM mean & 1DSfM med.\ s20/21/22 & BMVS\\
+\midrule
+MAD (\mad{}) & 11.5$\pm$2.3 & \textbf{4.4 / 7.0 / 6.6} & 0.15\\
+Huber & \textbf{11.5$\pm$1.6} & 3.8 / 12.4 / 5.3 & \textbf{0.11}\\
+STD & 15.2$\pm$1.2 & 13.3 / 9.0 / 12.9 & 0.15\\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Per-scene complementarity and the limits of contamination-based selection}
-Because individual scenes span a wide contamination range, we test whether the flip also
-holds \emph{per scene}. Fig.~\ref{fig:perscene} plots each scene's outlier rate against
-the signed advantage of the best removal mechanism over soft weighting: on OOD data soft
-weight wins the low-contamination scenes and removal the high-contamination ones, with the
-crossover bracketed to the sparsely-sampled ${\sim}3$--$29\%$ band.
+Fig.~\ref{fig:perscene} tests the flip \emph{per scene}: each scene's outlier rate vs.\
+the signed advantage of the best removal mechanism over soft weighting. On OOD data,
+weight wins the low-contamination scenes and removal the high-contamination ones; the
+crossover is bracketed to the sparsely-sampled ${\sim}3$--$29\%$ band.
 
 \begin{figure}[t]
 \centering
@@ -556,10 +570,9 @@ selection (Table~\ref{tab:selector}). An \emph{oracle} choosing the best of five
 mechanisms per scene from ground-truth error would change the picture: MegaDepth
 $0.42\!\to\!0.116$, surpassing every fixed arm, the supervised baseline at $0.344$,
 and even RESfM-released at $0.209$, and 1DSfM $12.4\!\to\!5.8$ vs.\ the
-baseline's $11.0$. The performance is thus already \emph{latent} in the label-free
-mechanism family; selection, not mechanism design, is the bottleneck. The signal selection
-needs is not contamination, and realizing this headroom without ground truth is future
-work.
+baseline's $11.0$. The performance is thus already \emph{latent} in the label-free mechanism family;
+selection, not mechanism design, is the bottleneck, and realizing this headroom without
+ground truth is future work.
 
 \begin{table}[t]\centering\footnotesize
 \setlength{\tabcolsep}{3pt}%
@@ -594,8 +607,8 @@ centers vs.\ GT (open markers); large dots\,+\,connectors mark gross-drift camer
 \end{figure}
 
 \subsection{Preliminary: training-pool diversity and the label ceiling}
-A preliminary experiment (single seed, our earlier five-milestone schedule, not the
-main-table recipe) retrains both methods on progressively diversified pools: MegaDepth-27
+A preliminary experiment (single seed, under a coarser five-milestone decay schedule;
+cf.\ \S\ref{sec:protocol}) retrains both methods on progressively diversified pools: MegaDepth-27
 $\to$ $+$ETH3D ($39$ scenes, added data ${\sim}8\%$ contaminated) $\to$ $+$VGG/T\&T ($52$
 scenes, adding a ${\sim}16\%$-contaminated mid-band). The supervised baseline's clean-OOD
 accuracy degrades \emph{monotonically} with diversity (Strecha
@@ -633,12 +646,10 @@ SS-RESfM shows that deep SfM outlier handling can be made \emph{entirely
 self-supervised} (no ground-truth or COLMAP labels) while staying within
 $\sim\!15$--$20\%$ of the supervised baseline in distribution, winning the clean-OOD
 splits, and beating it at high contamination (plain removal below the baseline on every
-seed at both $43\%$, on the representative median, and $61\%$), where both beat COLMAP
-and supervision itself can no longer be manufactured. The optimal mechanism is contamination-dependent:
+seed), where both beat COLMAP and supervision itself can no longer be manufactured. The optimal mechanism is contamination-dependent:
 removal at high contamination, reweighting at low. Robust deep SfM should treat outlier
-handling as adaptive and self-supervised rather than a single supervised mechanism. Code,
-configurations, and the rebuilt OOD tracks will be made publicly available upon
-publication.
+handling as adaptive and self-supervised; code, configurations, and the rebuilt OOD
+tracks will be released upon publication.
 
 \label{sec:endcontent}%
 \begin{thebibliography}{9}\small
