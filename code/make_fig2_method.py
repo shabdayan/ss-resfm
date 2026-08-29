@@ -77,13 +77,13 @@ def rm_extra(ax):
 panel(0, C_REMOVE, "remove  (RESfM analogue)", r"drop if $s>\tau$   ($\tau{=}0.6$; 0.8 clean sets)",
       lambda s: np.where(s < 0.6, 1.0, 0.0), tau=0.6, extra=rm_extra)
 # weight: soft 1-s
-panel(1, C_WEIGHT, "weight  (SS-RESfM)", "soft: $w = 1-s$, keep all",
+panel(1, C_WEIGHT, "weight  (SS-RESfM, ours)", "soft: $w = 1-s$, keep all",
       lambda s: 1 - s)
 # hybrid: 3-band (percentile bands, not fixed tau)
 def hyb(s):
     lo, hi = 0.35, 0.75
     w = np.where(s < lo, 1.0, np.where(s < hi, 1 - s, 0.0)); return w
-panel(2, C_HYBRID, "hybrid  (SS-RESfM)", "3-band: keep / soft / drop (percentiles)", hyb, tau=[0.35, 0.75])
+panel(2, C_HYBRID, "hybrid  (SS-RESfM, ours)", "3-band: keep / soft / drop (percentiles)", hyb, tau=[0.35, 0.75])
 # madweight: soft 1-s on MAD survivors; MAD removes by reproj error (any s)
 def mad_extra(ax):
     xs = [0.15, 0.45, 0.82]
