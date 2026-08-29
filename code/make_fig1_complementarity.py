@@ -44,10 +44,14 @@ plot(wttt,      C_T, "SS-RESfM · weight+TTT")
 plot(madweight, C_M, "SS-RESfM · madweight (label-free removal)")
 
 # direct end-labels at 1DSfM-hard
-for series, color, txt in [(madweight, C_M, "madweight"), (resfm, C_R, "RESfM"),
-                           (weight, C_W, "weight"), (wttt, C_T, "weight+TTT")]:
-    ax.annotate(txt, xy=(4, series[4]), xytext=(8, 0), textcoords="offset points",
-                color=color, fontsize=11, fontweight="bold", va="center")
+for series, color, txt, dy in [(madweight, C_M, "madweight", -3), (resfm, C_R, "RESfM", -1),
+                               (weight, C_W, "weight", 2), (wttt, C_T, "weight+TTT", 7)]:
+    ax.annotate(txt, xy=(4, series[4]), xytext=(8, dy), textcoords="offset points",
+                color=color, fontsize=9, fontweight="bold", va="center")
+for series, color, txt, dy in [(madweight_r, C_M, "madweight", -4), (resfm_r, C_R, "RESfM", -3),
+                               (weight_r, C_W, "weight", 3), (wttt_r, C_T, "weight+TTT", 7)]:
+    ax2.annotate(txt, xy=(4, series[4]), xytext=(8, dy), textcoords="offset points",
+                 color=color, fontsize=9, fontweight="bold", va="center")
 
 # mark the winner per dataset with a subtle ring on the lowest point
 for i in range(5):
