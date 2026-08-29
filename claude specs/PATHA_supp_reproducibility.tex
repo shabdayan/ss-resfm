@@ -143,6 +143,15 @@ arm dominates, the best mechanism flips scene by scene (with Ellis\_Island and
 Tower\_of\_London hard for every arm), consistent with the per-scene complementarity
 analysis in the main paper; on MegaDepth the four arms are close on most scenes and the
 dataset-level gap is dominated by a handful of high-error scenes.
+Table~\ref{tab:supp_fullmetrics} completes the dataset-level record with rotation and
+registered-camera counts alongside translation. Rotation orders the arms consistently
+with translation on every dataset (including the supervised BlendedMVS failure,
+$36\deg$). Registration is contamination-dependent: the supervised baseline registers
+the most cameras in distribution ($85\%$ vs.\ $78$--$80\%$ on MegaDepth) and on clean
+Strecha, while under high contamination the label-free arms retain more cameras than
+supervision ($38$--$43\%$ vs.\ $37\%$ on 1DSfM-hard) at lower error (madweight).
+
+
 
 \begin{table}[t]\centering\scriptsize
 \caption{\textbf{Per-scene 1DSfM results.} Post-BA translation error per scene (mean over the scene's cameras), seed 20, for the three SS-RESfM arms and supervised RESfM (all from-scratch, RESfM-aligned schedule). Best per scene in \textbf{bold}.}
@@ -215,6 +224,47 @@ Scene & madweight & weight & weight+TTT & RESfM\\
 \end{tabular}
 \end{table}
 
+\begin{table}[t]\centering\footnotesize
+\caption{\textbf{Dataset-level translation, rotation, and registered cameras} (post-BA,
+seed 20) for the four main-comparison arms. Trans and Rot are mean\,/\,median over
+scenes (per-scene values are camera means); $N_r/N_c$ is the fraction of ground-truth
+cameras surviving robust BA and the 5-pixel reprojection quality mask, summed over the
+dataset's scenes.}
+\label{tab:supp_fullmetrics}
+\setlength{\tabcolsep}{3pt}%
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{llcccc}
+\toprule
+Dataset & Metric & madweight & weight & weight+TTT & RESfM\\
+\midrule
+\multirow{3}{*}{\shortstack[l]{MegaDepth\\($N_c{=}13126$)}} & Trans & 0.422/0.145 & 0.423/0.182 & 0.316/0.186 & 0.344/0.07\\
+ & Rot ($\deg$) & 3.49/1.33 & 3.04/1.77 & 2.51/1.39 & 2.01/0.84\\
+ & $N_r/N_c$ & 80\% & 79\% & 78\% & 85\%\\
+\midrule
+\multirow{3}{*}{\shortstack[l]{1DSfM\\($N_c{=}4563$)}} & Trans & 12.4/4.37 & 12.8/11.0 & 16.1/7.16 & 11.0/2.93\\
+ & Rot ($\deg$) & 8.31/4.53 & 8.39/2.79 & 11.19/11.25 & 9.79/2.79\\
+ & $N_r/N_c$ & 74\% & 77\% & 80\% & 77\%\\
+\midrule
+\multirow{3}{*}{\shortstack[l]{1DSfM-hard\\($N_c{=}1497$)}} & Trans & 12.2/8.83 & 21.9/13.1 & 26.4/17.7 & 16.2/13.1\\
+ & Rot ($\deg$) & 14.40/7.39 & 25.58/17.70 & 31.97/12.83 & 22.70/15.86\\
+ & $N_r/N_c$ & 38\% & 39\% & 43\% & 37\%\\
+\midrule
+\multirow{3}{*}{\shortstack[l]{Strecha\\($N_c{=}54$)}} & Trans & 2.5/0.97 & 2/0.026 & 1.98/0.005 & 0.006/0.005\\
+ & Rot ($\deg$) & 14.62/8.43 & 7.48/0.17 & 7.41/0.02 & 0.02/0.01\\
+ & $N_r/N_c$ & 91\% & 96\% & 98\% & 100\%\\
+\midrule
+\multirow{3}{*}{\shortstack[l]{BlendedMVS\\($N_c{=}225$)}} & Trans & 0.146/0.004 & 0.1/0.036 & 0.136/0.011 & 0.379/0.348\\
+ & Rot ($\deg$) & 9.60/0.38 & 6.65/3.06 & 7.91/0.55 & 36.10/29.55\\
+ & $N_r/N_c$ & 95\% & 88\% & 95\% & 90\%\\
+\midrule
+\multirow{3}{*}{\shortstack[l]{Olsson\\($N_c{=}3858$)}} & Trans & 2.57/1.15 & 2.65/1.22 & 7.74/0.18 & 8.47/0.17\\
+ & Rot ($\deg$) & 13.57/4.37 & 13.23/5.41 & 10.49/2.27 & 12.34/3.35\\
+ & $N_r/N_c$ & 83\% & 90\% & 90\% & 88\%\\
+
+\bottomrule
+\end{tabular}}%
+\end{table}
+
 
 
 
@@ -224,12 +274,11 @@ methods share every setting except the base learning rate ($10^{-4}$ self-superv
 $10^{-3}$ supervised, each selected on its own training objective) and the supervision
 source (COLMAP-derived labels vs.\ the adaptive percentile pseudo-labels).
 
-\begin{table}[t]\centering\scriptsize
+\begin{table*}[t]\centering\small
 \caption{\textbf{Training and evaluation configuration.} All arms in the main paper use
 these settings; the only per-method difference is the base learning rate.}
 \label{tab:supp_config}
 \setlength{\tabcolsep}{4pt}%
-\resizebox{\linewidth}{!}{%
 \begin{tabular}{ll}
 \toprule
 Setting & Value\\
@@ -256,8 +305,8 @@ Test-time fine-tuning & 1{,}001 iterations, LR $5\times10^{-3}$,\\
  & evaluated every 250 iterations\\
 Bundle adjustment & pyceres/pycolmap robust BA, as RESfM\\
 \bottomrule
-\end{tabular}}
-\end{table}
+\end{tabular}
+\end{table*}
 
 \section{Per-scene label degradation}\label{sec:labelceiling}
 Table~\ref{tab:supp_labelceiling} gives the per-scene data behind the main paper's
@@ -265,11 +314,10 @@ label-ceiling analysis: for each of the 18 scenes we measure the contamination l
 fraction of track observations that receive a COLMAP-derived label at all (coverage), and
 the precision and recall of those labels against ground truth. The aggregate trend in the main paper is visible scene by scene: below ${\sim}10\%$ contamination coverage is $0.92$--$1.00$ and recall is $0.66$--$0.97$ (mostly above $0.8$), while above ${\sim}15\%$ contamination recall never exceeds $0.50$ on any scene ($0.25$--$0.50$) and coverage falls as low as $0.37$: the supervision signal degrades exactly where outlier handling matters most.
 
-\begin{table}[t]\centering\scriptsize
+\begin{table*}[t]\centering\small
 \caption{\textbf{Per-scene label-degradation results.} For each scene: contamination (fraction of track observations that are GT outliers), COLMAP-label coverage (fraction of observations receiving a label), and precision/recall of the COLMAP-derived outlier labels against GT, sorted by contamination. Recall collapses above ${\sim}15\%$ contamination.}
 \label{tab:supp_labelceiling}
 \setlength{\tabcolsep}{3.5pt}%
-\resizebox{\linewidth}{!}{%
 \begin{tabular}{llcccc}
 \toprule
 Dataset & Scene & Contam.\ (\%) & Coverage & Prec. & Recall\\
@@ -293,8 +341,8 @@ MegaDepth & 0047 & 54.9 & 0.37 & 0.83 & 0.50\\
 1DSfM & Ellis\_Island & 57.9 & 0.79 & 0.89 & 0.37\\
 1DSfM-hard & Gendarmenmarkt & 59.8 & 0.50 & 0.89 & 0.29\\
 \bottomrule
-\end{tabular}}
-\end{table}
+\end{tabular}
+\end{table*}
 
 
 \end{document}

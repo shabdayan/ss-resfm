@@ -277,8 +277,8 @@ own released weights yield $0.209$ in our harness (vs.\ their reported $0.169$),
 confirming our evaluation is faithful and that $\sim\!0.209$ is the reproducible level;
 this is unchanged ($0.217$) under the authors' exact pinned software stack (MKL BLAS,
 same pycolmap/pyceres), isolating the residual gap to solver/hardware-level
-nondeterminism in robust BA (analysis in the supplementary material). All reported results come from this
-single pipeline and software stack; a stack-replication study (supplementary) shows the
+nondeterminism in robust BA (analysis in the supplementary, Secs.~B--D). All reported results come from this
+single pipeline and software stack; a stack-replication study (supplementary, Sec.~E) shows the
 no-TTT arms are insensitive to it, while test-time fine-tuned \emph{means} inherit
 solver-level nondeterminism and should be read with that variance in mind.
 
@@ -301,11 +301,16 @@ supervised and self-supervised arms \emph{equally}. We report RESfM-released and
 RESfM~(paper) as reference rows throughout.
 
 \noindent\textbf{Metrics.} Following RESfM's convention we draw conclusions from
-\emph{mean} errors (translation emphasized, rotation reported alongside), post-BA, in
-degrees, and provide medians as supporting statistics (RESfM likewise reports medians in
-its appendix). The one declared exception is 1DSfM, whose mean is dominated by two
-symmetric-structure failure scenes (Ellis Island, Tower of London) that fail for
-\emph{all} methods; there we treat the median as the representative figure.
+\emph{mean} errors (translation emphasized, rotation reported alongside), post-BA
+(rotation in degrees; translation is the aligned camera-position error in scene
+coordinates), and provide medians as supporting statistics (RESfM likewise reports
+medians in its appendix). The one declared exception is 1DSfM, whose mean is dominated by
+two symmetric-structure failure scenes (Ellis Island, Tower of London) that fail for
+\emph{all} methods; there we treat the median as the representative figure. Rotation and
+registered-camera counts ($N_r$) for all arms are tabulated in the supplementary
+(Sec.~G); rotation orders the arms consistently with translation, and under high
+contamination the label-free arms register \emph{more} cameras than the supervised
+baseline ($38$--$43\%$ vs.\ $37\%$ of ground-truth cameras on 1DSfM-hard).
 
 \begin{figure*}[t]
 \centering
@@ -369,7 +374,7 @@ vs.\ $36\deg$ supervised) and mildly favor the self-supervised arms on 1DSfM
 translation error (post-BA), seed 20. All rows share tracks, architecture, schedule,
 robust BA, and seed; only the outlier mechanism and its supervision differ. Reference rows
 (means) below the rule; upper block = SS-RESfM arms. Best per column in \textbf{bold}. $^{\dagger}$mean$\pm$std over
-three evaluation repeats (TTT is run-to-run nondeterministic; supplementary).
+three evaluation repeats (TTT is run-to-run nondeterministic; supplementary Sec.~E).
 $^{\ddagger}$mean$\pm$std over seeds $20$--$22$; the RESfM cell is seed 20. Other
 cells: deterministic, seed 20.}
 \label{tab:main}
