@@ -322,9 +322,9 @@ attributable to the outlier mechanism and its supervision alone. Reading along t
 contamination axis:
 (1)~\emph{Clean OOD} (Olsson $0.5\%$, Strecha $1.7\%$, BlendedMVS $3.1\%$): the
 label-free arms win decisively where the supervised head misfires: every arm beats RESfM
-by $2.6$--$3.8\times$ on BlendedMVS ($0.10$--$0.15$ vs.\ $0.38$) and by $3.2\times$ on
-Olsson means ($2.6$ vs.\ $8.5$; the supervised baseline collapses on a subset of the $39$
-scenes). Strecha is the exception: RESfM's mean is far better ($0.006$ vs.\ $\sim\!2$, a
+by $2.6$--$3.8\times$ on BlendedMVS ($0.10$--$0.15$ vs.\ $0.38$) and by ${\sim}3\times$ on
+Olsson means ($2.8\pm0.3$ over seeds $20$--$22$ vs.\ $8.5$; the supervised baseline
+collapses on a subset of the $39$ scenes). Strecha is the exception: RESfM's mean is far better ($0.006$ vs.\ $\sim\!2$, a
 single self-supervised failure scene), the medians tie ($0.005$), and RESfM keeps the
 Olsson median ($0.17$).
 (2)~\emph{In distribution} (MegaDepth), supervised RESfM retains mean and median
@@ -362,7 +362,7 @@ replicates were still training at submission). Other cells: deterministic, seed 
 \toprule
 Arm & MegaDepth (25.4) & 1DSfM (43.3) & 1DSfM-hard (60) & Strecha (1.7) & BMVS (3.1) & Olsson (0.5)\\
 \midrule
-\mad{}       & 0.422/0.145 & 12.39/4.37 & 17.0$\pm$4.4/\textbf{11.7}$^{\ddagger}$ & 2.50/0.97 & 0.146/\textbf{0.004} & \textbf{2.57}/1.15\\
+\mad{}       & 0.422/0.145 & 12.39/4.37 & 17.0$\pm$4.4/\textbf{11.7}$^{\ddagger}$ & 2.50/0.97 & 0.146/\textbf{0.004} & \textbf{2.8$\pm$0.3}/1.2$^{\ddagger}$\\
 weight       & 0.423/0.182 & 12.79/11.01 & 21.9$\pm$3.4/12.7$^{\ddagger}$ & 2.00/0.026 & \textbf{0.100}/0.036 & 2.65/1.22\\
 weight+TTT   & 0.39$\pm$0.07/0.14$^{\dagger}$ & 16.13/7.16 & 21.9$\pm$3.9/14.5$^{\ddagger}$ & 1.98/\textbf{0.005} & 0.136/0.011 & 7.74/0.18\\
 RESfM-scratch (supervised)  & \textbf{0.344/0.070} & \textbf{11.03/2.93} & \textbf{16.22}/13.08 & \textbf{0.006/0.005} & 0.379/0.348 & 8.47/\textbf{0.17}\\

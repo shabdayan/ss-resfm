@@ -65,7 +65,7 @@ def panel(col, color, title, subtitle, wfun, extra=None, tau=None):
     ax.tick_params(colors=MUTED, labelsize=8)
     for sp in ["top", "right"]: ax.spines[sp].set_visible(False)
     for sp in ["left", "bottom"]: ax.spines[sp].set_color(GRID)
-    ax.set_title(title, color=color, fontsize=11, fontweight="bold", pad=13, loc="left")
+    ax.set_title(title, color=color, fontsize=9.5, fontweight="bold", pad=13, loc="left")
     ax.text(0, 1.12, subtitle, transform=ax.transAxes, fontsize=7.8, color=MUTED)
     return ax
 
@@ -74,16 +74,16 @@ def rm_extra(ax):
     ax.axvline(0.8, color=GRID, ls=":", lw=1.0, zorder=1)
     ax.text(0.58, 0.07, r"$\tau{=}0.6$", ha="right", fontsize=7.5, color=MUTED)
     ax.text(0.82, 0.45, "0.8\n(clean)", ha="left", fontsize=7, color=MUTED, va="center")
-panel(0, C_REMOVE, "remove", r"drop if $s>\tau$   ($\tau{=}0.6$; 0.8 clean sets)",
+panel(0, C_REMOVE, "remove  (RESfM analogue)", r"drop if $s>\tau$   ($\tau{=}0.6$; 0.8 clean sets)",
       lambda s: np.where(s < 0.6, 1.0, 0.0), tau=0.6, extra=rm_extra)
 # weight: soft 1-s
-panel(1, C_WEIGHT, "weight", "soft: $w = 1-s$, keep all",
+panel(1, C_WEIGHT, "weight  (SS-RESfM)", "soft: $w = 1-s$, keep all",
       lambda s: 1 - s)
 # hybrid: 3-band (percentile bands, not fixed tau)
 def hyb(s):
     lo, hi = 0.35, 0.75
     w = np.where(s < lo, 1.0, np.where(s < hi, 1 - s, 0.0)); return w
-panel(2, C_HYBRID, "hybrid", "3-band: keep / soft / drop (percentiles)", hyb, tau=[0.35, 0.75])
+panel(2, C_HYBRID, "hybrid  (SS-RESfM)", "3-band: keep / soft / drop (percentiles)", hyb, tau=[0.35, 0.75])
 # madweight: soft 1-s on MAD survivors; MAD removes by reproj error (any s)
 def mad_extra(ax):
     xs = [0.15, 0.45, 0.82]
@@ -91,7 +91,7 @@ def mad_extra(ax):
     ax.annotate("MAD removes high-reproj\npoints (any $s$)", xy=(0.45, 0.55),
                 xytext=(0.30, 0.86), fontsize=7.2, color=C_MAD,
                 arrowprops=dict(arrowstyle="->", color=C_MAD, lw=1))
-ax_mad = panel(3, C_MAD, "madweight  (ours)", "MAD-remove (reproj $e$) + soft $1-s$",
+ax_mad = panel(3, C_MAD, "madweight  (SS-RESfM, ours)", "MAD-remove (reproj $e$) + soft $1-s$",
                lambda s: 1 - s, extra=mad_extra)
 
 # highlighted reproj-e branch: only madweight consumes the reprojection-error e
