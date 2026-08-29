@@ -28,6 +28,7 @@ import numpy as np
 os.environ["WANDB__SERVICE_WAIT"] = "300"
 OPTIMIZER_TYPES = {
     'Adam': torch.optim.Adam,
+    'AdamW': torch.optim.AdamW,   # decoupled weight decay (for OOD-regularized retrains)
 }
 
 OUTPUT_MODES_TYPES = {
@@ -106,6 +107,11 @@ def epoch_evaluation(data_loader, model, conf, epoch, phase, save_predictions=Fa
                 # test evaluation can save them — the FINE_TUNE stage prunes tracks
                 # with this file (Euclidean.get_raw_data, output_mode == 3).
                 if pred_outliers is not None:
+                    # Restored from upstream RESfM (their train.py validation loop):
+                    # classification metrics (Accuracy/Precision/Recall) in the
+                    # validation table — required by confs selecting the best
+                    # checkpoint via validation_metric = ["Accuracy"].
+                    metrics.update(OutliersMetrics(pred_outliers, curr_data))
                     outliersOutputs = evaluation.prepare_outliers_predictions(curr_data, pred_outliers, conf)
 
                 metrics_list.append(metrics)
@@ -347,7 +353,8 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
     scheduler_milestone = conf.get_list('train.scheduler_milestone')
     gamma = conf.get_float('train.gamma', default=0.1)
     optim_type = conf.get_string('train.optim_type', default='Adam')
-    optimizer = OPTIMIZER_TYPES[optim_type](model.parameters(), lr=lr)
+    weight_decay = conf.get_float('train.weight_decay', default=0.0)  # 0.0 => unchanged for existing confs
+    optimizer = OPTIMIZER_TYPES[optim_type](model.parameters(), lr=lr, weight_decay=weight_decay)
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=scheduler_milestone, gamma=gamma)
 
     # print(f'Training with loss of type {loss_func}')
