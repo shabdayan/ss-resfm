@@ -94,15 +94,16 @@ def mad_extra(ax):
 ax_mad = panel(3, C_MAD, "madweight  (SS-RESfM, ours)", "MAD-remove (reproj $e$) + soft $1-s$",
                lambda s: 1 - s, extra=mad_extra)
 
-# highlighted reproj-e branch: only madweight consumes the reprojection-error e
-fig.text(0.52, 0.672,
-         "Only  madweight  uses the reprojection-error branch $e$ — for its MAD removal step;\n"
-         "its surviving points are then weighted by the head score $s$ ($w{=}1{-}s$).\n"
-         "remove / weight / hybrid use the head score $s$ alone.",
+# two column-separated callouts: left ties to the (s, e) signal box, right to the mechanism box
+fig.text(0.24, 0.665,
+         "Only  madweight  uses the\nreprojection-error branch $e$ (MAD removal);\n"
+         "survivors are weighted by the head score $s$.",
          ha="center", va="center", fontsize=8.5, color=C_MAD)
-# short arrow tying the callout to the 'reproj e' branch in the signal box
-arr = ConnectionPatch(xyA=(0.455, 0.715), coordsA=fig.transFigure,
-                      xyB=(45, 6.1), coordsB=axp.transData,
+fig.text(0.80, 0.665,
+         "remove / weight / hybrid\nuse the head score $s$ alone.",
+         ha="center", va="center", fontsize=8.5, color=MUTED)
+arr = ConnectionPatch(xyA=(0.30, 0.705), coordsA=fig.transFigure,
+                      xyB=(43, 6.0), coordsB=axp.transData,
                       arrowstyle="-|>", mutation_scale=13, lw=1.6, color=C_MAD, zorder=5)
 fig.add_artist(arr)
 
