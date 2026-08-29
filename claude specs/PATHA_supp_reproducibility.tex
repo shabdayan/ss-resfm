@@ -263,11 +263,7 @@ Bundle adjustment & pyceres/pycolmap robust BA, as RESfM\\
 Table~\ref{tab:supp_labelceiling} gives the per-scene data behind the main paper's
 label-ceiling analysis: for each of the 18 scenes we measure the contamination level, the
 fraction of track observations that receive a COLMAP-derived label at all (coverage), and
-the precision and recall of those labels against ground truth. The aggregate trend in the
-main paper is visible scene by scene: below ${\sim}10\%$ contamination the labels are
-near-complete and high-recall, while every scene above ${\sim}15\%$ contamination shows
-recall collapsing toward ${\sim}0.3$ with coverage dropping toward ${\sim}0.55$: the
-supervision signal degrades exactly where outlier handling matters most.
+the precision and recall of those labels against ground truth. The aggregate trend in the main paper is visible scene by scene: below ${\sim}10\%$ contamination coverage is $0.92$--$1.00$ and recall is $0.66$--$0.97$ (mostly above $0.8$), while above ${\sim}15\%$ contamination recall never exceeds $0.50$ on any scene ($0.25$--$0.50$) and coverage falls as low as $0.37$: the supervision signal degrades exactly where outlier handling matters most.
 
 \begin{table}[t]\centering\scriptsize
 \caption{\textbf{Per-scene label-degradation results.} For each scene: contamination (fraction of track observations that are GT outliers), COLMAP-label coverage (fraction of observations receiving a label), and precision/recall of the COLMAP-derived outlier labels against GT, sorted by contamination. Recall collapses above ${\sim}15\%$ contamination.}
