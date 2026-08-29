@@ -44,8 +44,10 @@ In addition, Sec.~\ref{sec:perscene} tabulates the per-scene translation, rotati
 registered-camera ($N_r$) results behind the main paper's dataset-level numbers, with
 dataset-level rotation and registration summaries in Table~\ref{tab:supp_fullmetrics};
 Sec.~\ref{sec:impl} gives the complete training and
-evaluation configuration, and Sec.~\ref{sec:labelceiling} provides the per-scene
-label-degradation breakdown behind the label-ceiling analysis.
+evaluation configuration, Sec.~\ref{sec:labelceiling} provides the per-scene
+label-degradation breakdown behind the label-ceiling analysis, and
+Sec.~\ref{sec:extended} provides extended versions of the main paper's Tables~2, 5, 6,
+and 7 (adding rotation and $N_r$/$N_c$) intended to replace them in the camera-ready.
 
 \section{The reproduction question}\label{sec:repro}
 Evaluating the RESfM authors' \emph{released checkpoint} in our harness on the 36 MegaDepth
@@ -62,6 +64,7 @@ conditions, vs.\ the published number. $N_r$ is the mean number of registered ca
 per scene (mean $N_c{=}364.6$ ground-truth cameras); the published row averages the
 paper's per-scene Table~1 values.}
 \label{tab:supp_reprocond}
+\resizebox{\linewidth}{!}{%
 \begin{tabular}{lccc}
 \toprule
 Condition & Trans & Rot ($\deg$) & $N_r$\\
@@ -71,7 +74,7 @@ Our env (pip/OpenBLAS), 5-seed mean & 0.203 & 1.82 & 303.9\\
 Our env, seed 20 & 0.209 & 1.89 & 303.6\\
 Authors' exact stack (conda/MKL) & 0.217 & 1.92 & 303.7\\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 \section{Eliminating the controllable factors}\label{sec:factors}
@@ -374,4 +377,156 @@ MegaDepth & 0047 & 54.9 & 0.37 & 0.83 & 0.50\\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\clearpage
+\section{Extended main-paper tables (camera-ready)}\label{sec:extended}
+Tables~\ref{tab:x_main}--\ref{tab:x_selector} extend the main paper's Tables~2, 5, 6, and
+7 with rotation error and registered-camera counts alongside translation, following
+RESfM's metric emphasis (translation first, then rotation, then $N_r$; $N_c$ last). All
+values come from the same seed-20 evaluations behind the main paper (rotation panels and
+$N_r$ at seed 20; translation panels repeat the main-paper cells including their seed
+bands). \textbf{In the camera-ready we will replace main-paper Tables~2, 5, 6, and 7 with
+these extended versions.} Reading the additions: rotation broadly agrees with translation
+(the supervised BlendedMVS failure is even larger in rotation, $36\deg$; the
+high-contamination ordering is preserved), though the best arm can differ per metric (on
+MegaDepth, weight+TTT leads translation while the supervised baseline leads rotation).
+Registration is contamination-dependent: the supervised baseline registers the most
+cameras in distribution ($85\%$) and on clean Strecha ($100\%$), while under high
+contamination the label-free arms retain more ($38$--$43\%$ vs.\ $37\%$ on 1DSfM-hard).
+In the ablation (Table~\ref{tab:x_madstat}) rotation and registration are
+statistic-insensitive ($7.6$--$9.0\deg$, $71$--$74\%$): the statistic matters through the
+translation medians. The selection oracle (Table~\ref{tab:x_selector}) improves rotation
+as well as translation (MegaDepth $1.22\deg$ vs.\ the supervised $2.01\deg$) but
+registers fewer 1DSfM cameras ($66\%$): selecting by translation error can sacrifice
+registration.
+
+\begin{table*}[t]\centering\footnotesize
+\caption{\textbf{Extended main comparison} (extends main-paper Table~2; RESfM-aligned
+schedule, seed 20). Translation panel repeats the main table (mean\,/\,median;
+$^{\dagger}$/$^{\ddagger}$ as there); rotation (mean\,/\,median, $\deg$) and $N_r/N_c$
+panels at seed 20. Best per column in bold.}
+\label{tab:x_main}
+\setlength{\tabcolsep}{3pt}%
+\begin{tabular}{lcccccc}
+\toprule
+Arm & MegaDepth (25.4) & 1DSfM (43.3) & 1DSfM-hard (60) & Strecha (1.7) & BMVS (3.1) & Olsson (0.5)\\
+ & $N_c{=}13126$ & $4563$ & $1497$ & $54$ & $225$ & $3858$\\
+\midrule
+\multicolumn{7}{l}{\emph{Translation error (mean\,/\,median), the primary metric}}\\[1pt]
+madweight    & 0.422/0.145 & 12.39/4.37 & 17.0$\pm$4.4/$\mathbf{11.7}$$^{\ddagger}$ & 2.50/0.97 & 0.146/$\mathbf{0.004}$ & $\mathbf{2.8\pm 0.3}$/1.2$^{\ddagger}$\\
+weight       & 0.423/0.182 & 12.79/11.01 & 21.9$\pm$3.4/12.7$^{\ddagger}$ & 2.00/0.026 & $\mathbf{0.100}$/0.036 & 2.8$\pm$0.4/1.1$^{\ddagger}$\\
+weight+TTT   & 0.39$\pm$0.07/0.14$^{\dagger}$ & 16.13/7.16 & 21.9$\pm$3.9/14.5$^{\ddagger}$ & 1.98/$\mathbf{0.005}$ & 0.136/0.011 & 8.0$\pm$0.4/0.4$^{\ddagger}$\\
+RESfM-scratch (supervised)  & $\mathbf{0.344/0.070}$ & $\mathbf{11.03/2.93}$ & $\mathbf{16.22}$/13.08 & $\mathbf{0.006/0.005}$ & 0.379/0.348 & 8.47/$\mathbf{0.17}$\\
+RESfM (released)            & 0.209 & 10.71 & -- & 0.197 & 0.330 & --\\
+RESfM (paper)               & 0.169 & -- & -- & -- & -- & --\\
+\midrule
+\multicolumn{7}{l}{\emph{Rotation error ($\deg$, mean\,/\,median)}}\\[1pt]
+madweight    & 3.49/1.33 & $\mathbf{8.31}$/4.53 & $\mathbf{14.40}$/$\mathbf{7.39}$ & 14.62/8.43 & 9.60/0.38 & 13.57/4.37\\
+weight       & 3.04/1.77 & 8.39/$\mathbf{2.79}$ & 25.58/17.70 & 7.48/0.17 & $\mathbf{6.65}$/3.06 & 13.23/5.41\\
+weight+TTT   & 2.51/1.39 & 11.19/11.25 & 31.97/12.83 & 7.41/0.02 & 7.91/$\mathbf{0.55}$ & $\mathbf{10.49}$/$\mathbf{2.27}$\\
+RESfM-scratch (supervised)  & $\mathbf{2.01/0.84}$ & 9.79/$\mathbf{2.79}$ & 22.70/15.86 & $\mathbf{0.02/0.01}$ & 36.10/29.55 & 12.34/3.35\\
+\midrule
+\multicolumn{7}{l}{\emph{Registered cameras $N_r/N_c$}}\\[1pt]
+madweight    & 80\% & 74\% & 38\% & 91\% & $\mathbf{95}$\% & 83\%\\
+weight       & 79\% & 77\% & 39\% & 96\% & 88\% & $\mathbf{90}$\%\\
+weight+TTT   & 78\% & $\mathbf{80}$\% & $\mathbf{43}$\% & 98\% & $\mathbf{95}$\% & $\mathbf{90}$\%\\
+RESfM-scratch (supervised)  & $\mathbf{85}$\% & 77\% & 37\% & $\mathbf{100}$\% & 90\% & 88\%\\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table*}[t]\centering\footnotesize
+\caption{\textbf{Extended full shallow mechanism matrix} (extends main-paper Table~5;
+seed 20; $^{\ddagger}$mean$\pm$std over seeds 20--22). Translation panel repeats the main
+table; rotation and $N_r/N_c$ panels: seed-20 means / fractions. Olsson column: means.
+Best per column in bold.}
+\label{tab:x_matrix}
+\setlength{\tabcolsep}{4pt}%
+\begin{tabular}{lccccc}
+\toprule
+Arm & MD & 1DSfM & Strecha & BMVS & Olsson\\
+\midrule
+\multicolumn{6}{l}{\emph{Translation error (mean\,/\,median), the primary metric}}\\[1pt]
+remove       & 0.60/0.19 & 9.1$\pm$2.8/$\mathbf{1.6\pm 0.2}$$^{\ddagger}$ & 3.02/1.68 & 0.27/0.19 & 2.81\\
+remove+TTT   & 0.49/0.13 & $\mathbf{8.7\pm 1.1}$/2.2$\pm$1.1$^{\ddagger}$ & 2.97/1.56 & 0.19/0.07 & 4.07\\
+hybrid       & 0.37/0.20 & 16.0$\pm$1.4/6.7$\pm$4.4$^{\ddagger}$ & 2.70/1.39 & 0.10/0.03 & 2.82\\
+hybrid+TTT   & 0.39/0.14 & 15.4$\pm$1.1/10.7$\pm$3.5$^{\ddagger}$ & 3.52/2.65 & 0.13/$\mathbf{0.00}$ & 3.19\\
+madweight    & 0.42/0.15 & 11.5$\pm$2.3/6.0$\pm$1.4$^{\ddagger}$ & 2.50/0.97 & 0.15/0.004 & $\mathbf{2.57}$\\
+weight       & 0.42/0.18 & 15.8$\pm$3.1/10.9$\pm$2.1$^{\ddagger}$ & 2.00/0.03 & $\mathbf{0.10}$/0.04 & 2.65\\
+weight+TTT   & 0.39/0.14 & 17.0$\pm$1.3/10.9$\pm$4.1$^{\ddagger}$ & 1.98/$\mathbf{0.005}$ & 0.14/0.01 & 7.74\\
+RESfM (sup.) & $\mathbf{0.34/0.07}$ & 11.03/2.93 & $\mathbf{0.006/0.005}$ & 0.38/0.35 & 8.47\\
+\midrule
+\multicolumn{6}{l}{\emph{Rotation error ($\deg$, means)}}\\[1pt]
+remove       & 4.87 & 5.50 & 12.96 & 19.83 & 12.97\\
+remove+TTT   & 4.05 & $\mathbf{5.31}$ & 12.81 & 12.52 & 15.60\\
+hybrid       & 2.81 & 6.98 & 13.04 & 7.45 & 12.54\\
+hybrid+TTT   & 2.99 & 11.32 & 16.62 & 7.80 & 13.76\\
+madweight    & 3.49 & 8.31 & 14.62 & 9.60 & 13.57\\
+weight       & 3.04 & 8.39 & 7.48 & $\mathbf{6.65}$ & 13.23\\
+weight+TTT   & 2.51 & 11.19 & 7.41 & 7.91 & $\mathbf{10.49}$\\
+RESfM (sup.) & $\mathbf{2.01}$ & 9.79 & $\mathbf{0.02}$ & 36.10 & 12.34\\
+\midrule
+\multicolumn{6}{l}{\emph{Registered cameras $N_r/N_c$}}\\[1pt]
+remove       & 71\% & 59\% & 96\% & 87\% & 80\%\\
+remove+TTT   & 68\% & 59\% & 94\% & 90\% & 80\%\\
+hybrid       & 78\% & $\mathbf{82}$\% & 67\% & 90\% & 88\%\\
+hybrid+TTT   & 77\% & 80\% & 76\% & $\mathbf{95}$\% & 89\%\\
+madweight    & 80\% & 74\% & 91\% & $\mathbf{95}$\% & 83\%\\
+weight       & 79\% & 77\% & 96\% & 88\% & $\mathbf{90}$\%\\
+weight+TTT   & 78\% & 80\% & 98\% & $\mathbf{95}$\% & $\mathbf{90}$\%\\
+RESfM (sup.) & $\mathbf{85}$\% & 77\% & $\mathbf{100}$\% & 90\% & 88\%\\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table}[t]\centering\footnotesize
+\caption{\textbf{Extended removal-statistic ablation} (extends main-paper Table~6; head
+reweighting fixed). Translation first, then rotation, then $N_r$ (1DSfM, seed 20).}
+\label{tab:x_madstat}
+\setlength{\tabcolsep}{3pt}%
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lccccc}
+\toprule
+Statistic & 1DSfM trans & med.\ s20/21/22 & 1DSfM rot$^{\ddagger}$ & $N_r$ & BMVS\\
+\midrule
+MAD (madweight) & 11.5$\pm$2.3 & $\mathbf{4.4\,/\,7.0\,/\,6.6}$ & 8.0$\pm$0.8 & $\mathbf{74}$\% & 0.15\\
+Huber & $\mathbf{11.5\pm 1.6}$ & 3.8 / 12.4 / 5.3 & $\mathbf{7.6\pm 0.4}$ & 71\% & $\mathbf{0.11}$\\
+STD & 15.2$\pm$1.2 & 13.3 / 9.0 / 12.9 & 9.0$\pm$0.2 & $\mathbf{74}$\% & 0.15\\
+\bottomrule
+\end{tabular}}%
+\end{table}
+
+\begin{table}[t]\centering\footnotesize
+\caption{\textbf{Extended per-scene selection} (extends main-paper Table~7; mean
+translation, then rotation, then $N_r$; seed 20). The oracle (italics) selects by
+ground-truth \emph{translation} error over five mechanisms; its rotation and $N_r$ are
+those of the selected arms.}
+\label{tab:x_selector}
+\setlength{\tabcolsep}{3pt}%
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lccccc}
+\toprule
+Dataset & weight & madwt & contam & oracle (GT) & $N_c$\\
+\midrule
+\multicolumn{6}{l}{\emph{Translation error (means)}}\\[1pt]
+MegaDepth  & 0.423 & $\mathbf{0.422}$ & 0.422 & $\mathit{0.116}$ & \\
+1DSfM      & 12.79 & $\mathbf{12.39}$ & 12.39 & $\mathit{5.78}$ & \\
+Strecha    & $\mathbf{2.00}$ & 2.50 & 2.00 & $\mathit{1.98}$ & \\
+BlendedMVS & $\mathbf{0.100}$ & 0.146 & 0.100 & $\mathit{0.083}$ & \\
+\midrule
+\multicolumn{6}{l}{\emph{Rotation error ($\deg$, means)}}\\[1pt]
+MegaDepth  & $\mathbf{3.04}$ & 3.49 & 3.49 & $\mathit{1.22}$ & \\
+1DSfM      & 8.39 & $\mathbf{8.31}$ & 8.31 & $\mathit{5.50}$ & \\
+Strecha    & $\mathbf{7.48}$ & 14.62 & 7.48 & $\mathit{7.41}$ & \\
+BlendedMVS & $\mathbf{6.65}$ & 9.60 & 6.65 & $\mathit{5.28}$ & \\
+\midrule
+\multicolumn{6}{l}{\emph{Registered cameras $N_r/N_c$}}\\[1pt]
+MegaDepth  & 79\% & $\mathbf{80}$\% & $\mathbf{80}$\% & $\mathit{75\%}$ & 13126\\
+1DSfM      & $\mathbf{77}$\% & 74\% & 74\% & $\mathit{66\%}$ & 4563\\
+Strecha    & $\mathbf{96}$\% & 91\% & $\mathbf{96}$\% & $\mathit{98\%}$ & 54\\
+BlendedMVS & 88\% & $\mathbf{95}$\% & 88\% & $\mathit{90\%}$ & 225\\
+\bottomrule
+\end{tabular}}%
+\end{table}
+
 \end{document}
