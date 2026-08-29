@@ -52,10 +52,10 @@ test. Under a strictly controlled protocol (identical tracks, robust bundle adju
 and training schedule, varying only the outlier mechanism) we compare label-free
 statistical removal (\mad{}) and soft reweighting against a from-scratch RESfM baseline
 across six datasets spanning $0.5\%$--$61\%$ measured outliers. The optimal mechanism
-\emph{flips with contamination}. Removal wins the high-contamination regime: at $61\%$ it
-matches the supervised baseline ($17.0\pm4.4\deg$ vs.\ $16.2\deg$) while both beat COLMAP,
-and at $43\%$ plain removal nearly halves the supervised median on every seed
-($1.4$--$1.8\deg$ vs.\ $2.9\deg$). Reweighting wins the low-contamination regime, beating
+\emph{flips with contamination}. Removal wins the high-contamination regime: at $61\%$
+plain removal beats the supervised baseline on every seed ($13.0\pm2.6\deg$ vs.\
+$16.2\deg$) and both beat COLMAP, while at $43\%$ it nearly halves the supervised median
+on every seed ($1.4$--$1.8\deg$ vs.\ $2.9\deg$). Reweighting wins the low-contamination regime, beating
 the supervised baseline $2.6$--$3.8\times$ on clean out-of-distribution data. Supervision
 retains the clean, in-distribution regime (self-supervised arms within
 $\sim\!15$--$20\%$). We trace this to a structural circularity: outlier labels
@@ -338,9 +338,10 @@ plain remove attains median $1.4$--$1.8$ vs.\ $2.9$ across all three seeds (its 
 $9.1\pm2.8$, remain failure-scene-dominated): a label-free win at $43\%$
 (Table~\ref{tab:matrix}), albeit against the baseline's single available seed.
 (4)~\emph{Extreme contamination} (1DSfM-hard, ${\sim}60\%$): removal beats weighting
-robustly ($17.0\pm4.4$ vs.\ $\sim\!22$ over seeds $20$--$22$) and \mad{} statistically
-matches the supervised baseline ($16.2$, seed 20), with both far ahead of COLMAP
-(\S\ref{sec:extreme}). Rotation means follow the same ordering on
+robustly, \mad{} ($17.0\pm4.4$ over seeds $20$--$22$) statistically matches the
+supervised baseline ($16.2$, seed 20), and plain remove goes further: $13.0\pm2.6$,
+below the baseline on \emph{every} seed, with tight medians ($11.9\pm0.6$ vs.\
+$13.1$); all label-free arms are far ahead of COLMAP (\S\ref{sec:extreme}). Rotation means follow the same ordering on
 MegaDepth/Strecha/BlendedMVS/Olsson (e.g.\ BlendedMVS $6.6$--$9.6\deg$ self-supervised
 vs.\ $36\deg$ supervised) and mildly favor the self-supervised arms on 1DSfM
 ($8.3$--$8.4\deg$ vs.\ $9.8\deg$) even where translation favors the baseline. 
@@ -439,7 +440,8 @@ COLMAP runs incremental mapping on the same tracks with known intrinsics.
 \toprule
 Method & Trans/Rot (post-BA) & Registered\\
 \midrule
-\mad{} & \textbf{12.2}/\textbf{14.4} & all\\
+remove & \textbf{10.6}/\textbf{13.6} & all\\
+\mad{} & 12.2/14.4 & all\\
 RESfM-scratch              & 16.2/22.7 & all\\
 COLMAP                     & 20.9/--   & 64\%\\
 weight & 21.9/25.6 & all\\
@@ -447,10 +449,10 @@ weight+TTT & 26.4/32.0 & all\\
 \bottomrule
 \end{tabular}
 \end{center}
-The mechanism-level ordering extrapolates: over seeds $20$--$22$,
-label-free removal attains $17.0\pm4.4$ translation vs.\ $\sim\!22$ for both soft arms,
-statistically matching the supervised baseline ($16.2$, seed 20; the tabulated seed-20
-draw, $12.2/14.4$, is favorable), and COLMAP degrades severely: its error is computed
+The mechanism-level ordering extrapolates: over seeds $20$--$22$, plain remove attains
+$13.0\pm2.6$ translation (below the supervised $16.2$, seed 20, on every seed; medians
+$11.9\pm0.6$ vs.\ $13.1$), \mad{} at $17.0\pm4.4$ statistically matches it, the soft
+arms trail at $\sim\!22$, and COLMAP degrades severely: its error is computed
 \emph{only over the $64\%$ of cameras it registers} (a favorable metric) yet still loses.
 Errors are large for every method (these scenes are hard), but the trend matches the
 label-ceiling prediction: the supervised advantage vanishes exactly where supervision can
