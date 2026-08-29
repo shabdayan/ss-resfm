@@ -65,7 +65,7 @@ $16.2$) and both beat COLMAP, while at $43\%$ it nearly halves the supervised me
 on every seed ($1.4$--$1.8$ vs.\ $2.9$). Reweighting wins the low-contamination regime, beating
 the supervised baseline $2.6$--$3.8\times$ on clean out-of-distribution data. Supervision
 retains the in-distribution regime and the cleanest OOD mean (self-supervised arms within
-$\sim\!15$--$20\%$ in distribution). We trace this to a structural circularity: outlier labels
+$\sim\!13$--$23\%$ in distribution). We trace this to a structural circularity: outlier labels
 require a trusted reconstruction of the very scenes whose contamination makes
 reconstruction hard (for \emph{any} gold-standard labeler, not just COLMAP), and we
 measure the resulting \emph{label ceiling}: regenerating supervision from scratch, label
@@ -320,7 +320,7 @@ ground-truth cameras on 1DSfM-hard).
 (left) and rotation (right) means (log scale) of the self-supervised arms vs.\ supervised
 RESfM, five of the six datasets ordered by measured contamination
 (Table~\ref{tab:main} data). Circled = best per dataset. The rotation panel mirrors the
-translation ordering, with the self-supervised arms also taking 1DSfM and the supervised
+translation ordering, with a self-supervised arm best on 1DSfM and the supervised
 BlendedMVS failure even more pronounced ($36\deg$).}
 \label{fig:complement}
 \end{figure*}
@@ -367,8 +367,9 @@ supervised baseline ($16.2$, seed 20), and plain remove goes further: $13.0\pm2.
 below the baseline on \emph{every} seed, with tight medians ($11.9\pm0.6$ vs.\
 $13.1$); all label-free arms are far ahead of COLMAP (\S\ref{sec:extreme}). Rotation means (Fig.~\ref{fig:complement}, right) follow the same ordering on
 MegaDepth/Strecha/BlendedMVS/Olsson (e.g.\ BlendedMVS $6.6$--$9.6\deg$ self-supervised
-vs.\ $36\deg$ supervised) and mildly favor the self-supervised arms on 1DSfM
-($8.3$--$8.4\deg$ vs.\ $9.8\deg$) even where translation favors the baseline. 
+vs.\ $36\deg$ supervised) and mildly favor madweight and weight on 1DSfM
+($8.3$--$8.4\deg$ vs.\ $9.8\deg$; weight+TTT trails at $11.2\deg$) even where translation
+favors the baseline. 
 
 \begin{table*}[t]\centering\small
 \caption{\textbf{Main controlled comparison (RESfM-aligned schedule).} Mean\,/\,median
@@ -644,7 +645,7 @@ multi-seed replication is in progress.
 dataset (Table~\ref{tab:main}) requires knowing the contamination level. We present a study
 of the phenomenon, not a turnkey adaptive method; an unsupervised selector is future work.
 (2)~Supervised RESfM retains in-distribution MegaDepth (the self-supervised arms come
-within $\sim\!15$--$20\%$, no closer) and the clean Strecha mean, and RESfM-released
+within $\sim\!13$--$23\%$, no closer) and the clean Strecha mean, and RESfM-released
 remains stronger on MegaDepth, so we claim no SOTA. (3)~Versus supervision, \mad{} has no stable winner at moderate or extreme
 ($17.0\pm4.4$ vs.\ $16.2$) contamination; plain remove leads on every evaluated seed at
 both $43\%$ and $\sim\!60\%$, but against a single-seed baseline, and the fully
@@ -657,8 +658,8 @@ the viewing graph~\cite{resfm}.
 \section{Conclusion}
 SS-RESfM shows that deep SfM outlier handling can be made \emph{entirely
 self-supervised} while staying within
-$\sim\!15$--$20\%$ of the supervised baseline in distribution, winning the clean-OOD
-splits, and beating it at high contamination (plain removal below the baseline on every
+$\sim\!13$--$23\%$ of the supervised baseline in distribution, winning two of the three
+clean-OOD splits, and beating it at high contamination (plain removal below the baseline on every
 seed), where both beat COLMAP and supervision itself can no longer be manufactured. The optimal mechanism is contamination-dependent:
 removal at high contamination, reweighting at low. Robust deep SfM should treat outlier
 handling as adaptive and self-supervised; code, configurations, and the rebuilt OOD
