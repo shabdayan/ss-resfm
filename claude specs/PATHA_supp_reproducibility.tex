@@ -55,6 +55,7 @@ robust bundle adjustment.
 conditions, vs.\ the published number. $N_r$ is the mean number of registered cameras
 per scene (mean $N_c{=}364.6$ ground-truth cameras); the published row averages the
 paper's per-scene Table~1 values.}
+\label{tab:supp_reprocond}
 \begin{tabular}{lccc}
 \toprule
 Condition & Trans & Rot ($\deg$) & $N_r$\\
@@ -87,7 +88,10 @@ from their released \texttt{environment.yaml}: Python 3.8.20, MKL-backed numpy 1
 is the CUDA build of PyTorch, forced by GPU-driver compatibility; the BA stage is
 CPU-only.) Re-evaluating all 36 scenes in this matched environment gives
 translation/rotation errors of $0.217/1.92\deg$, statistically indistinguishable from
-our environment's $0.209/1.89\deg$, and not the published $0.169/1.29\deg$.
+our environment's $0.209/1.89\deg$, and not the published $0.169/1.29\deg$. Registration is
+equally stable: all three of our conditions register $303.6$--$303.9$ cameras per scene
+on average (Table~\ref{tab:supp_reprocond}), slightly more than the published $298.9$,
+so the higher mean error is not an artifact of evaluating fewer cameras.
 
 \section{Mechanism: chaotic basin selection in robust BA}\label{sec:mech}
 \noindent\textbf{Initialization perturbation is at the $10^{-10}$ level.} We isolated the
@@ -146,7 +150,10 @@ recipe. The per-scene view makes two aggregate statements concrete: on 1DSfM no 
 arm dominates, the best mechanism flips scene by scene (with Ellis\_Island and
 Tower\_of\_London hard for every arm), consistent with the per-scene complementarity
 analysis in the main paper; on MegaDepth the four arms are close on most scenes and the
-dataset-level gap is dominated by a handful of high-error scenes.
+dataset-level gap is dominated by a handful of high-error scenes. Per scene, rotation
+tracks translation (the large translation failures, e.g.\ Tower\_of\_London, are
+rotation failures too), and $N_r$ stays in the $58$--$92\%$ range on 1DSfM with no arm
+systematically dropping scenes.
 Table~\ref{tab:supp_fullmetrics} completes the dataset-level record with rotation and
 registered-camera counts alongside translation. Rotation orders the arms consistently
 with translation on every dataset (including the supervised BlendedMVS failure,
