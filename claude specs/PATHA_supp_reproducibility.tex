@@ -52,17 +52,17 @@ robust bundle adjustment.
 
 \begin{table}[h]\centering\small
 \caption{Released RESfM checkpoint, MegaDepth 36-scene post-BA means, under three
-conditions, vs.\ the published number. $N_r$ sums registered cameras over the 36 scenes
-(of $N_c{=}13{,}126$ ground-truth cameras); the published $N_r$ sums the paper's
-per-scene Table~1 values.}
+conditions, vs.\ the published number. $N_r$ is the mean number of registered cameras
+per scene (mean $N_c{=}364.6$ ground-truth cameras); the published row averages the
+paper's per-scene Table~1 values.}
 \begin{tabular}{lccc}
 \toprule
 Condition & Trans & Rot ($\deg$) & $N_r$\\
 \midrule
-Published (paper Table 1) & 0.169 & 1.29 & 10{,}760\\
-Our env (pip/OpenBLAS), 5-seed mean & 0.203 & 1.82 & 10{,}939\\
-Our env, seed 20 & 0.209 & 1.89 & 10{,}928\\
-Authors' exact stack (conda/MKL) & 0.217 & 1.92 & 10{,}934\\
+Published (paper Table 1) & 0.169 & 1.29 & 298.9\\
+Our env (pip/OpenBLAS), 5-seed mean & 0.203 & 1.82 & 303.9\\
+Our env, seed 20 & 0.209 & 1.89 & 303.6\\
+Authors' exact stack (conda/MKL) & 0.217 & 1.92 & 303.7\\
 \bottomrule
 \end{tabular}
 \end{table}
