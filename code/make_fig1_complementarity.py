@@ -15,9 +15,9 @@ labels = ["Strecha\n1.7%", "BlendedMVS\n3.1%", "MegaDepth\n25.4%\n(in-dist.)",
 x = list(range(5))
 
 # shallow translation error, mean (deg) — RESfM-aligned (finelr) schedule, seed 20
-weight     = [2.003, 0.100, 0.423, 12.787, 21.941]   # soft reweight (U-ESFM)
-wttt       = [1.977, 0.136, 0.390, 16.128, 26.435]   # soft reweight + TTT (U-ESFM; MD = mean of 3 eval repeats)
-madweight  = [2.498, 0.146, 0.422, 12.392, 12.211]   # label-free MAD-remove + head-weight (U-ESFM)
+weight     = [2.003, 0.100, 0.423, 12.787, 21.941]   # soft reweight (SS-RESfM)
+wttt       = [1.977, 0.136, 0.390, 16.128, 26.435]   # soft reweight + TTT (SS-RESfM; MD = mean of 3 eval repeats)
+madweight  = [2.498, 0.146, 0.422, 12.392, 12.211]   # label-free MAD-remove + head-weight (SS-RESfM)
 resfm      = [0.006, 0.379, 0.344, 11.032, 16.218]   # supervised from-scratch baseline (twin config)
 
 # Okabe-Ito (CVD-safe): blue, sky, vermillion; baseline neutral gray dashed
@@ -33,9 +33,9 @@ def plot(series, color, label, ls="-", marker="o"):
             label=label, zorder=3, clip_on=False)
 
 plot(resfm,     C_R, "RESfM-from-scratch (supervised)", ls="--", marker="s")
-plot(weight,    C_W, "U-ESFM · weight (soft)")
-plot(wttt,      C_T, "U-ESFM · weight+TTT")
-plot(madweight, C_M, "U-ESFM · madweight (label-free removal)")
+plot(weight,    C_W, "SS-RESfM · weight (soft)")
+plot(wttt,      C_T, "SS-RESfM · weight+TTT")
+plot(madweight, C_M, "SS-RESfM · madweight (label-free removal)")
 
 # direct end-labels at 1DSfM-hard
 for series, color, txt in [(madweight, C_M, "madweight"), (resfm, C_R, "RESfM"),

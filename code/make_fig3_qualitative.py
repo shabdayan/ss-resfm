@@ -10,8 +10,8 @@ import numpy as np, glob
 
 SCENE = "NYC_Library"
 ARMS = [
-    ("uesfm_shallow_rf_madweight_1dsfm_eval", "madweight (ours, label-free)", 1.32, "#D55E00"),
-    ("resfm_shallow_1dsfm_eval",              "RESfM (from-scratch, supervised)", 5.42, "#555555"),
+    ("uesfm_finelr_rf_madweight_1dsfm_eval", "madweight (ours, label-free)", 2.94, "#D55E00"),
+    ("resfm_finelr_1dsfm_eval",              "RESfM (from-scratch, supervised)", 6.28, "#555555"),
 ]
 INK, MUTED, GTC = "#1a1a1a", "#777777", "#9aa7b4"
 

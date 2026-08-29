@@ -17,7 +17,9 @@ def contam(ds, s):
     v=float(d['outlier_pct']); return v*100 if ds=="megadepth" else v
 def cd(ds): return "results/multiscene" if ds=="megadepth" else "results/crossdataset"
 def err(ds,m,s):
-    f=glob.glob(f"{cd(ds)}/uesfm_shallow_rf_{m}_{ds}_eval/{s}_ba/Results_FINE_TUNE*.xlsx")
+    root=(f"{cd(ds)}/uesfm_finelr_{m}_megadepth_eval" if ds=="megadepth"
+          else f"{cd(ds)}/uesfm_finelr_rf_{m}_{ds}_eval")
+    f=glob.glob(f"{root}/{s}_ba/Results_FINE_TUNE*.xlsx")
     if not f: return None
     try: return float(pd.read_excel(f[0]).iloc[0]['ts_ba_final_mean'])
     except: return None
@@ -76,4 +78,3 @@ out="../claude specs/PATHA_fig4_perscene"
 fig.savefig(out+".pdf",bbox_inches="tight"); fig.savefig(out+".png",dpi=200,bbox_inches="tight")
 print("wrote",out+".pdf and .png")
 print("counts:",{ds:len(pts[ds]) for ds in pts})
-PY

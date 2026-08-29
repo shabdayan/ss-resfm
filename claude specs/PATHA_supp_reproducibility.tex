@@ -7,24 +7,56 @@
 \def\confYear{2027}
 \def\paperID{*****}
 \renewcommand{\deg}{^{\circ}}
+\renewcommand{\thesection}{\Alph{section}}
 
-\title{Supplementary: Reproducibility of Post-BA Benchmark Means\\
-under Exact Environment Matching}
+\title{Supplementary Material:\\
+Environment Sensitivity and Reproducibility of Post-BA SfM Benchmarks}
 \author{Anonymous 3DV submission\\ Paper ID *****}
 
 \begin{document}
 \maketitle
 
-\section{Motivation}
+\section{What this document supports}
+This supplementary substantiates four specific statements in the main paper; a reviewer
+following any of its pointers can go directly to the listed section.
+\begin{itemize}\itemsep2pt
+\item \emph{Protocol, ``Track provenance'':} ``$\sim\!0.209\deg$ is the reproducible level
+[for the released RESfM checkpoint] \ldots\ unchanged ($0.217\deg$) under the authors'
+exact pinned software stack'' --- Secs.~\ref{sec:repro}--\ref{sec:mech}.
+\item \emph{Protocol:} ``a stack-replication study (supplementary) shows the no-TTT arms
+are insensitive to it, while test-time fine-tuned means inherit solver-level
+nondeterminism'' --- Sec.~\ref{sec:ttt}.
+\item \emph{Table~1, $\dagger$ footnote:} ``TTT is run-to-run nondeterministic'' ---
+Sec.~\ref{sec:ttt}.
+\item \emph{Reading any post-BA mean in this literature:} differences
+$\lesssim\!0.05\deg$ are within environment noise --- Sec.~\ref{sec:implications}.
+\end{itemize}
+
+\section{The reproduction question}\label{sec:repro}
 Evaluating the RESfM authors' \emph{released checkpoint} in our harness on the 36 MegaDepth
 test scenes yields a post-BA mean translation error of $0.209$ vs.\ the published $0.169$
 (rotation $1.89\deg$ vs.\ $1.29\deg$). Since our controlled comparisons hinge on baseline
-fidelity, we traced this discrepancy to its source. The result is a finding of independent
+fidelity, we traced this discrepancy to its source. The finding is of independent
 interest: \textbf{post-BA means on internet-photo benchmarks carry an irreducible
 environment-noise floor of $\mathcal{O}(0.05)$}, produced by chaotic basin selection in
 robust bundle adjustment.
 
-\section{Eliminating the controllable factors}
+\begin{table}[h]\centering\small
+\caption{Released RESfM checkpoint, MegaDepth 36-scene post-BA means, under three
+conditions, vs.\ the published number.}
+\begin{tabular}{lcc}
+\toprule
+Condition & Rot ($\deg$) & Trans\\
+\midrule
+Published (paper Table 1) & 1.29 & 0.169\\
+Our env (pip/OpenBLAS), 5-seed mean & 1.82 & 0.203\\
+Our env, seed 20 & 1.89 & 0.209\\
+Authors' exact stack (conda/MKL) & 1.92 & 0.217\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Eliminating the controllable factors}\label{sec:factors}
 \noindent\textbf{Data.} Our MegaDepth npz files are byte-identical to the authors' released
 archive, including the Group-2 300-camera subsamples.
 
@@ -46,7 +78,7 @@ CPU-only.) Re-evaluating all 36 scenes in this matched environment gives
 $1.92\deg/0.217$ --- statistically indistinguishable from our environment's
 $1.89\deg/0.209$, and not the published $1.29\deg/0.169$.
 
-\section{The mechanism: chaotic basin selection in robust BA}
+\section{Mechanism: chaotic basin selection in robust BA}\label{sec:mech}
 \noindent\textbf{Initialization perturbation is at the $10^{-10}$ level.} We isolated the
 BLAS layer by running the identical DLT triangulation (the BA initialization) on identical
 inputs under OpenBLAS and MKL, single-threaded: over $11{,}131$ triangulated points the
@@ -65,30 +97,14 @@ basin flips (scenes 0046, 0148, 0012, 5016; e.g.\ 0046: $0.043 \to 0.892$). Bidi
 scene-concentrated flips are the signature of basin selection --- not of a weaker checkpoint,
 which would degrade scenes uniformly.
 
-\begin{table}[h]\centering\small
-\caption{Released RESfM checkpoint, MegaDepth 36-scene post-BA means, under three
-conditions, vs.\ the published number.}
-\begin{tabular}{lcc}
-\toprule
-Condition & Rot ($\deg$) & Trans\\
-\midrule
-Published (paper Table 1) & 1.29 & 0.169\\
-Our env (pip/OpenBLAS), 5-seed mean & 1.82 & 0.203\\
-Our env, seed 20 & 1.89 & 0.209\\
-Authors' exact stack (conda/MKL) & 1.92 & 0.217\\
-\bottomrule
-\end{tabular}
-\end{table}
-
-
-\section{Stack replication and TTT run-to-run variance}
+\section{Stack replication and TTT run-to-run variance}\label{sec:ttt}
 Beyond the released checkpoint, we re-evaluated both from-scratch main-comparison
 checkpoints under the authors' pinned stack (MKL numpy, pycolmap 3.10.0, pyceres 2.3),
 changing nothing else, and additionally repeated the TTT evaluation \emph{within} our own
 stack. The supervised baseline is essentially unchanged across stacks---MegaDepth
 $0.344\!\to\!0.350$ mean, $0.070\!\to\!0.088$ median, only $7/36$ scenes moving more than
 $0.05^{\circ}$ (max $\pm0.37^{\circ}$, bidirectional)---matching the released-checkpoint
-result above. The U-ESFM weight+TTT arm, by contrast, varies \emph{regardless of stack}:
+result above. The SS-RESfM weight+TTT arm, by contrast, varies \emph{regardless of stack}:
 three evaluations of the same checkpoint (ours, a same-stack repeat, the authors' stack)
 give MegaDepth means $0.316$, $0.401$, $0.453$ ($\sim\!18$--$20/36$ scenes shifting per
 repeat, up to $\pm2.9^{\circ}$, largely the same scenes, medians $0.12$--$0.19$). The
@@ -99,13 +115,13 @@ the single declared pipeline, treats TTT \emph{means} as carrying $\sim\!\pm0.07
 run-to-run variance, and rests its environment- and run-independent claims on the
 deterministic no-TTT cells (which reproduce exactly on repeat).
 
-\section{Implications}
+\section{Implications for reading the paper's numbers}\label{sec:implications}
 (1)~The published number and ours are draws from a distribution over environments; no
 software matching can force a particular draw. (2)~Differences of $\lesssim\!0.05$ in
 post-BA translation means on these benchmarks are \textbf{within environment noise} and
 should not be read as method differences --- by any paper. (3)~Consequently, meaningful
-comparisons must be \emph{environment-controlled}: every number in our main paper
+comparisons must be \emph{environment-controlled}: every number in the main paper
 (all arms, RESfM-from-scratch, and the released checkpoint) is produced in a single
-environment, and our out-of-distribution margins ($2\times$ and larger) sit far above this
+environment, and the out-of-distribution margins ($2\times$ and larger) sit far above this
 noise floor.
 \end{document}
