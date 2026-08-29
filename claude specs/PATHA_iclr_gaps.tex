@@ -1,0 +1,100 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs,xcolor,enumitem}
+\usepackage[colorlinks]{hyperref}
+\title{U-ESFM: What the current conclusions lack for an ICLR submission\\
+\large Calibrated against the bar RESfM itself cleared at ICLR 2025}
+\author{}
+\date{August 28, 2026}
+\begin{document}
+\maketitle
+
+\section*{Calibration}
+RESfM was accepted to ICLR with single-seed results, no error bars, no adaptive mechanism,
+and OOD numbers on its own unreplicated track preprocessing. Judged by that revealed bar,
+most items below are \emph{armor}, not entry requirements. The one structural difference:
+RESfM's headline margins were large ($\sim\!2\times$ over ESFM), so single-seed reporting
+was tolerable; \textbf{our headline is parity with small margins} (MegaDepth $0.316$ vs.\
+$0.344$, an $8\%$ gap, with measured seed std $\pm 0.08$--$0.09$)---the claimed margins sit
+\emph{inside} single-seed noise, which reviewers will catch. Hence one must-have, the
+rest optional strengtheners.
+
+\section*{Must-have}
+\begin{enumerate}[leftmargin=1.4em]
+\item \textbf{Seed error bars on the primary (finelr twin) table.} U-ESFM-finelr s21/s22:
+trained; the missing OOD/MD eval fleets (379 jobs, incl.\ Olsson) submitted Aug 28.
+RESfM-finelr s21/s22: \emph{launched Aug 28} (jobs 400449/400451, $\sim$2 days), our env
+(matches the table; env shown negligible for no-TTT evals). Goal: every main-table cell as
+mean$\pm$std over 3 seeds; ``on par without labels'' becomes defensible.
+\end{enumerate}
+
+\section*{Strongly advisable (each upgrades a caveat into a claim)}
+\begin{enumerate}[leftmargin=1.4em,resume]
+\item \textbf{TTT stack-sensitivity characterization.} New finding (Aug 28): under the
+authors' pinned BLAS stack, no-TTT RESfM moves $0.344\!\to\!0.350$ (7/36 scenes) while
+U-ESFM weight+TTT moves $0.316\!\to\!0.453$ (20/36 scenes, bidirectional): TTT amplifies
+solver-level nondeterminism $\sim\!20\times$. Same-env repeat control in flight to separate
+stack effect from TTT stochasticity. Needed: per-mechanism quantification, so the
+in-distribution parity claim is stated with its stability envelope rather than as a caveat.
+\item \textbf{Author-track replication (external validity).} All OOD numbers are on our own
+rebuilds, explicitly not comparable to published numbers. Fadi Khatib's preprocessed OOD
+tracks (${\sim}$Sep 4) unlock replication of the key arms on their preprocessing.
+(RESfM's own OOD numbers are equally unreplicated---this is armor, but high-value.)
+\item \textbf{Multi-dataset training under the canonical recipe.} The diversity finding
+(supervised gains 1DSfM but collapses clean OOD from epoch 1000; \textsc{madweight}
+uniquely survives, BMVS $0.22$ vs.\ $2.8$--$4.0$) is currently confounded (5-milestone
+recipe, early-vs-late checkpoint regimes). Fix in flight: 9-run authors-config multids
+batch launched Aug 28 (U-ESFM at $10^{-4}$, RESfM at both lrs, seeds 20--22, our env;
+jobs 410185--410213), then standard eval fleets.
+\item \textbf{Learning-rate symmetry closure.} Base lr is per-method ($10^{-4}$ self-sup,
+$10^{-3}$ supervised); disclosed, but the 2$\times$2 is incomplete. In flight:
+RESfM at $10^{-4}$ under authors' full recipe (faithful\_lr1e4, job 389928).
+\end{enumerate}
+
+\section*{Optional spine upgrade (would change the paper's shape)}
+\begin{enumerate}[leftmargin=1.4em,resume]
+\item \textbf{Selector impossibility as a thesis.} The 4-way negative (contamination,
+reprojection, held-out CV, cycle consistency all fail; oracle headroom real at $87\%$
+decisive scenes) is currently ``future work.'' For ICLR it could be elevated to a
+systematic label-free-signal-wall analysis (demonstrated $3\times$: mechanism selection,
+checkpoint selection by OOD, run ranking)---the intellectual spine RESfM never attempted.
+\item \textbf{Statistical treatment.} Per-scene bootstrap/significance on top of
+mean/median; expected by ICLR reviewers for small-margin claims.
+\end{enumerate}
+
+\section*{Already exceeding the RESfM-revealed bar (no action)}
+Measured per-dataset contamination; the label-ceiling measurement (recall $0.82\!\to\!0.26$--$0.39$,
+coverage $99\!\to\!55\%$ above ${\sim}15\%$); controlled twin protocol with full provenance
+ladder (scratch / faithful / matched-env / authors-code / released); regime-level
+adaptivity recommendation; environment noise-floor analysis.
+
+
+\section*{Baseline coverage vs.\ the RESfM paper's comparison set}
+RESfM (ICLR 2025) compares against ESFM, GASFM, Theia, GLOMAP, ESFM$^\ast$ (clean-track
+upper bound, unranked), COLMAP, VGGSfM, and MASt3R (the last two image-based, outside the
+shared-tracks protocol). Our coverage and the actions to close it:
+\begin{itemize}[leftmargin=1.4em]
+\item \textbf{ESFM} --- done (author code on our tracks, shallow + deep, 5-seed OOD evals).
+\item \textbf{COLMAP} --- done on our tracks (1DSfM-hard + spot checks); matched-env
+repeats running.
+\item \textbf{ESFM$^\ast$} --- \emph{in flight (launched Aug 28)}: GT-4px-filtered
+``\_star'' track copies built for MegaDepth/1DSfM/1DSfM-hard/Strecha/BlendedMVS; ESFM
+trained and tested on clean tracks per the paper's protocol. Highest-value missing
+baseline: it doubles as the oracle-removal upper bound for the label-ceiling argument and
+quantifies how much of that headroom label-free \textsc{madweight} captures.
+\item \textbf{GLOMAP} --- not computed. Next most valuable: modern classical global SfM,
+single binary, runs on COLMAP-format inputs; needed to preempt ``RESfM compared to
+classical SfM, why don't you?''
+\item \textbf{Theia} --- not computed; same role as GLOMAP, older pipeline, lower priority.
+\item \textbf{GASFM} --- blocked: forward/pre-BA works in our env, but post-BA requires
+their custom-compiled Ceres cost functors; closing it means wiring GASFM output into our
+pycolmap robust BA (engineering task).
+\item \textbf{VGGSfM / MASt3R} --- lowest priority: image-based (outside the controlled
+shared-tracks protocol) and RESfM already reports they cannot run the large scenes.
+\end{itemize}
+
+\section*{Timeline anchors}
+RESfM-finelr seeds + faithful pair + lr probe + multids quartet: results within ${\sim}2$
+days of Aug 28. Author tracks: ${\sim}$Sep 4. 3DV supplementary deadline: Sep 2 (no
+post-deadline results allowed). ICLR: all of the above land comfortably.
+\end{document}

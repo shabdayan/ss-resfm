@@ -56,13 +56,14 @@ adjustment, and training schedule, varying only the outlier mechanism---we compa
 removal, soft reweighting, a three-band hybrid, and a new MAD-remove\,+\,head-reweight
 variant (\mad{}) against a from-scratch RESfM baseline across five datasets spanning
 $2\%$--$61\%$ measured outliers. We find a clear complementarity: hard, statistics-based
-removal wins the high-contamination regime---on an extreme $\sim\!60\%$-outlier held-out
-set our label-free \mad{} beats both the supervised baseline ($12.2\deg$ vs.\ $16.2\deg$
-translation) and COLMAP itself, which fails to register a third of the cameras; soft
+removal wins the high-contamination regime among label-free mechanisms---on an extreme
+$\sim\!60\%$-outlier held-out set \mad{} attains $17.0\pm4.4\deg$ over three seeds vs.\
+$\sim\!22\deg$ for soft weighting, statistically matching the supervised baseline
+($16.2\deg$) while both beat COLMAP, which fails to register a third of the cameras; soft
 reweighting wins the low-contamination regime, beating the supervised baseline
 $2.6$--$3.8\times$ on out-of-distribution BlendedMVS; and in distribution the
-self-supervised arms reach mean-level parity with the supervised classifier
-($0.316\deg$ vs.\ $0.344\deg$ on MegaDepth), which retains the better median. We attribute
+self-supervised arms come within $\sim\!15$--$20\%$ of the supervised classifier
+($0.39$--$0.42\deg$ vs.\ $0.34\deg$ on MegaDepth), which retains the better median. We attribute
 this to domain shift and to a \emph{measurable label ceiling}: regenerating supervision with
 from-scratch COLMAP, label recall collapses from $0.82$ to $\sim\!0.3$ and label coverage
 from $99\%$ to $\sim\!55\%$ once contamination exceeds $\sim\!15\%$---precisely the regime
@@ -89,15 +90,15 @@ pseudo-labels from percentiles of the model's own reprojection error --- so no g
 COLMAP outlier labels are used anywhere in training or test. On top of this self-supervised
 head we study a question RESfM's single supervised mechanism leaves open: \emph{is one
 outlier-handling mechanism optimal across the range of contamination levels SfM encounters?}
-We find that it is not. Holding everything else fixed---tracks, robust BA, training schedule,
-seed---and varying \emph{only} the outlier-handling mechanism, the best mechanism
-\textbf{flips with contamination}: aggressive statistics-based removal in the
-high-contamination regime, soft reweighting in the low-contamination regime, and the
-supervised classifier in the clean, in-distribution regime (Fig.~\ref{fig:complement}).
+We find that it is not. Holding everything else fixed and varying \emph{only} the
+outlier-handling mechanism, the best mechanism \textbf{flips with contamination}:
+aggressive statistics-based removal at high contamination, soft reweighting at low, and
+the supervised classifier in the clean, in-distribution regime
+(Fig.~\ref{fig:complement}).
 We further show that a \emph{label-free} removal mechanism---\mad{}, which discards points
 by the median-absolute-deviation (MAD) of their reprojection error and soft-weights the
-survivors---is the strongest arm at extreme contamination ($\sim\!60\%$ measured outliers),
-beating both the supervised from-scratch baseline and COLMAP itself. We attribute this to
+survivors---is the strongest label-free arm at extreme contamination ($\sim\!60\%$
+measured outliers), matching the supervised from-scratch baseline and beating COLMAP. We attribute this to
 (i)~domain shift---the classifier is trained only on in-distribution MegaDepth---and
 (ii)~supervised labeling's dependence on a COLMAP reconstruction and ground-truth poses,
 readily obtained for curated data but not for the contaminated collections where
@@ -116,9 +117,9 @@ tracks\,+\,BA\,+\,schedule pipeline, isolating the mechanism alone.
 (3)~The complementarity finding: the optimal mechanism flips with contamination; no single
 mechanism dominates.
 (4)~\mad{}, which removes outliers by robust reprojection statistics (MAD) --- needing not
-even the head --- and reweights survivors; it is the strongest arm at extreme
-contamination, beating the from-scratch supervised baseline by $25\%$ translation\,/\,$37\%$
-rotation and COLMAP itself at $\sim\!60\%$ measured outliers.
+even the head --- and reweights survivors; it is the strongest label-free arm at extreme
+contamination ($\sim\!60\%$), matching the from-scratch supervised baseline and beating
+COLMAP, which registers only two-thirds of the cameras.
 
 \section{Related Work}
 \textbf{Deep equivariant SfM.} Learning-based SfM regresses cameras from point tracks with
@@ -126,21 +127,19 @@ permutation-equivariant networks. ESFM~\cite{esfm} casts uncalibrated SfM as dee
 factorization over a measurement tensor, trained with an unsupervised reprojection loss;
 GASFM~\cite{gasfm} uses a graph-attention variant. Both assume outliers were already removed
 by two-view geometric verification. RESfM~\cite{resfm} targets contaminated internet
-collections with a \emph{sets-of-sets} permutation-equivariant architecture plus a supervised
-per-point inlier/outlier classification module and a robust BA, reporting accuracy close to
-its own clean-track upper bound (ESFM applied to outlier-free tracks, ``ESFM$^\ast$'') and on
-par with classical Theia/GLOMAP. End-to-end pointmap and pose-regression pipelines
-(VGGSfM, MASt3R, DUSt3R) target far smaller image sets. Our work proposes no new
-architecture; we reuse the RESfM/ESFM backbone and study the outlier-handling stage in
-isolation.
+collections with a \emph{sets-of-sets} architecture plus a supervised per-point
+inlier/outlier classification module and a robust BA, reporting accuracy close to its own
+clean-track upper bound (``ESFM$^\ast$'') and on par with classical Theia/GLOMAP.
+End-to-end pointmap and pose-regression pipelines (VGGSfM, MASt3R, DUSt3R) target far
+smaller image sets. We propose no new architecture; we reuse the RESfM/ESFM backbone and
+study the outlier-handling stage in isolation.
 
-\noindent\textbf{Outlier rejection.} Correspondence outliers that \emph{survive} RANSAC/
-two-view filtering---from repetitive structure, wide viewpoint, and illumination
-change---are the central difficulty in internet-scale SfM. Classical pipelines suppress
-them with M-estimators and robust BA; RESfM casts rejection as supervised classification. We
-contrast supervised classification against \emph{label-free} statistical removal via the
-median absolute deviation (MAD)~\cite{mad} and against soft reweighting, and show their
-relative merit is contamination-dependent.
+\noindent\textbf{Outlier rejection.} Correspondence outliers that \emph{survive}
+RANSAC/two-view filtering are the central difficulty in internet-scale SfM. Classical
+pipelines suppress them with M-estimators and robust BA; RESfM casts rejection as
+supervised classification. We contrast supervised classification against \emph{label-free}
+statistical removal via the median absolute deviation (MAD)~\cite{mad} and soft
+reweighting, and show their relative merit is contamination-dependent.
 
 \noindent\textbf{Robust bundle adjustment.} Following~\cite{resfm}, we apply a robust BA
 that removes high-reprojection and low-visibility points, keeps the largest connected
@@ -255,7 +254,10 @@ own released weights yield $0.209\deg$ in our harness (vs.\ their reported $0.16
 confirming our evaluation is faithful and that $\sim\!0.209\deg$ is the reproducible level;
 this is unchanged ($0.217\deg$) under the authors' exact pinned software stack (MKL BLAS,
 same pycolmap/pyceres), isolating the residual gap to solver/hardware-level
-nondeterminism in robust BA (analysis in the supplementary material).
+nondeterminism in robust BA (analysis in the supplementary material). All reported results come from this
+single pipeline and software stack; a stack-replication study (supplementary) shows the
+no-TTT arms are insensitive to it, while test-time fine-tuned \emph{means} inherit
+solver-level nondeterminism and should be read with that variance in mind.
 
 \noindent\textbf{Training generations.} An earlier generation of our runs used a
 five-milestone decay variant ($10\mathrm{k},12\mathrm{k},\dots,18\mathrm{k}$)---an
@@ -289,11 +291,10 @@ median as the representative figure.
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.88\linewidth]{PATHA_fig1_complementarity.pdf}
-\caption{\textbf{The optimal outlier mechanism flips with contamination.} Translation error
-(log scale) of U-ESFM's soft \textbf{weight} and \textbf{\mad{}} (both self-supervised) vs.\
-COLMAP-supervised RESfM across the four datasets ordered by contamination. Circled point = best per dataset. \mad{} wins
-high-outlier 1DSfM; weight wins low-outlier BlendedMVS; RESfM wins clean Strecha and
-in-distribution MegaDepth.}
+\caption{\textbf{The optimal outlier mechanism flips with contamination.} Translation
+error (log scale) of the self-supervised arms vs.\ supervised RESfM, five datasets ordered
+by measured contamination (Table~\ref{tab:main} data). Circled = best per dataset: weight
+wins low-outlier BlendedMVS, \mad{} wins extreme 1DSfM-hard, RESfM retains the rest.}
 \label{fig:complement}
 \end{figure}
 
@@ -311,37 +312,40 @@ consumes the reprojection-error branch $e$ for removal; the others use the head 
 Table~\ref{tab:main} is the controlled head-to-head under the RESfM-aligned schedule:
 every row shares tracks, architecture, schedule, robust BA, and seed; only the
 outlier-handling mechanism (and its supervision) differs. Four observations.
-(1)~\emph{In distribution}, the self-supervised weight+TTT arm attains the better
-MegaDepth \emph{mean} ($0.316$ vs.\ $0.344$), while supervised RESfM retains the better
-\emph{median} ($0.07$ vs.\ $0.19$)---mean-level parity without labels, with the supervised
-head still better on the typical scene. (2)~\emph{Clean OOD splits}: on BlendedMVS every
+(1)~\emph{In distribution}, supervised RESfM retains the better mean and median
+($0.344/0.07$); the deterministic self-supervised arms land within $\sim\!23\%$
+($0.42$), and the TTT arm averages $0.39\pm0.07$ over evaluation repeats---near-parity
+without labels, not a win. (2)~\emph{Clean OOD splits}: on BlendedMVS every
 self-supervised arm beats RESfM by $2.6$--$3.8\times$ ($0.10$--$0.15$ vs.\ $0.38$); on
 Strecha RESfM's mean is far better ($0.006$ vs.\ $\sim\!2$), but the medians \emph{tie}
 ($0.005$)---the self-supervised mean is dominated by a single failure scene.
-(3)~\emph{Extreme contamination} ($1$DSfM-hard, ${\sim}60\%$): label-free \mad{} wins
-clearly ($12.2$ vs.\ $16.2$), and the soft arms fall behind removal---the regime flip
-detailed below. (4)~\emph{Moderate-contaminated 1DSfM} ($43\%$) has no stable winner:
+(3)~\emph{Extreme contamination} ($1$DSfM-hard, ${\sim}60\%$): removal beats weighting
+robustly ($17.0\pm4.4$ vs.\ $\sim\!22$ over seeds $20$--$22$) and \mad{} statistically
+matches the supervised baseline ($16.2$, seed 20)---the regime flip detailed below. (4)~\emph{Moderate-contaminated 1DSfM} ($43\%$) has no stable winner:
 RESfM leads at this seed ($11.0/2.9$ vs.\ \mad{}'s $12.4/4.4$), the earlier generation
 showed the reverse ($5.5/2.3$ vs.\ $11.1/4.0$), and the three-seed replication brackets
 both---so we decline a directional claim at $43\%$ and rest the high-contamination case
-on the $60\%$ set, where the ranking is generation-consistent. The wider eight-mechanism matrix (Table~\ref{tab:shallow}) reports all arms;
-the deep-architecture excerpt is in the supplementary material.
+on the $60\%$ set, where the ranking is generation-consistent. The full eight-mechanism matrix is Table~\ref{tab:shallow}; the
+deep excerpt is in the supplementary material.
 
 \begin{table*}[t]\centering\small
 \caption{\textbf{Main controlled comparison (RESfM-aligned schedule).} Mean\,/\,median
 translation error (deg, post-BA), seed 20. All rows share tracks, architecture, schedule,
 robust BA, and seed; only the outlier mechanism and its supervision differ. Reference rows
-(means) below the rule. Best per column in \textbf{bold}.}
+(means) below the rule. Best per column in \textbf{bold}. $^{\dagger}$mean$\pm$std over
+three evaluation repeats (TTT is run-to-run nondeterministic; supplementary).
+$^{\ddagger}$mean$\pm$std over seeds $20$--$22$; the RESfM cell is seed 20 (its seed
+replicates were still training at submission). Other cells: deterministic, seed 20.}
 \label{tab:main}
 \setlength{\tabcolsep}{4.5pt}%
 \begin{tabular}{lccccc}
 \toprule
 Arm & MegaDepth (25.4) & 1DSfM (43.3) & 1DSfM-hard ($\sim$60) & Strecha (1.7) & BlendedMVS (3.1)\\
 \midrule
-U-ESFM $\cdot$ \mad{}       & 0.422/0.145 & 12.39/4.37 & \textbf{12.21/8.83} & 2.50/0.97 & 0.146/\textbf{0.004}\\
-U-ESFM $\cdot$ weight       & 0.423/0.182 & 12.79/11.01 & 21.94/13.13 & 2.00/0.026 & \textbf{0.100}/0.036\\
-U-ESFM $\cdot$ weight+TTT   & \textbf{0.316}/0.186 & 16.13/7.16 & 26.44/17.67 & 1.98/\textbf{0.005} & 0.136/0.011\\
-RESfM-scratch (supervised)  & 0.344/\textbf{0.070} & \textbf{11.03/2.93} & 16.22/13.08 & \textbf{0.006/0.005} & 0.379/0.348\\
+U-ESFM $\cdot$ \mad{}       & 0.422/0.145 & 12.39/4.37 & 17.0$\pm$4.4/\textbf{11.7}$^{\ddagger}$ & 2.50/0.97 & 0.146/\textbf{0.004}\\
+U-ESFM $\cdot$ weight       & 0.423/0.182 & 12.79/11.01 & 21.9$\pm$3.4/12.7$^{\ddagger}$ & 2.00/0.026 & \textbf{0.100}/0.036\\
+U-ESFM $\cdot$ weight+TTT   & 0.39$\pm$0.07/0.14$^{\dagger}$ & 16.13/7.16 & 21.9$\pm$3.9/14.5$^{\ddagger}$ & 1.98/\textbf{0.005} & 0.136/0.011\\
+RESfM-scratch (supervised)  & \textbf{0.344/0.070} & \textbf{11.03/2.93} & \textbf{16.22}/13.08 & \textbf{0.006/0.005} & 0.379/0.348\\
 \midrule
 RESfM (released)            & 0.209 & 10.71 & -- & 0.197 & 0.330\\
 RESfM (paper)               & 0.169 & -- & -- & -- & --\\
@@ -378,10 +382,9 @@ RESfM (paper)               & 0.169/1.29 & -- & -- & --\\
 
 \subsection{The complementarity finding}
 Fig.~\ref{fig:complement} visualizes the flip on the main-comparison arms. Reading the
-per-column winners of Table~\ref{tab:main}, \emph{every dataset is won by a different
-arm}: soft weight wins low-outlier BlendedMVS, weight+TTT wins the in-distribution
-MegaDepth mean, label-free \mad{} wins extreme 1DSfM-hard, and the supervised classifier
-wins clean Strecha (mean) and moderate 1DSfM. The self-supervised wins concentrate exactly
+per-column winners of Table~\ref{tab:main}: soft weight wins low-outlier BlendedMVS,
+label-free \mad{} wins extreme 1DSfM-hard, and the supervised classifier retains the
+clean and in-distribution cells (Strecha mean, MegaDepth, moderate 1DSfM). The self-supervised wins concentrate exactly
 where a label-free design should help---the clean OOD split where the supervised head
 misfires on out-of-distribution statistics (BlendedMVS, where RESfM's rotation error also
 explodes to $32\deg$), and the extreme-contamination regime where supervision itself can no
@@ -455,13 +458,14 @@ U-ESFM $\cdot$ weight+TTT  & 26.4/32.0 & all\\
 \bottomrule
 \end{tabular}
 \end{center}
-The complementarity extrapolates: label-free removal (\mad{}) beats the
-COLMAP-supervised baseline by $25\%$ translation\,/\,$37\%$ rotation, the soft arms fall
-further behind, and COLMAP itself degrades severely---its error is computed \emph{only
-over the $64\%$ of cameras it registers} (a favorable metric) yet still loses. Errors are
-large for every method---these scenes are hard---but the ranking at the extreme matches
-the label-ceiling prediction: the supervised advantage inverts exactly where supervision
-can no longer be manufactured.
+The complementarity extrapolates at the mechanism level: over seeds $20$--$22$,
+label-free removal attains $17.0\pm4.4$ translation vs.\ $\sim\!22$ for both soft arms,
+statistically matching the supervised baseline ($16.2$, seed 20; the tabulated seed-20
+draw, $12.2/14.4$, is favorable), and COLMAP degrades severely---its error is computed
+\emph{only over the $64\%$ of cameras it registers} (a favorable metric) yet still loses.
+Errors are large for every method---these scenes are hard---but the trend matches the
+label-ceiling prediction: the supervised advantage vanishes exactly where supervision can
+no longer be manufactured.
 
 \subsection{Which robust statistic? MAD vs.\ STD vs.\ Huber}
 \mad{} removes outliers by a robust statistic of the reprojection error, and the choice of
@@ -547,15 +551,13 @@ BlendedMVS & 0.112 & 0.122 & 0.112 & \textit{0.048}\\
 
 \noindent\textbf{Does per-scene contamination help selection?} Choosing madweight vs.\ weight
 \emph{per scene} by its contamination does \emph{not} improve the aggregate
-(Table~\ref{tab:selector}): within each dataset the contamination is too homogeneous relative
-to any threshold to trigger different choices, so a contamination-keyed selector collapses to
-per-dataset selection---and on in-distribution MegaDepth it chooses removal for every scene
-and thereby \emph{underperforms} plain weight ($0.51$ vs.\ $0.46$). An \emph{oracle} picking
-the best of all four mechanisms per scene (using ground-truth error) would help
-substantially---MegaDepth $0.46\!\to\!0.20$ (matching RESfM-released $0.209$) and 1DSfM
-$5.50\!\to\!4.58$---but the signal it needs is not per-scene contamination, which separates
-datasets rather than scenes within them. A deployable per-scene selector therefore requires a
-richer signal than contamination alone; we leave it to future work.
+(Table~\ref{tab:selector}): within each dataset the contamination is too homogeneous to
+trigger different choices, so a contamination-keyed selector collapses to per-dataset
+selection (and on MegaDepth it \emph{underperforms} plain weight, $0.51$ vs.\ $0.46$). An
+\emph{oracle} picking the best mechanism per scene from ground-truth error would help
+substantially (MegaDepth $0.46\!\to\!0.20$, 1DSfM $5.50\!\to\!4.58$), but the signal it
+needs is not contamination; a deployable selector requires a richer signal, left to future
+work.
 
 \noindent\textbf{Why a cheap unsupervised selector fails.} Beyond contamination, we tested
 three ground-truth-free selection signals against the oracle's per-scene choice on 1DSfM
@@ -603,11 +605,11 @@ centers vs.\ GT (open markers); large dots\,+\,connectors mark gross-drift camer
 (1)~No single deployable configuration wins all datasets; selecting the best mechanism per
 dataset (Table~\ref{tab:main}) requires knowing the contamination level. We present a study
 of the phenomenon, not a turnkey adaptive method; an unsupervised selector is future work.
-(2)~The in-distribution parity is mean-level only: supervised RESfM keeps the better
-MegaDepth median and the clean Strecha mean, and RESfM-released remains stronger than
-either from-scratch arm on MegaDepth, so we claim no SOTA. (3)~At moderate contamination
-($43\%$, 1DSfM) no winner is stable across seeds and training generations; our
-high-contamination claim rests on the $\sim\!60\%$ set, where the ranking is consistent.
+(2)~Supervised RESfM retains in-distribution MegaDepth (the self-supervised arms come
+within $\sim\!15$--$20\%$, no closer) and the clean Strecha mean, and RESfM-released
+remains stronger than either from-scratch arm on MegaDepth, so we claim no SOTA. (3)~Versus supervision, no stable winner exists at moderate ($43\%$) or extreme
+($\sim\!60\%$: \mad{} $17.0\pm4.4$ vs.\ $16.2$) contamination; the seed-robust claims
+are mechanism-level (removal $>$ weighting at high contamination) and the clean-OOD wins.
 (4)~OOD tracks are self-constructed; OOD numbers are controlled within our pipeline
 and not comparable to RESfM's published OOD numbers. (5)~Two symmetric-structure scenes
 (Ellis Island, Tower of London) fail for all methods and inflate 1DSfM means; we report
@@ -616,12 +618,11 @@ viewing graph---a failure mode RESfM itself reports~\cite{resfm}.
 
 \section{Conclusion}
 U-ESFM shows that deep SfM outlier handling can be made \emph{entirely
-self-supervised}---with no ground-truth or COLMAP labels---and still reach mean-level
-parity in distribution and win the clean-OOD and extreme-contamination regimes. The
-optimal mechanism is contamination-dependent: removal wins high contamination (where
-label-free \mad{} beats the supervised baseline and COLMAP itself, precisely where
-COLMAP-based supervision is hardest to obtain), reweighting wins low, and the supervised
-baseline retains the clean and typical-scene regimes. Robust deep SfM should treat outlier
+self-supervised}---no ground-truth or COLMAP labels---while staying within
+$\sim\!15$--$20\%$ of the supervised baseline in distribution, winning the clean-OOD
+splits, and matching it at extreme contamination, where both beat COLMAP and supervision
+itself can no longer be manufactured. The optimal mechanism is contamination-dependent:
+removal at high contamination, reweighting at low. Robust deep SfM should treat outlier
 handling as adaptive and self-supervised rather than a single supervised mechanism. Code,
 configurations, and the rebuilt OOD tracks will be made publicly available upon
 publication.

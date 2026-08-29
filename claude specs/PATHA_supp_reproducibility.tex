@@ -80,6 +80,25 @@ Authors' exact stack (conda/MKL) & 1.92 & 0.217\\
 \end{tabular}
 \end{table}
 
+
+\section{Stack replication and TTT run-to-run variance}
+Beyond the released checkpoint, we re-evaluated both from-scratch main-comparison
+checkpoints under the authors' pinned stack (MKL numpy, pycolmap 3.10.0, pyceres 2.3),
+changing nothing else, and additionally repeated the TTT evaluation \emph{within} our own
+stack. The supervised baseline is essentially unchanged across stacks---MegaDepth
+$0.344\!\to\!0.350$ mean, $0.070\!\to\!0.088$ median, only $7/36$ scenes moving more than
+$0.05^{\circ}$ (max $\pm0.37^{\circ}$, bidirectional)---matching the released-checkpoint
+result above. The U-ESFM weight+TTT arm, by contrast, varies \emph{regardless of stack}:
+three evaluations of the same checkpoint (ours, a same-stack repeat, the authors' stack)
+give MegaDepth means $0.316$, $0.401$, $0.453$ ($\sim\!18$--$20/36$ scenes shifting per
+repeat, up to $\pm2.9^{\circ}$, largely the same scenes, medians $0.12$--$0.19$). The
+attribution is therefore \emph{not} the software stack but test-time fine-tuning itself:
+it runs an optimization at evaluation time, so the chaotic basin selection documented
+above re-enters the result on every run. Consequently the paper reports all results from
+the single declared pipeline, treats TTT \emph{means} as carrying $\sim\!\pm0.07^{\circ}$
+run-to-run variance, and rests its environment- and run-independent claims on the
+deterministic no-TTT cells (which reproduce exactly on repeat).
+
 \section{Implications}
 (1)~The published number and ours are draws from a distribution over environments; no
 software matching can force a particular draw. (2)~Differences of $\lesssim\!0.05$ in

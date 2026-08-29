@@ -16,7 +16,7 @@ x = list(range(5))
 
 # shallow translation error, mean (deg) — RESfM-aligned (finelr) schedule, seed 20
 weight     = [2.003, 0.100, 0.423, 12.787, 21.941]   # soft reweight (U-ESFM)
-wttt       = [1.977, 0.136, 0.316, 16.128, 26.435]   # soft reweight + TTT (U-ESFM)
+wttt       = [1.977, 0.136, 0.390, 16.128, 26.435]   # soft reweight + TTT (U-ESFM; MD = mean of 3 eval repeats)
 madweight  = [2.498, 0.146, 0.422, 12.392, 12.211]   # label-free MAD-remove + head-weight (U-ESFM)
 resfm      = [0.006, 0.379, 0.344, 11.032, 16.218]   # supervised from-scratch baseline (twin config)
 
@@ -79,8 +79,8 @@ ax.legend(loc="upper left", frameon=False, fontsize=9, ncol=1,
 # caption note
 fig.text(0.5, -0.02,
          "Circled point = best method per dataset. weight wins low-outlier BlendedMVS; "
-         "weight+TTT wins in-distribution MegaDepth (mean);\nsupervised RESfM wins clean "
-         "Strecha and moderate 1DSfM; label-free madweight wins extreme 1DSfM-hard. "
+         "label-free madweight wins extreme 1DSfM-hard;\nsupervised RESfM retains clean "
+         "Strecha, in-distribution MegaDepth, and moderate 1DSfM. "
          "Shallow (1x3), RESfM-aligned schedule, seed 20.",
          ha="center", fontsize=7.5, color=MUTED)
 
