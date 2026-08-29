@@ -269,8 +269,9 @@ mechanism remains the only controlled variable.}
 
 \noindent\textbf{Track provenance.} MegaDepth tracks, preprocessing, and the 36 test scenes
 are \emph{identical} to RESfM, so MegaDepth is directly comparable to published numbers. The
-OOD tracks (1DSfM/1DSfM-hard/Strecha/BlendedMVS/Olsson) are \emph{reconstructed by us} (RESfM did not release
-OOD tracks); OOD comparisons are therefore \emph{controlled within our pipeline} and are
+OOD tracks (1DSfM/1DSfM-hard/Strecha/BlendedMVS/Olsson) are \emph{built by us} from the
+publicly released images and ground truth (feature extraction, matching, and track
+formation with our pipeline; RESfM did not release OOD tracks); OOD comparisons are therefore \emph{controlled within our pipeline} and are
 \textbf{not} directly comparable to RESfM's published OOD numbers. On MegaDepth, RESfM's
 own released weights yield $0.209\deg$ in our harness (vs.\ their reported $0.169\deg$),
 confirming our evaluation is faithful and that $\sim\!0.209\deg$ is the reproducible level;
