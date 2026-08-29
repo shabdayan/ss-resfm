@@ -133,7 +133,7 @@ environment, and the out-of-distribution margins ($2\times$ and larger) sit far 
 noise floor.
 
 \section{Per-scene results}\label{sec:perscene}
-Tables~\ref{tab:supp_perscene_1dsfm}--\ref{tab:supp_perscene_md2} report the per-scene
+Tables~\ref{tab:supp_perscene_1dsfm}--\ref{tab:supp_perscene_md1} report the per-scene
 post-BA mean translation errors underlying the main paper's dataset-level means and
 medians (seed 20, the declared pipeline): the ten 1DSfM scenes and the 36 MegaDepth test
 scenes, for the three self-supervised arms (madweight, weight, weight+TTT) and the
@@ -168,7 +168,7 @@ Yorkminster & $\mathbf{5.79}$ & 30.87 & 10.79 & 8.77\\
 \end{table}
 
 \begin{table}[t]\centering\scriptsize
-\caption{\textbf{Per-scene MegaDepth results (1/2).} Post-BA mean translation error (degrees) per scene, seed 20. Best per scene in \textbf{bold}. weight+TTT values are single draws of a run-to-run nondeterministic evaluation (Sec.~\ref{sec:ttt}).}
+\caption{\textbf{Per-scene MegaDepth results.} Post-BA mean translation error (degrees) per scene, seed 20. Best per scene in bold. weight+TTT values are single draws of a run-to-run nondeterministic evaluation (Sec.~\ref{sec:ttt}).}
 \label{tab:supp_perscene_md1}
 \setlength{\tabcolsep}{4pt}%
 \begin{tabular}{lcccc}
@@ -193,18 +193,6 @@ Scene & madweight & weight & weight+TTT & RESfM\\
 0231 & 0.15 & 0.07 & 0.24 & $\mathbf{0.02}$\\
 0411 & 0.03 & 0.32 & 0.46 & $\mathbf{0.02}$\\
 0377 & 0.05 & 0.26 & $\mathbf{0.03}$ & 0.06\\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[t]\centering\scriptsize
-\caption{\textbf{Per-scene MegaDepth results (2/2).} Continuation of Table~\ref{tab:supp_perscene_md1}.}
-\label{tab:supp_perscene_md2}
-\setlength{\tabcolsep}{4pt}%
-\begin{tabular}{lcccc}
-\toprule
-Scene & madweight & weight & weight+TTT & RESfM\\
-\midrule
 0102 & 0.02 & $\mathbf{0.01}$ & 0.01 & 0.02\\
 0147 & 2.99 & 1.21 & $\mathbf{1.20}$ & 3.22\\
 0148 & 0.33 & 0.11 & 0.04 & $\mathbf{0.04}$\\
@@ -226,6 +214,8 @@ Scene & madweight & weight & weight+TTT & RESfM\\
 \bottomrule
 \end{tabular}
 \end{table}
+
+
 
 
 \section{Implementation details}\label{sec:impl}
