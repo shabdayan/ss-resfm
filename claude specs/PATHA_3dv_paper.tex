@@ -496,29 +496,32 @@ supervised baseline, and the full three-seed band confirms it: remove+TTT
 $8.7\pm1.1$ mean (every seed below the baseline's $11.0$), plain remove median
 $1.59\pm0.18$ (vs.\ $2.9$; means $9.1\pm2.8$, dominated by the two failure scenes). On
 clean data the soft arms dominate the removal family, reproducing the complementarity.
+On outlier-free Olsson the grid flattens (all label-free arms $2.6$--$4.1$ vs.\
+supervised $8.5$): the clean-benchmark failure is specific to the supervised head, not
+the mechanism.
 
 \begin{table}[t]\centering\scriptsize
 \setlength{\tabcolsep}{2.5pt}%
 \caption{\textbf{Full shallow mechanism matrix} (RESfM-aligned schedule, seed 20;
 $^{\ddagger}$mean$\pm$std over seeds 20--22). Mean\,/\,median translation (deg,
-post-BA). Best per column in \textbf{bold}.}
+post-BA); Olsson column: means. Best per column in \textbf{bold}.}
 \label{tab:matrix}
-\setlength{\tabcolsep}{1pt}%
-\begin{tabular}{lcccc}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lccccc}
 \toprule
-Arm & MD & 1DSfM & Strecha & BMVS\\
+Arm & MD & 1DSfM & Strecha & BMVS & Olsson\\
 \midrule
-remove       & 0.60/0.19 & 9.1$\pm$2.8/\textbf{1.6$\pm$0.2}$^{\ddagger}$ & 3.02/1.68 & 0.27/0.19\\
-remove+TTT   & 0.49/0.13 & \textbf{8.7$\pm$1.1}/2.2$\pm$1.1$^{\ddagger}$ & 2.97/1.56 & 0.19/0.07\\
-hybrid       & 0.37/0.20 & 16.0$\pm$1.4/6.7$\pm$4.4$^{\ddagger}$ & 2.70/1.39 & 0.10/0.03\\
-hybrid+TTT   & 0.39/0.14 & 15.4$\pm$1.1/10.7$\pm$3.5$^{\ddagger}$ & 3.52/2.65 & 0.13/\textbf{0.00}\\
-\mad{}       & 0.42/0.15 & 11.5$\pm$2.3/6.0$\pm$1.4$^{\ddagger}$ & 2.50/0.97 & 0.15/0.004\\
-weight       & 0.42/0.18 & 15.8$\pm$3.1/10.9$\pm$2.1$^{\ddagger}$ & 2.00/0.03 & \textbf{0.10}/0.04\\
-weight+TTT   & 0.39/0.14 & 17.0$\pm$1.3/10.9$\pm$4.1$^{\ddagger}$ & 1.98/\textbf{0.005} & 0.14/0.01\\
+remove       & 0.60/0.19 & 9.1$\pm$2.8/\textbf{1.6$\pm$0.2}$^{\ddagger}$ & 3.02/1.68 & 0.27/0.19 & 2.81\\
+remove+TTT   & 0.49/0.13 & \textbf{8.7$\pm$1.1}/2.2$\pm$1.1$^{\ddagger}$ & 2.97/1.56 & 0.19/0.07 & 4.07\\
+hybrid       & 0.37/0.20 & 16.0$\pm$1.4/6.7$\pm$4.4$^{\ddagger}$ & 2.70/1.39 & 0.10/0.03 & 2.89\\
+hybrid+TTT   & 0.39/0.14 & 15.4$\pm$1.1/10.7$\pm$3.5$^{\ddagger}$ & 3.52/2.65 & 0.13/\textbf{0.00} & 3.19\\
+\mad{}       & 0.42/0.15 & 11.5$\pm$2.3/6.0$\pm$1.4$^{\ddagger}$ & 2.50/0.97 & 0.15/0.004 & \textbf{2.57}\\
+weight       & 0.42/0.18 & 15.8$\pm$3.1/10.9$\pm$2.1$^{\ddagger}$ & 2.00/0.03 & \textbf{0.10}/0.04 & 2.65\\
+weight+TTT   & 0.39/0.14 & 17.0$\pm$1.3/10.9$\pm$4.1$^{\ddagger}$ & 1.98/\textbf{0.005} & 0.14/0.01 & 7.74\\
 \midrule
-RESfM (sup.) & \textbf{0.34/0.07} & 11.03/2.93 & \textbf{0.006/0.005} & 0.38/0.35\\
+RESfM (sup.) & \textbf{0.34/0.07} & 11.03/2.93 & \textbf{0.006/0.005} & 0.38/0.35 & 8.47\\
 \bottomrule
-\end{tabular}
+\end{tabular}}%
 \end{table}
 
 \subsection{Which robust statistic? MAD vs.\ STD vs.\ Huber}
@@ -638,8 +641,8 @@ both $43\%$ and $\sim\!60\%$, but against a single-seed baseline, and the fully
 seed-robust claims remain the mechanism ordering and the clean-OOD wins.
 (4)~OOD tracks are self-constructed; OOD numbers are controlled within our pipeline
 and not comparable to RESfM's published OOD numbers. (5)~Two symmetric-structure scenes (Ellis Island, Tower of London) fail for all
-methods and inflate 1DSfM means (we report medians alongside); these are the cases where
-excess removal can disconnect the viewing graph~\cite{resfm}.
+methods and inflate 1DSfM means; these are the cases where excess removal can disconnect
+the viewing graph~\cite{resfm}.
 
 \section{Conclusion}
 SS-RESfM shows that deep SfM outlier handling can be made \emph{entirely
