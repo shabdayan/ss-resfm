@@ -8,6 +8,12 @@
 \def\paperID{524}
 \renewcommand{\deg}{^{\circ}}
 \renewcommand{\thesection}{\Alph{section}}
+% pack floats: allow tall top floats and fuller float pages
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\dbltopfraction}{0.92}
+\renewcommand{\floatpagefraction}{0.8}
+\renewcommand{\dblfloatpagefraction}{0.8}
+\setcounter{dbltopnumber}{3}
 
 \title{Supplementary Material:\\
 Environment Sensitivity and Reproducibility of Post-BA SfM Benchmarks}
@@ -139,32 +145,6 @@ environment, and the out-of-distribution margins ($2\times$ and larger) sit far 
 noise floor.
 
 \section{Per-scene results}\label{sec:perscene}
-Tables~\ref{tab:supp_perscene_1dsfm} and~\ref{tab:supp_perscene_md1} report the per-scene
-post-BA translation and rotation errors and registered-camera fractions underlying the
-main paper's dataset-level numbers (seed 20, the declared pipeline): the ten 1DSfM scenes and the 36 MegaDepth test
-scenes, for the three self-supervised arms (madweight, weight, weight+TTT) and the
-supervised RESfM baseline trained from scratch under the identical
-recipe. The per-scene view makes two aggregate statements concrete: on 1DSfM no single
-arm dominates, the best mechanism flips scene by scene (with Ellis\_Island and
-Tower\_of\_London hard for every arm), consistent with the per-scene complementarity
-analysis in the main paper; on MegaDepth the four arms are close on most scenes and the
-dataset-level gap is dominated by a handful of high-error scenes. Per scene, the
-catastrophic scenes (Ellis\_Island, Tower\_of\_London) fail in both metrics, though
-rotation does not always track translation (weight's Vienna\_Cathedral failure is
-translation-specific: $22.71/0.46$), and $N_r$ stays in the $58$--$92\%$ range on 1DSfM
-with no arm systematically dropping scenes.
-Table~\ref{tab:supp_fullmetrics} completes the dataset-level record with rotation and
-registered-camera counts alongside translation. Rotation broadly agrees with translation
-at the dataset level: the supervised BlendedMVS failure is even larger in rotation
-($36\deg$) and the high-contamination ordering is preserved, though the best arm can
-differ per metric (on MegaDepth, weight+TTT leads translation while RESfM leads
-rotation). Registration is contamination-dependent: the supervised baseline registers
-the most cameras in distribution ($85\%$ vs.\ $78$--$80\%$ on MegaDepth) and on clean
-Strecha, while under high contamination the label-free arms retain more cameras than
-supervision ($38$--$43\%$ vs.\ $37\%$ on 1DSfM-hard) at lower error (madweight).
-
-
-
 \begin{table*}[t]\centering\footnotesize
 \caption{\textbf{Per-scene 1DSfM results.} Post-BA translation and rotation error per scene (camera means; rotation in degrees), registered-camera fraction $N_r$, and the scene's ground-truth camera count $N_c$, seed 20. Best translation per scene in bold.}
 \label{tab:supp_perscene_1dsfm}
@@ -238,6 +218,36 @@ Scene & Trans/Rot & $N_r$ & Trans/Rot & $N_r$ & Trans/Rot & $N_r$ & Trans/Rot & 
 \bottomrule
 \end{tabular}
 \end{table*}
+
+Tables~\ref{tab:supp_perscene_1dsfm} and~\ref{tab:supp_perscene_md1} report the per-scene
+post-BA translation and rotation errors and registered-camera fractions underlying the
+main paper's dataset-level numbers (seed 20, the declared pipeline): the ten 1DSfM scenes and the 36 MegaDepth test
+scenes, for the three self-supervised arms (madweight, weight, weight+TTT) and the
+supervised RESfM baseline trained from scratch under the identical
+recipe. The per-scene view makes two aggregate statements concrete: on 1DSfM no single
+arm dominates, the best mechanism flips scene by scene (with Ellis\_Island and
+Tower\_of\_London hard for every arm), consistent with the per-scene complementarity
+analysis in the main paper; on MegaDepth the four arms are close on most scenes and the
+dataset-level gap is dominated by a handful of high-error scenes. Per scene, the
+catastrophic scenes (Ellis\_Island, Tower\_of\_London) fail in both metrics, though
+rotation does not always track translation (weight's Vienna\_Cathedral failure is
+translation-specific: $22.71/0.46$), and $N_r$ stays in the $58$--$92\%$ range on 1DSfM
+with no arm systematically dropping scenes.
+Table~\ref{tab:supp_fullmetrics} completes the dataset-level record with rotation and
+registered-camera counts alongside translation. Rotation broadly agrees with translation
+at the dataset level: the supervised BlendedMVS failure is even larger in rotation
+($36\deg$) and the high-contamination ordering is preserved, though the best arm can
+differ per metric (on MegaDepth, weight+TTT leads translation while RESfM leads
+rotation). Registration is contamination-dependent: the supervised baseline registers
+the most cameras in distribution ($85\%$ vs.\ $78$--$80\%$ on MegaDepth) and on clean
+Strecha, while under high contamination the label-free arms retain more cameras than
+supervision ($38$--$43\%$ vs.\ $37\%$ on 1DSfM-hard) at lower error (madweight).
+
+
+
+
+
+
 
 
 
