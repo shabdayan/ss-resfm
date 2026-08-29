@@ -30,7 +30,7 @@ C_W, C_T, C_M, C_R = "#0072B2", "#56B4E9", "#D55E00", "#555555"
 INK, MUTED, GRID = "#1a1a1a", "#666666", "#dddddd"
 
 fig, (ax, ax2) = plt.subplots(1, 2, figsize=(13.2, 4.4),
-                              gridspec_kw={"wspace": 0.18})
+                              gridspec_kw={"wspace": 0.3})
 ax.set_yscale("log"); ax2.set_yscale("log")
 
 def plot(series, color, label, ls="-", marker="o"):
@@ -69,7 +69,7 @@ for i in range(5):
     ax2.scatter([i], [vals2[bc]], s=200, facecolors="none", edgecolors=bc,
                 linewidths=1.8, zorder=4, clip_on=False)
 ax2.axvspan(-0.35, 1.5, color="#f2f7fb", zorder=0)
-ax2.axvspan(2.5, 4.35, color="#fdf3ee", zorder=0)
+ax2.axvspan(2.5, 5.6, color="#fdf3ee", zorder=0)
 ax2.set_ylabel("Rotation error (deg, log scale)", fontsize=14, color=INK)
 for s in ["top", "right"]: ax2.spines[s].set_visible(False)
 for s in ["left", "bottom"]: ax2.spines[s].set_color(GRID)
@@ -78,7 +78,7 @@ ax2.tick_params(colors=MUTED)
 
 # regime annotations (shaded bands; labels pinned to the bottom to avoid collisions)
 ax.axvspan(-0.35, 1.5, color="#f2f7fb", zorder=0)
-ax.axvspan(2.5, 4.35, color="#fdf3ee", zorder=0)
+ax.axvspan(2.5, 5.6, color="#fdf3ee", zorder=0)
 ax.text(0.5, 0.0045, "low contamination", ha="center", va="bottom",
         fontsize=11, color=MUTED, style="italic")
 ax.text(3.45, 0.0045, "high contamination", ha="center", va="bottom",
@@ -86,7 +86,7 @@ ax.text(3.45, 0.0045, "high contamination", ha="center", va="bottom",
 
 ax.set_xticks(x); ax.set_xticklabels(labels, fontsize=10, color=INK)
 ax2.set_xticks(x); ax2.set_xticklabels(labels, fontsize=10, color=INK)
-ax.set_xlim(-0.35, 4.35); ax2.set_xlim(-0.35, 4.35)
+ax.set_xlim(-0.35, 5.6); ax2.set_xlim(-0.35, 5.6)
 ax.set_ylabel("Translation error (deg, log scale)", fontsize=14, color=INK)
 ax.yaxis.set_major_locator(FixedLocator([0.01, 0.1, 0.3, 1, 3, 10, 30]))
 ax.yaxis.set_major_formatter(FixedFormatter(["0.01", "0.1", "0.3", "1", "3", "10", "30"]))
