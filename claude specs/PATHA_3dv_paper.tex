@@ -88,13 +88,14 @@ head we study a question RESfM's single supervised mechanism leaves open: \emph{
 outlier-handling mechanism optimal across the range of contamination levels SfM encounters?}
 We find that it is not. Holding everything else fixed and varying \emph{only} the
 outlier-handling mechanism, the best mechanism \textbf{flips with contamination}:
-aggressive statistics-based removal at high contamination, soft reweighting at low, and
-the supervised classifier in the clean, in-distribution regime
+hard removal at high contamination, soft reweighting at low, with the supervised
+classifier retaining the typical in-distribution scene and the cleanest OOD mean
 (Fig.~\ref{fig:complement}).
-We further show that \mad{}, a label-free removal mechanism which discards points
-by the median-absolute-deviation (MAD) of their reprojection error and soft-weights the
-survivors, is the strongest such arm at extreme contamination ($\sim\!60\%$
-measured outliers), matching the supervised from-scratch baseline and beating COLMAP. We attribute this to
+We further show the removal family wins the high-contamination regime outright: plain
+removal beats the supervised baseline on every seed at both $43\%$ and $\sim\!60\%$,
+while \mad{}, which discards points by the median-absolute-deviation (MAD) of their
+reprojection error and soft-weights the survivors with no learned threshold, matches the
+baseline there and beats COLMAP. We attribute this to
 (i)~domain shift, since the classifier is trained only on in-distribution MegaDepth, and
 (ii)~supervised labeling's dependence on a COLMAP reconstruction and ground-truth poses,
 readily obtained for curated data but not for the contaminated collections where
@@ -116,17 +117,17 @@ infrastructure at all.
 adaptive confident-pseudo-label head (trained on percentiles of the model's own reprojection
 error), label-free statistical removal, and robust BA, using \emph{no} ground-truth or
 COLMAP outlier labels, in contrast to RESfM's COLMAP-supervised head. It beats the
-supervised baseline on clean out-of-distribution data and matches it at extreme
-contamination.
+supervised baseline on clean out-of-distribution data and at high contamination.
 (2)~A controlled study of label-free removal vs.\ soft reweighting
 ($\pm$test-time fine-tuning) under an identical tracks\,+\,BA\,+\,schedule pipeline,
 isolating the mechanism alone.
 (3)~The complementarity finding: the optimal mechanism flips with contamination; no single
 mechanism dominates.
 (4)~\mad{}, which removes outliers by robust reprojection statistics (MAD), needing not
-even the head, and reweights survivors; it is the strongest label-free arm at extreme
-contamination ($\sim\!60\%$), matching the from-scratch supervised baseline and beating
-COLMAP, which registers only two-thirds of the cameras.
+even the head, and reweights survivors; it matches the from-scratch supervised baseline at
+extreme contamination ($\sim\!60\%$) with no learned threshold, while plain removal on
+the same self-supervised head beats the baseline outright, and both beat COLMAP, which
+registers only two-thirds of the cameras.
 
 \section{Related Work}
 \textbf{Deep equivariant SfM.} Learning-based SfM regresses cameras from point tracks with
