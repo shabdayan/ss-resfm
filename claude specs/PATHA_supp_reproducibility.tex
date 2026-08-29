@@ -44,7 +44,7 @@ Evaluating the RESfM authors' \emph{released checkpoint} in our harness on the 3
 test scenes yields a post-BA mean translation error of $0.209$ vs.\ the published $0.169$
 (rotation $1.89\deg$ vs.\ $1.29\deg$). Since our controlled comparisons hinge on baseline
 fidelity, we traced this discrepancy to its source. The finding is of independent
-interest: \textbf{post-BA means on internet-photo benchmarks carry an irreducible
+interest: \textbf{post-BA means on internet-photo benchmarks carry a practical
 environment-noise floor of $\mathcal{O}(0.05)$}, produced by chaotic basin selection in
 robust bundle adjustment.
 
@@ -73,7 +73,7 @@ $\pm 0.004$ and the post-BA mean by $\pm 0.01$; negligible.
 \noindent\textbf{Our re-implementation.} Running the \emph{authors' own evaluation code} in
 our environment also yields $\approx\!0.209$.
 
-\noindent\textbf{Network forward pass.} The pre-BA output ($11.88\deg/1.730$, identical
+\noindent\textbf{Network forward pass.} The pre-BA output (rotation/translation $11.88\deg/1.730$, identical
 across seeds) is deterministic; the divergence therefore enters at the robust-BA stage.
 (Notably, the paper does not report pre-BA numbers; all its tables are post-robust-BA.)
 
@@ -82,8 +82,8 @@ from their released \texttt{environment.yaml}: Python 3.8.20, MKL-backed numpy 1
 (\texttt{mkl=2023.1.0}), pycolmap 3.10.0, pyceres 2.3, lightning 2.3.3. (The sole deviation
 is the CUDA build of PyTorch, forced by GPU-driver compatibility; the BA stage is
 CPU-only.) Re-evaluating all 36 scenes in this matched environment gives
-$1.92\deg/0.217$, statistically indistinguishable from our environment's
-$1.89\deg/0.209$, and not the published $1.29\deg/0.169$.
+rotation/translation errors of $1.92\deg/0.217$, statistically indistinguishable from
+our environment's $1.89\deg/0.209$, and not the published $1.29\deg/0.169$.
 
 \section{Mechanism: chaotic basin selection in robust BA}\label{sec:mech}
 \noindent\textbf{Initialization perturbation is at the $10^{-10}$ level.} We isolated the
