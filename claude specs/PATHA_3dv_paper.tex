@@ -34,12 +34,12 @@
 \renewcommand{\deg}{^{\circ}}             % degree symbol in math mode
 % Required by the author-kit cvpr.sty in [review] mode.
 \def\paperID{524}
-% Tighten the gap between the Abstract heading and its text (12pt -> 4pt).
+% Tighten the gap between the Abstract heading and its text.
 \makeatletter
 \def\abstract{%
    \iftoggle{cvprpagenumbers}{}{\thispagestyle{empty}}%
    \centerline{\large\bf Abstract}%
-   \vspace*{4pt}\noindent\it\ignorespaces}
+   \vspace*{-3.0pt}\noindent\it\ignorespaces}
 \makeatother
 
 \title{SS-RESfM: Self-Supervised Outlier Handling\\
@@ -321,7 +321,9 @@ BlendedMVS failure even more pronounced ($36\deg$).}
 \includegraphics[width=0.85\textwidth]{PATHA_fig2_method.pdf}
 \caption{\textbf{Method.} A shared pipeline (top) in which only the outlier-mechanism block
 changes. The four mechanisms as weight-vs-signal transfer functions (bottom). Only \mad{}
-consumes the reprojection-error branch $e$ for removal; the others use the head score $s$.}
+consumes the reprojection-error branch $e$, and only for its removal step; its surviving
+points are still weighted by the head score $s$ ($w{=}1{-}s$). The other three mechanisms
+use $s$ alone.}
 \label{fig:method}
 \end{figure*}
 

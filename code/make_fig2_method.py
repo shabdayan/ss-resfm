@@ -99,9 +99,9 @@ fig.text(0.24, 0.665,
          "Only  madweight  uses the\nreprojection-error branch $e$ (MAD removal);\n"
          "survivors are weighted by the head score $s$.",
          ha="center", va="center", fontsize=8.5, color=C_MAD)
-fig.text(0.627, 0.652,
+fig.text(0.627, 0.665,
          "remove / weight / hybrid\nuse the head score $s$ alone.",
-         ha="center", va="top", fontsize=8.5, color=C_MAD)
+         ha="center", va="center", fontsize=8.5, color=C_MAD)
 arr = ConnectionPatch(xyA=(0.30, 0.705), coordsA=fig.transFigure,
                       xyB=(43, 6.0), coordsB=axp.transData,
                       arrowstyle="-|>", mutation_scale=13, lw=1.6, color=C_MAD, zorder=5)
