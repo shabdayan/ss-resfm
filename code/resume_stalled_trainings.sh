@@ -63,6 +63,7 @@ JOBS=(
  "resfm_shallow_faithful|confs/multiscene_resfm_shallow_faithful.conf|resfm_shallow_27scenes_faithful"
  "resfm_deep_multids_v2_ln|confs/multiscene_resfm_deep_multids_v2_ln.conf|resfm_deep_multids_v2_ln"
  "resfm_finelr_lr1e4_30k|confs/multiscene_resfm_shallow_finelr_lr1e4_30k.conf|resfm_shallow_27scenes_finelr_lr1e4_30k|29999"
+ "uesfm_sa_rf_lr1e3|confs/multiscene_uesfm_sa_rf_lr1e3.conf|uesfm_27scenes_sa_rf_lr1e3"
 )
 for row in "${JOBS[@]}"; do
   IFS='|' read -r exp conf resdir final ngpu pyexe <<< "$row"
