@@ -400,6 +400,24 @@ as well as translation (MegaDepth $1.22\deg$ vs.\ the supervised $2.01\deg$) but
 registers fewer 1DSfM cameras ($66\%$): selecting by translation error can sacrifice
 registration.
 
+\noindent\textbf{Two notions of registration, and an error-vs-coverage trade-off.} Two
+registration notions must be distinguished. Main-paper Table~4's ``Registered'' column
+reports \emph{pose coverage}: every learned arm outputs a pose for every camera
+(``all''), whereas COLMAP genuinely fails to register $36\%$ of the cameras. $N_r$ here
+is stricter: the cameras surviving robust BA and the $5$-pixel reprojection quality mask,
+i.e.\ the set over which the reported errors are computed. Under this stricter notion the
+plain-removal arms attain their low errors over a \emph{reduced} registered set: on
+1DSfM plain remove registers $59\%$ vs.\ the supervised baseline's $77\%$, and on
+1DSfM-hard $28\%$ vs.\ $37\%$ (remove+TTT: $59\%$/$32\%$), consistent with
+aggressive pruning disconnecting weakly-supported cameras (main-paper limitation~5). The
+camera-ready will state this caveat alongside the plain-remove claims (``over the cameras
+it retains''). madweight, by contrast, is \emph{registration-matched} to the supervised
+baseline ($74\%$/$38\%$ vs.\ $77\%$/$37\%$), so its statistical match at extreme
+contamination and its clean-OOD wins are not coverage artifacts, and the soft arms
+register at least as many cameras as supervision under high contamination. These
+readings, together with the paragraph above, are intended for the camera-ready main text
+(the Metrics paragraph, Secs.~5.1 and 5.5, and limitation~5).
+
 \begin{table*}[t]\centering\footnotesize
 \caption{\textbf{Extended main comparison} (extends main-paper Table~2; RESfM-aligned
 schedule, seed 20). Translation panel repeats the main table (mean\,/\,median;
