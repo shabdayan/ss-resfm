@@ -12,11 +12,11 @@
 %%%  [x] lr 2x2 grid + lr-robust vs lr-dependent OOD split (new Sec 5.2)
 %%%  [x] ESFM* clean-track reference row (our star tracks)
 %%%  [x] Registration two-notions + plain-remove coverage caveat
-%%%  [ ] 5-seed bands for headline cells (s23/s24 finishing)
+%%%  [x] 5-seed bands integrated (s20-24); OLSSON COLLAPSE = 4/5 SEEDS (conclusion change)
 %%%  [x] uesfm@1e-3: loses everywhere at 1e-3 -> lr policy vindicated, asymmetry vs baseline (wttt fleet pending)
-%%%  [x] 30k lr1e4: plateaus at Ep16000 through 30k -> OOD gain not under-training (eval fleet pending)
+%%%  [x] 30k lr1e4: Ep16000 ckpt = near-parity MD (0.365) + keeps OOD gains; strongest supervised OOD variant
 %%%  [x] faithful pair: authors' Accuracy selection weaker everywhere -> margins are lower bounds
-%%%  [ ] authors-faithful ESFM* (esfm_star_af, job 64116)
+%%%  [x] authors-faithful ESFM*: MD 0.462/0.049 (construction diff explained our-star 0.596); row updated
 %%%  [ ] layer-norm deep multids RESfM baseline (job 914663-successor)
 %%%  [ ] af-multids canonical-schedule replication; GLOMAP/Theia baselines
 %%%  [ ] natbib citations; appendix = per-seed tables + reproducibility study
@@ -39,9 +39,9 @@ and training schedule, varying only the outlier mechanism) we compare label-free
 statistical removal (\mad{}) and soft reweighting against a from-scratch RESfM baseline
 across six datasets spanning $0.5\%$--$61\%$ measured outliers. The optimal mechanism
 \emph{flips with contamination}. Removal wins the high-contamination regime: at $61\%$
-plain removal beats the supervised baseline on every seed pair ($13.0\pm2.6$ vs.\
-$17.3\pm1.6$) and both beat COLMAP, while at $43\%$ it beats every supervised seed's
-median ($1.4$--$1.8$ vs.\ $2.9$--$5.0$). Reweighting wins the low-contamination regime, beating
+plain removal beats the supervised baseline on every seed pair over five seeds each
+($12.4\pm2.1$ vs.\ $19.2\pm3.4$) and both beat COLMAP, while at $43\%$ it beats every
+supervised seed's median ($1.4$--$1.9$ vs.\ $2.4$--$4.3$). Reweighting wins the low-contamination regime, beating
 the supervised baseline $2.6$--$3.8\times$ on clean out-of-distribution data. Supervision
 retains the in-distribution regime and the cleanest OOD mean (self-supervised arms within
 $\sim\!13$--$23\%$ in distribution). We trace this to a structural circularity: outlier labels
@@ -338,31 +338,34 @@ contamination axis:
 (1)~\emph{Clean OOD} (Olsson $0.5\%$, Strecha $1.7\%$, BlendedMVS $3.1\%$): the
 label-free arms win decisively where the supervised head misfires, and the wins are
 seed-robust on both sides: every arm beats the full baseline band on BlendedMVS
-($0.10$--$0.15$ vs.\ $0.34\pm0.05$; the baseline's rotation failure is $27$--$36\deg$
-on every seed) and by ${\sim}3\times$ on Olsson means ($2.8\pm0.3$ vs.\ $8.44\pm0.23$;
-the supervised baseline collapses on a subset of the $39$ scenes on every seed). Strecha is the exception: RESfM's mean is far better on every seed
-($0.006$--$0.22$ vs.\ $\sim\!2$, a single self-supervised failure scene) and the
+($0.10$--$0.15$ vs.\ $0.35\pm0.04$; the baseline's rotation failure is $27$--$36\deg$
+on every seed) and by ${\sim}3\times$ on Olsson means against four of five baseline
+seeds ($3.0\pm0.3$ vs.\ $8.2$--$8.9$; one baseline seed escapes the collapse at $2.69$,
+revealing the clean-benchmark failure as basin-dependent rather than universal, its
+frequency $4/5$). Strecha is the exception: RESfM's mean is better on every seed
+($0.006$--$1.67$ vs.\ $\sim\!2$, though one baseline seed nearly loses it) and the
 medians tie ($0.005$).
 (2)~\emph{In distribution} (MegaDepth), supervised RESfM retains mean and median.
-Its mean is strongly seed-dependent ($0.32\pm0.12$; its best seed, $0.19$, approaches
-the released checkpoint) while its median is stable ($0.06\pm0.01$); the deterministic
-self-supervised arms land at $0.42$ and the TTT arm averages $0.39\pm0.07$ over
-evaluation repeats; near-parity without labels, not a win (though against the
-authors-faithful configuration, $0.50$, the arms reach parity outright).
+Its mean is strongly seed-dependent ($0.37\pm0.12$ over five seeds; its best, $0.19$,
+approaches the released checkpoint) while its median is stable ($0.07\pm0.02$); the
+deterministic self-supervised arms band at $0.50\pm0.08$ and the TTT arm averages
+$0.39\pm0.07$ over evaluation repeats; a $\sim\!35\%$ band-level gap without labels,
+not a win (though against the authors-faithful configuration, $0.50$, the arms reach
+parity).
 (3)~\emph{Moderate contamination} (1DSfM, $43\%$) has no stable winner between \mad{}
-($11.5\pm2.3$) and the baseline ($10.1\pm0.9$; overlapping bands), so we decline a
+($11.5\pm2.3$) and the baseline ($10.5\pm1.5$; overlapping bands), so we decline a
 directional claim for \mad{}. The \emph{removal family} leads on both statistics in
-band terms: remove+TTT $8.7\pm1.1$ vs.\ the baseline's $10.1\pm0.9$ (separated means,
+band terms: remove+TTT $8.9\pm1.2$ vs.\ the baseline's $10.5\pm1.5$ (separated means,
 overlapping tails), and plain remove's medians beat \emph{every} baseline seed
-pairwise ($1.4$--$1.8$ vs.\ $2.9$--$5.0$; its means, $9.1\pm2.8$, remain
-failure-scene-dominated): a label-free win at $43\%$ (Table~\ref{tab:matrix}), now
-established against the baseline's own seed band.
+pairwise at five seeds each ($1.4$--$1.9$ vs.\ $2.4$--$4.3$; its means, $9.1\pm2.2$,
+remain failure-scene-dominated): a label-free win at $43\%$ (Table~\ref{tab:matrix}),
+established against the baseline's own five-seed band.
 (4)~\emph{Extreme contamination} (1DSfM-hard, ${\sim}60\%$): removal beats weighting
-robustly, \mad{} ($17.0\pm4.4$) statistically matches the supervised baseline
-($17.3\pm1.6$), and plain remove goes further: $13.0\pm2.6$, below the baseline on
-\emph{every seed pair} (its worst seed, $15.8$, beats the baseline's best, $16.2$),
-with tight medians ($11.9\pm0.6$ vs.\ $13.9\pm0.9$); all label-free arms are far
-ahead of COLMAP (\S\ref{sec:extreme}). Rotation means (Fig.~\ref{fig:complement}, right) follow the same ordering on
+robustly, \mad{} ($18.9\pm4.1$) statistically matches the supervised baseline
+($19.2\pm3.4$), and plain remove goes further: $12.4\pm2.1$ over five seeds, below the
+baseline on \emph{every} of the $25$ seed pairs (its worst seed, $15.8$, beats the
+baseline's best, $16.2$), with tight medians ($10.8\pm2.8$ vs.\ $16.5\pm4.8$); all
+label-free arms are far ahead of COLMAP (\S\ref{sec:extreme}). Rotation means (Fig.~\ref{fig:complement}, right) follow the same ordering on
 MegaDepth/Strecha/BlendedMVS/Olsson (e.g.\ BlendedMVS $6.6$--$9.6\deg$ self-supervised
 vs.\ $36\deg$ supervised) and mildly favor madweight and weight on 1DSfM
 ($8.3$--$8.4\deg$ vs.\ $9.8\deg$; weight+TTT trails at $11.2\deg$) even where translation
@@ -374,7 +377,7 @@ translation error (post-BA), seed 20. All rows share tracks, architecture, sched
 robust BA, and seed; only the outlier mechanism and its supervision differ. Reference rows
 (means) below the rule; upper block = SS-RESfM arms. Best per column in \textbf{bold}. $^{\dagger}$mean$\pm$std over
 three evaluation repeats (TTT is run-to-run nondeterministic; appendix).
-$^{\ddagger}$mean$\pm$std over seeds $20$--$22$ (both methods). Other cells:
+$^{\ddagger}$mean$\pm$std over seeds $20$--$24$ (both methods). Other cells:
 deterministic, seed 20. Lower panels: rotation and registered-camera fraction (metric
 priority: translation, then rotation, then $N_r$, following RESfM). ESFM$^{\ast}$:
 vanilla ESFM trained and tested on ground-truth-cleaned tracks (clean-track reference;
@@ -388,15 +391,15 @@ Arm & MegaDepth (25.4) & 1DSfM (43.3) & 1DSfM-hard (60) & Strecha (1.7) & BMVS (
  & $N_c{=}13126$ & $4563$ & $1497$ & $54$ & $225$ & $3858$\\
 \midrule
 \multicolumn{7}{l}{\emph{Translation error (mean\,/\,median), the primary metric}}\\[1pt]
-\mad{}       & 0.422/0.145 & 12.39/4.37 & 17.0$\pm$4.4/$\mathbf{11.7}$$^{\ddagger}$ & 2.50/0.97 & 0.146/$\mathbf{0.004}$ & $\mathbf{2.8\pm 0.3}$/1.2$^{\ddagger}$\\
-weight       & 0.423/0.182 & 12.79/11.01 & 21.9$\pm$3.4/12.7$^{\ddagger}$ & 2.00/0.026 & $\mathbf{0.100}$/0.036 & 2.8$\pm$0.4/1.1$^{\ddagger}$\\
-weight+TTT   & 0.39$\pm$0.07/0.14$^{\dagger}$ & 16.13/7.16 & 21.9$\pm$3.9/14.5$^{\ddagger}$ & 1.98/$\mathbf{0.005}$ & 0.136/0.011 & 8.0$\pm$0.4/0.4$^{\ddagger}$\\
-RESfM-scratch (supervised)$^{\ddagger}$  & $\mathbf{0.32\pm0.12}$/$\mathbf{0.06\pm0.01}$ & $\mathbf{10.1\pm0.9}$/$\mathbf{3.8\pm1.1}$ & 17.3$\pm$1.6/13.9$\pm$0.9 & $\mathbf{0.09\pm0.12/0.005}$ & 0.34$\pm$0.05/0.31 & 8.44$\pm$0.23/0.80\\
+\mad{}       & 0.422/0.145 & 12.39/4.37 & 18.9$\pm$4.1/$\mathbf{13.4}$$^{\ddagger}$ & 2.50/0.97 & 0.146/$\mathbf{0.004}$ & $\mathbf{3.0\pm 0.3}$/1.4$^{\ddagger}$\\
+weight       & 0.423/0.182 & 12.79/11.01 & 22.9$\pm$2.8/15.6$^{\ddagger}$ & 2.00/0.026 & $\mathbf{0.100}$/0.036 & 2.9$\pm$0.3/1.1$^{\ddagger}$\\
+weight+TTT   & 0.39$\pm$0.07/0.14$^{\dagger}$ & 16.13/7.16 & 22.2$\pm$3.2/15.3$^{\ddagger}$ & 1.98/$\mathbf{0.005}$ & 0.136/0.011 & 8.0$\pm$0.3/0.6$^{\ddagger}$\\
+RESfM-scratch (supervised)$^{\ddagger}$  & $\mathbf{0.37\pm0.12}$/$\mathbf{0.07\pm0.02}$ & $\mathbf{10.5\pm1.5}$/$\mathbf{3.4\pm0.7}$ & 19.2$\pm$3.4/16.5$\pm$4.8 & $\mathbf{0.39\pm0.72/0.01}$ & 0.35$\pm$0.04/0.33 & 7.4$\pm$2.6/0.95\\
 \midrule
 RESfM (released)            & 0.209 & 10.71 & -- & 0.197 & 0.330 & --\\
 RESfM (paper)               & 0.169 & -- & -- & -- & -- & --\\
 RESfM-faithful (authors' ckpt selection) & 0.496 & 12.00 & 17.58 & 0.144 & 0.489 & 8.77\\
-ESFM$^{\ast}$ (clean tracks) & 0.596 & 12.96 & 16.62 & 1.17 & 0.398 & --\\
+ESFM$^{\ast}$ (clean tracks) & 0.462 & 13.84 & 15.20 & 1.16 & 0.327 & --\\
 \midrule
 \multicolumn{7}{l}{\emph{Rotation error ($\deg$, mean\,/\,median), seed 20}}\\[1pt]
 \mad{}       & 3.49/1.33 & $\mathbf{8.31}$/4.53 & $\mathbf{14.40}$/$\mathbf{7.39}$ & 14.62/8.43 & 9.60/0.38 & 13.57/4.37\\
@@ -440,8 +443,13 @@ whereas its BlendedMVS, 1DSfM, and 1DSfM-hard deficits shrink substantially at t
 rate ($0.379\!\to\!0.139$, $11.0\!\to\!5.9$, $16.2\!\to\!12.8$): the
 under-trained low-rate model overfits MegaDepth less and generalizes better. Two follow-ups
 complete the grid. A $30$k-budget replicate at $10^{-4}$ plateaus (best validation at
-epoch $16$k, never improving through $30$k), so the low-rate model's OOD advantage is
-not an under-training artifact but a regularization effect. And the self-supervised
+epoch $16$k, never improving through $30$k), and its evaluation sharpens the picture:
+that checkpoint reaches \emph{near-parity in distribution} ($0.365$ vs.\ the $10^{-3}$
+baseline's $0.344$) while keeping the OOD gains (1DSfM $6.1$, 1DSfM-hard $13.9$,
+BlendedMVS $0.18$), making it the strongest supervised variant out of distribution
+(single seed). The Olsson ($8.27$) and Strecha ($1.64$) failures persist, and label-free
+plain removal still leads at extreme contamination ($12.4\pm2.1$ vs.\ $13.9$); the OOD
+advantage of the low rate is a regularization effect, not an under-training artifact. And the self-supervised
 arms show \emph{no} symmetric effect: trained at $10^{-3}$ they are worse on every
 dataset (madweight MegaDepth $0.75$ vs.\ $0.42$, 1DSfM $15.7$ vs.\ $12.4$, Olsson
 $10.1$ vs.\ $2.6$). Each method's declared rate is therefore its empirical best-of-two,
