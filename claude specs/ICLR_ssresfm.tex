@@ -18,7 +18,9 @@
 %%%  [x] faithful pair: authors' Accuracy selection weaker everywhere -> margins are lower bounds
 %%%  [x] authors-faithful ESFM*: MD 0.462/0.049 (construction diff explained our-star 0.596); row updated
 %%%  [ ] layer-norm deep multids RESfM baseline (job 914663-successor)
-%%%  [ ] af-multids canonical-schedule replication; GLOMAP/Theia baselines
+%%%  [x] selector study: reproj self-select (5x) = secondary mention only (author decision, not headline/SOTA);
+%%%      head=rank-calibrator-not-rate-estimator finding integrated; gauge ladder in 5.7
+%%%  [ ] af-multids canonical-schedule replication; GLOMAP rot-fix + Theia baselines
 %%%  [ ] natbib citations; appendix = per-seed tables + reproducibility study
 
 \title{SS-RESfM: Self-Supervised Outlier Handling\\
@@ -634,23 +636,40 @@ mechanisms per scene from ground-truth error would change the picture: MegaDepth
 $0.42\!\to\!0.116$, surpassing every fixed arm, the supervised baseline at $0.344$,
 and even RESfM-released at $0.209$, and 1DSfM $12.4\!\to\!5.8$ vs.\ the
 baseline's $11.0$. The performance is thus already \emph{latent} in the label-free mechanism family;
-selection, not mechanism design, is the bottleneck, and realizing this headroom without
-ground truth is future work.
+selection, not mechanism design, is the bottleneck. A first unsupervised step exists:
+running all five mechanisms and keeping the reconstruction with the lowest post-BA
+reprojection error reaches $0.276$ on MegaDepth, past every fixed arm and the supervised
+baseline ($0.344$), and matches the oracle on BlendedMVS (Table~\ref{tab:selector},
+self-sel.). We report this as a secondary observation rather than a claim: it spends
+$5\times$ test-time compute, and it inherits reprojection's retention bias exactly where
+pruning over-fires (1DSfM $12.8$ vs.\ plain remove's $8.9$). Cheaper selection signals
+fail informatively. The classification head cannot estimate contamination at all:
+trained on per-scene \emph{percentile} pseudo-labels, it is a rank calibrator, not a
+rate estimator, flagging a near-constant $39$--$42\%$ of observations on datasets
+whose true contamination spans $0.5$--$60\%$ (this also explains the collapse of
+contamination-keyed selection, and retroactively justifies \mad{}'s design choice of
+thresholding reprojection statistics rather than head scores). And \emph{pre}-fine-tune
+reprojection magnitudes measure domain shift, not contamination (in-distribution
+MegaDepth shows the largest raw error); only the \emph{post}-fine-tune residual tracks
+the contamination axis monotonically. Realizing the remaining headroom at unit compute
+is future work.
 
 \begin{table}[t]\centering\footnotesize
 \setlength{\tabcolsep}{3pt}%
 \caption{\textbf{Per-scene selection} (mean translation; RESfM-aligned schedule).
 Contamination-keyed selection collapses to per-dataset choice. The oracle uses
-ground-truth error over five mechanisms: an upper bound, not a deployable method.}
+ground-truth error over five mechanisms: an upper bound, not a deployable method.
+Self-sel.: run all five, keep the lowest post-BA reprojection error (unsupervised,
+$5\times$ test-time compute); a secondary observation, not a headline method.}
 \label{tab:selector}
-\begin{tabular}{lcccc}
+\begin{tabular}{lccccc}
 \toprule
-Dataset & weight & madwt & contam & oracle (GT)\\
+Dataset & weight & madwt & contam & self-sel.\ ($5\times$) & oracle (GT)\\
 \midrule
-MegaDepth  & 0.423 & $\mathbf{0.422}$ & 0.422 & $\mathit{0.116}$\\
-1DSfM      & 12.79 & $\mathbf{12.39}$ & 12.39 & $\mathit{5.78}$\\
-Strecha    & $\mathbf{2.00}$ & 2.50 & 2.00 & $\mathit{1.98}$\\
-BlendedMVS & $\mathbf{0.100}$ & 0.146 & 0.100 & $\mathit{0.083}$\\
+MegaDepth  & 0.423 & $\mathbf{0.422}$ & 0.422 & 0.276 & $\mathit{0.116}$\\
+1DSfM      & 12.79 & $\mathbf{12.39}$ & 12.39 & 12.83 & $\mathit{5.78}$\\
+Strecha    & $\mathbf{2.00}$ & 2.50 & 2.00 & 2.70 & $\mathit{1.98}$\\
+BlendedMVS & $\mathbf{0.100}$ & 0.146 & 0.100 & 0.083 & $\mathit{0.083}$\\
 \bottomrule
 \end{tabular}
 \end{table}
