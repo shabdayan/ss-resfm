@@ -20,7 +20,9 @@
 %%%  [ ] layer-norm deep multids RESfM baseline (job 914663-successor)
 %%%  [x] selector study: reproj self-select (5x) = secondary mention only (author decision, not headline/SOTA);
 %%%      head=rank-calibrator-not-rate-estimator finding integrated; gauge ladder in 5.7
-%%%  [ ] af-multids canonical-schedule replication; GLOMAP rot-fix + Theia baselines
+%%%  [x] af-multids U-ESFM 3-seed: BMVS diversity-robustness seed-stable (0.12+-0.01); 1DSfM gain
+%%%      VOLATILE (5.4/11.2/12.8) - '6.4 best anywhere' claim retired (conclusion change)
+%%%  [ ] af-multids RESfM rows (4 finishing) -> supervised diversity verdict; GLOMAP rot-fix; Theia
 %%%  [ ] natbib citations; appendix = per-seed tables + reproducibility study
 
 \title{SS-RESfM: Self-Supervised Outlier Handling\\
@@ -706,11 +708,15 @@ differences within single-seed noise on this benchmark, so consistent with, thou
 established by, these runs). If it holds, the implication is pointed: the data that
 helps is precisely the data whose COLMAP labels degrade (cf.\ the label ceiling), making
 supervised diversity scaling self-limiting. The
-label-free arms diverge by mechanism: soft weighting collapses on clean OOD like the
-baseline (BlendedMVS $2.9$--$4.0$), whereas \mad{} is diversity-robust (BlendedMVS
-$0.22$--$0.30$) and reaches our best high-contamination result anywhere (1DSfM $6.4$ at
-$52$ scenes). We report this as a labeled preliminary observation; a canonical-schedule,
-multi-seed replication is in progress.
+label-free arms diverge by mechanism, and the canonical-schedule three-seed replication
+(authors' configuration, $52$ scenes) now separates the robust from the fragile:
+\mad{}'s clean-OOD diversity-robustness is seed-stable (BlendedMVS $0.12\pm0.01$ vs.\
+the baseline's $0.35\pm0.04$), whereas its high-contamination gain is real only in the
+best case: 1DSfM $5.4/11.2/12.8$ across seeds ($9.8\pm3.9$), overlapping the
+single-pool band ($11.5\pm2.3$). Diversification can yield large gains at $43\%$ but
+does not do so reliably, and yields none at $60\%$ ($20.1\pm1.2$); soft weighting
+collapses on clean OOD like the baseline at the retired schedule ($2.9$--$4.0$) and
+holds only BlendedMVS under the canonical one.
 
 \section{Limitations}
 (1)~No single deployable configuration wins all datasets; selecting the best mechanism per
