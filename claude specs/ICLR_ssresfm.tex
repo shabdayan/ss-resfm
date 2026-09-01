@@ -344,7 +344,9 @@ seed-robust on both sides: every arm beats the full baseline band on BlendedMVS
 on every seed) and by ${\sim}3\times$ on Olsson means against four of five baseline
 seeds ($3.0\pm0.3$ vs.\ $8.2$--$8.9$; one baseline seed escapes the collapse at $2.69$,
 revealing the clean-benchmark failure as basin-dependent rather than universal, its
-frequency $4/5$). Strecha is the exception: RESfM's mean is better on every seed
+frequency $4/5$). The collapse is not a from-scratch artifact: the authors' released
+checkpoint also collapses on Olsson ($9.10$; identically, $9.18$, under their pinned
+software stack), as does the authors-faithful configuration ($8.77$). Strecha is the exception: RESfM's mean is better on every seed
 ($0.006$--$1.67$ vs.\ $\sim\!2$, though one baseline seed nearly loses it) and the
 medians tie ($0.005$).
 (2)~\emph{In distribution} (MegaDepth), supervised RESfM retains mean and median.
@@ -366,7 +368,9 @@ established against the baseline's own five-seed band.
 robustly, \mad{} ($18.9\pm4.1$) statistically matches the supervised baseline
 ($19.2\pm3.4$), and plain remove goes further: $12.4\pm2.1$ over five seeds, below the
 baseline on \emph{every} of the $25$ seed pairs (its worst seed, $15.8$, beats the
-baseline's best, $16.2$), with tight medians ($10.8\pm2.8$ vs.\ $16.5\pm4.8$); all
+baseline's best, $16.2$), with tight medians ($10.8\pm2.8$ vs.\ $16.5\pm4.8$); it also beats the authors'
+\emph{released} checkpoint there ($15.29$, environment-insensitive), so the extreme-%
+contamination win holds against every supervised variant we can construct or obtain; all
 label-free arms are far ahead of COLMAP (\S\ref{sec:extreme}). Rotation means (Fig.~\ref{fig:complement}, right) follow the same ordering on
 MegaDepth/Strecha/BlendedMVS/Olsson (e.g.\ BlendedMVS $6.6$--$9.6\deg$ self-supervised
 vs.\ $36\deg$ supervised) and mildly favor madweight and weight on 1DSfM
@@ -398,7 +402,7 @@ weight       & 0.423/0.182 & 12.79/11.01 & 22.9$\pm$2.8/15.6$^{\ddagger}$ & 2.00
 weight+TTT   & 0.39$\pm$0.07/0.14$^{\dagger}$ & 16.13/7.16 & 22.2$\pm$3.2/15.3$^{\ddagger}$ & 1.98/$\mathbf{0.005}$ & 0.136/0.011 & 8.0$\pm$0.3/0.6$^{\ddagger}$\\
 RESfM-scratch (supervised)$^{\ddagger}$  & $\mathbf{0.37\pm0.12}$/$\mathbf{0.07\pm0.02}$ & $\mathbf{10.5\pm1.5}$/$\mathbf{3.4\pm0.7}$ & 19.2$\pm$3.4/16.5$\pm$4.8 & $\mathbf{0.39\pm0.72/0.01}$ & 0.35$\pm$0.04/0.33 & 7.4$\pm$2.6/0.95\\
 \midrule
-RESfM (released)            & 0.209 & 10.71 & -- & 0.197 & 0.330 & --\\
+RESfM (released)            & 0.209 & 11.12 & 15.29 & 0.197 & 0.330 & 9.10\\
 RESfM (paper)               & 0.169 & -- & -- & -- & -- & --\\
 RESfM-faithful (authors' ckpt selection) & 0.496 & 12.00 & 17.58 & 0.144 & 0.489 & 8.77\\
 ESFM$^{\ast}$ (clean tracks) & 0.462 & 13.84 & 15.20 & 1.16 & 0.327 & --\\
