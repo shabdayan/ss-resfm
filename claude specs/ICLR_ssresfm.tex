@@ -829,7 +829,13 @@ high-contamination result.
 A third observation concerns the baseline specifically: its clean-OOD instability is
 already present \emph{before} BA (Strecha $0.68\pm0.78$, Olsson $11.01\pm2.27$, versus
 $\pm0.02$--$0.5$ for every self-supervised arm), locating that failure in supervised
-training rather than in evaluation.
+training rather than in evaluation. The single-run reference rows in the lower block
+sharpen the same point: every supervised variant, including the authors' released
+weights, leaves BA with an Olsson error of $8.1$--$9.1$ despite entering it at
+$11.9$--$12.1$ --- a repair factor of only ${\sim}1.4\times$, against $4.7$--$5.5\times$
+for the label-free arms from a \emph{worse} starting point ($13.4$--$17.1 \to
+2.9$--$3.6$). On the clean benchmark the supervised head does not give bundle adjustment
+a set of observations it can fix.
 
 \begin{table*}[t]\centering\footnotesize
 \caption{\textbf{Pre-BA $\to$ post-BA translation error}, mean$\pm$std over five training
@@ -848,6 +854,12 @@ weight+TTT & 3.01$\pm$0.03 $\to$ 0.40$\pm$0.11 & 26.63$\pm$0.10 $\to$ 15.72$\pm$
 remove & 3.03$\pm$0.02 $\to$ 0.51$\pm$0.08 & 25.34$\pm$0.10 $\to$ 9.13$\pm$2.17 & 36.32$\pm$0.09 $\to$ 12.42$\pm$2.05 & 4.22$\pm$0.19 $\to$ 3.20$\pm$0.11 & 0.62$\pm$0.01 $\to$ 0.24$\pm$0.06 & 17.05$\pm$0.39 $\to$ 3.41$\pm$0.57\\
 remove+TTT & 3.04$\pm$0.02 $\to$ 0.56$\pm$0.07 & 25.23$\pm$0.13 $\to$ 8.93$\pm$1.20 & 36.32$\pm$0.07 $\to$ 15.15$\pm$0.98 & 4.31$\pm$0.18 $\to$ 3.01$\pm$0.07 & 0.63$\pm$0.02 $\to$ 0.22$\pm$0.10 & 17.03$\pm$0.47 $\to$ 3.63$\pm$0.35\\
 RESfM-scratch & 1.76$\pm$0.05 $\to$ 0.37$\pm$0.12 & 22.13$\pm$0.27 $\to$ 10.50$\pm$1.45 & 35.80$\pm$0.43 $\to$ 19.16$\pm$3.42 & 0.68$\pm$0.78 $\to$ 0.39$\pm$0.72 & 0.45$\pm$0.01 $\to$ 0.35$\pm$0.04 & 11.01$\pm$2.27 $\to$ 7.37$\pm$2.63\\
+\midrule
+\multicolumn{7}{l}{\emph{single-run reference rows (no seed band; pre $\to$ post only)}}\\[1pt]
+RESfM-faithful & 1.94 $\to$ 0.50 & 22.26 $\to$ 9.75 & 35.41 $\to$ 17.58 & 0.29 $\to$ 0.14 & 0.44 $\to$ 0.37 & 12.01 $\to$ 8.76\\
+RESfM-faithful @$10^{-4}$ & 2.23 $\to$ 0.60 & 22.88 $\to$ 6.72 & 34.98 $\to$ 16.21 & 1.27 $\to$ 0.22 & 0.32 $\to$ 0.17 & 12.00 $\to$ 8.11\\
+RESfM-released & 1.73 $\to$ 0.21 & 22.42 $\to$ 11.12 & 35.26 $\to$ 15.29 & 0.97 $\to$ 0.20 & 0.42 $\to$ 0.33 & 12.11 $\to$ 9.10\\
+RESfM @$10^{-4}$, 30k & 2.08 $\to$ 0.36 & 23.14 $\to$ 6.12 & 35.76 $\to$ 13.88 & 1.92 $\to$ 1.64 & 0.29 $\to$ 0.18 & 11.94 $\to$ 8.27\\
 \bottomrule
 \end{tabular}}%
 \end{table*}
