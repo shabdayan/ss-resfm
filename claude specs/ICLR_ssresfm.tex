@@ -810,6 +810,12 @@ Table~\ref{tab:prepost} reports, for every arm and dataset, the five-seed band o
 behaviour is what one expects of a non-linear optimiser with multiple basins, and it is
 worth recording because two statements in the main text depend on it.
 
+A direct control separates the two sources. Re-evaluating the authors' \emph{fixed}
+released weights under five evaluation seeds gives $0.203\pm0.008$ on MegaDepth
+(pre-BA $1.730\pm0.005$): with the network held constant, bundle adjustment is close to
+deterministic. The large bands below therefore reflect genuine differences between
+independently trained networks, amplified by BA, and not evaluation noise.
+
 First, essentially all seed variability is created by bundle adjustment, not by training:
 pre-BA bands are $\pm0.02$--$0.1$ (relative spread below $1\%$ on every contaminated
 dataset), while the same cells after BA carry $\pm1.7$--$4.1$. The networks are highly
@@ -840,7 +846,10 @@ a set of observations it can fix.
 \begin{table*}[t]\centering\footnotesize
 \caption{\textbf{Pre-BA $\to$ post-BA translation error}, mean$\pm$std over five training
 seeds (seeds $20$--$24$). Pre-BA bands are one to two orders of magnitude tighter than
-post-BA bands.}
+post-BA bands. $^{\S}$For the released checkpoint the MegaDepth entry is a band over five
+\emph{evaluation} seeds on the fixed weights ($\pm0.008$), for comparison with the
+training-seed bands above: re-seeding the evaluation moves the result by two orders of
+magnitude less than retraining does.}
 \label{tab:prepost}
 \setlength{\tabcolsep}{3pt}%
 \resizebox{\textwidth}{!}{%
@@ -858,7 +867,7 @@ RESfM-scratch & 1.76$\pm$0.05 $\to$ 0.37$\pm$0.12 & 22.13$\pm$0.27 $\to$ 10.50$\
 \multicolumn{7}{l}{\emph{single-run reference rows (no seed band; pre $\to$ post only)}}\\[1pt]
 RESfM-faithful & 1.94 $\to$ 0.50 & 22.26 $\to$ 9.75 & 35.41 $\to$ 17.58 & 0.29 $\to$ 0.14 & 0.44 $\to$ 0.37 & 12.01 $\to$ 8.76\\
 RESfM-faithful @$10^{-4}$ & 2.23 $\to$ 0.60 & 22.88 $\to$ 6.72 & 34.98 $\to$ 16.21 & 1.27 $\to$ 0.22 & 0.32 $\to$ 0.17 & 12.00 $\to$ 8.11\\
-RESfM-released & 1.73 $\to$ 0.21 & 22.42 $\to$ 11.12 & 35.26 $\to$ 15.29 & 0.97 $\to$ 0.20 & 0.42 $\to$ 0.33 & 12.11 $\to$ 9.10\\
+RESfM-released$^{\S}$ & 1.730$\pm$0.005 $\to$ 0.203$\pm$0.008 & 22.42 $\to$ 11.12 & 35.26 $\to$ 15.29 & 0.97 $\to$ 0.20 & 0.42 $\to$ 0.33 & 12.11 $\to$ 9.10\\
 RESfM @$10^{-4}$, 30k & 2.08 $\to$ 0.36 & 23.14 $\to$ 6.12 & 35.76 $\to$ 13.88 & 1.92 $\to$ 1.64 & 0.29 $\to$ 0.18 & 11.94 $\to$ 8.27\\
 \bottomrule
 \end{tabular}}%
