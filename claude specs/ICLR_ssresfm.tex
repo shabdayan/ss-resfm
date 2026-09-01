@@ -822,12 +822,16 @@ bundle adjustment is close to deterministic, and exactly deterministic on the sm
 clean sets. The large bands below therefore reflect genuine differences between
 independently trained networks, amplified by BA, and not evaluation noise.
 
-First, essentially all seed variability is created by bundle adjustment, not by training:
-pre-BA bands are $\pm0.02$--$0.1$ (relative spread below $1\%$ on every contaminated
-dataset), while the same cells after BA carry $\pm1.7$--$4.1$. The networks are highly
-reproducible across seeds; the pipeline's variance enters at the BA stage. This is the
-seed-level counterpart of the environment-level chaotic basin selection documented in the
-reproducibility study, now measured over $36$ independent cells.
+First, on the contaminated datasets nearly all seed variability is created by bundle
+adjustment, not by training: pre-BA bands are $\pm0.02$--$0.13$ for the self-supervised
+arms and $\pm0.05$--$0.43$ for the baseline (relative spreads of ${\sim}0.5\%$ and
+$1$--$3\%$ respectively), while the same cells after BA carry $\pm1.7$--$4.1$. The
+networks are highly reproducible across seeds; most of the pipeline's variance enters at
+the BA stage, which lowers the error on $234$ of $242$ baseline scene evaluations we
+examined while widening the \emph{relative} seed band by an order of magnitude --- BA
+compresses the mean and amplifies the spread. This is the seed-level counterpart of the
+environment-level chaotic basin selection documented in the reproducibility study, now
+measured over $36$ independent cells.
 
 Second, the removal arms do not produce better raw geometry than supervision --- they
 produce geometry that robust BA can repair. Pre-BA the supervised baseline leads
@@ -838,10 +842,25 @@ on Olsson ($17.1\to3.4$) against $1.5\times$ ($11.0\to7.4$). Feeding BA a cleane
 observation set, rather than a more accurate initialisation, is the mechanism behind the
 high-contamination result.
 
-A third observation concerns the baseline specifically: its clean-OOD instability is
-already present \emph{before} BA (Strecha $0.68\pm0.78$, Olsson $11.01\pm2.27$, versus
-$\pm0.02$--$0.5$ for every self-supervised arm), locating that failure in supervised
-training rather than in evaluation. The single-run reference rows in the lower block
+A third observation concerns the baseline specifically, and is the one exception to the
+first: its clean-OOD instability is already present \emph{before} BA (Strecha
+$0.68\pm0.78$, Olsson $11.01\pm2.27$, versus $\pm0.18$--$0.24$ and $\pm0.19$--$0.47$ for
+the self-supervised arms), locating that failure in supervised training rather than in
+bundle adjustment or evaluation. Per scene the failure is bimodal and seed-contingent
+rather than noisy: entry-P10 costs $0.04$--$0.06$ on three seeds and $4.0$/$7.0$ on the
+other two; dtu106 sits at $250$--$260$ on four seeds and $53$ on one. The same signature
+appears in-distribution at smaller amplitude --- individual MegaDepth scenes swing
+$3$--$4\times$ across seeds (0060: $1.0$--$3.3$; 0231: $0.5$--$2.2$) while opposite-signed
+swings cancel in the dataset mean, and the baseline's median per-scene std is about twice
+the arms' ($0.11$ vs.\ $0.04$--$0.05$). Our reading is structural: the supervised head
+fits fixed labels generated at ${\sim}25\%$ contamination, many decision boundaries
+achieve near-identical training loss, and its behaviour on scenes far from that regime
+--- near-outlier-free ones in particular --- is underdetermined and decided by the draw
+of the seed. The self-supervised arms, trained against their own reprojection-error
+percentiles, converge to nearly the same solution from every seed (per-scene stds as low
+as $0.01$). Stability is not accuracy --- the arms remain \emph{worse} pre-BA on clean
+data --- but predictability under retraining is a property the label-free objective buys
+that labels do not. The single-run reference rows in the lower block
 sharpen the same point: every supervised variant, including the authors' released
 weights, leaves BA with an Olsson error of $8.1$--$9.1$ despite entering it at
 $11.9$--$12.1$ --- a repair factor of only ${\sim}1.4\times$, against $4.7$--$5.5\times$
@@ -852,7 +871,8 @@ a set of observations it can fix.
 \begin{table*}[t]\centering\footnotesize
 \caption{\textbf{Pre-BA $\to$ post-BA translation error}, mean$\pm$std over five training
 seeds (seeds $20$--$24$). Pre-BA bands are one to two orders of magnitude tighter than
-post-BA bands. $^{\S}$For the released checkpoint the MegaDepth entry is a band over five
+post-BA bands, except the supervised baseline's clean-OOD cells (Strecha, Olsson), whose
+variance predates BA (see text). $^{\S}$For the released checkpoint the MegaDepth entry is a band over five
 \emph{evaluation} seeds on the fixed weights ($\pm0.008$), for comparison with the
 training-seed bands above: re-seeding the evaluation moves the result by two orders of
 magnitude less than retraining does.}
