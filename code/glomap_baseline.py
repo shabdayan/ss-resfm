@@ -17,7 +17,64 @@ Writes results/classical/glomap/<dataset>__<scene>.json
 import argparse, os, json, tempfile, shutil, subprocess
 import numpy as np
 import pycolmap
-from colmap_baseline import load_scene, build_database, add_matches, align_and_error
+from colmap_baseline import load_scene, build_database, add_matches
+
+
+def align_and_error(rec, Ps_gt, K, m):
+    """Umeyama alignment + pose errors, reflection-aware.
+
+    GLOMAP's global solver can converge to a MIRRORED reconstruction: camera
+    positions are gauge-equivalent (a similarity with det=-1 still maps them onto
+    GT), but orientations are not -- applying the reflected rotation to R gives
+    garbage angles (150-180 deg). We detect det<0 and mirror the estimate into a
+    right-handed frame (negate one world axis on positions AND rotations) before
+    scoring, so rotation errors are comparable to the other baselines.
+    """
+    def gt_pose(P, Kmat):
+        RT = np.linalg.inv(Kmat) @ P
+        R = RT[:, :3]; t = RT[:, 3]
+        U, _, Vt = np.linalg.svd(R); R = U @ Vt
+        return -R.T @ t, R
+    gt_c = {}; gt_R = {}
+    for i in range(m):
+        c, R = gt_pose(Ps_gt[i], K[i]); gt_c[i] = c; gt_R[i] = R
+    est_c = {}; est_R = {}
+    for img in rec.images.values():
+        i = int(img.name.split(".")[0])
+        Rt = img.cam_from_world.matrix()
+        R = Rt[:, :3]; t = Rt[:, 3]
+        est_c[i] = -R.T @ t; est_R[i] = R
+    common = sorted(set(gt_c) & set(est_c))
+    if len(common) < 3:
+        return len(common), None, None, False
+
+    def umeyama(A, B):
+        muA, muB = A.mean(0), B.mean(0)
+        AA, BB = A - muA, B - muB
+        U, S, Vt = np.linalg.svd((BB.T @ AA) / len(A))
+        d = np.sign(np.linalg.det(U @ Vt)); D = np.diag([1, 1, d])
+        Rs = U @ D @ Vt
+        scale = S.sum() / (AA ** 2).sum() * len(A)
+        return Rs, scale, muA, muB, d
+
+    A = np.array([est_c[i] for i in common]); B = np.array([gt_c[i] for i in common])
+    _, _, _, _, d = umeyama(A, B)
+    mirrored = d < 0
+    if mirrored:
+        # mirror the estimate about the world x-axis: positions and rotations
+        M = np.diag([-1.0, 1.0, 1.0])
+        est_c = {i: M @ c for i, c in est_c.items()}
+        est_R = {i: M @ R @ M for i, R in est_R.items()}
+        A = np.array([est_c[i] for i in common])
+    Rsim, scale, muA, muB, _ = umeyama(A, B)
+    trans_err = []; rot_err = []
+    for i in common:
+        c_al = scale * Rsim @ est_c[i] + (muB - scale * Rsim @ muA)
+        trans_err.append(np.linalg.norm(c_al - gt_c[i]))
+        R_al = est_R[i] @ Rsim.T
+        cosv = (np.trace(R_al @ gt_R[i].T) - 1) / 2
+        rot_err.append(np.degrees(np.arccos(np.clip(cosv, -1, 1))))
+    return len(common), np.array(rot_err), np.array(trans_err), mirrored
 
 GLOMAP_ENV = os.path.expanduser("~/micromamba/root/envs/glomap")
 
@@ -66,10 +123,11 @@ def main():
         else:
             recs = [pycolmap.Reconstruction(os.path.join(sparse, d)) for d in model_dirs]
             rec = max(recs, key=lambda r: len(r.images))
-            nreg, rot, trans = align_and_error(rec, Ps, K, m)
+            nreg, rot, trans, mirrored = align_and_error(rec, Ps, K, m)
             print(f"  GLOMAP registered {len(rec.images)}/{m} cams", flush=True)
             res = dict(dataset=args.dataset, scene=args.scene, ncams=m,
-                       registered=int(len(rec.images)), aligned=int(nreg), failed=False)
+                       registered=int(len(rec.images)), aligned=int(nreg), failed=False,
+                       mirrored=bool(mirrored))
             if rot is not None:
                 res.update(rot_mean=float(rot.mean()), rot_med=float(np.median(rot)),
                            trans_mean=float(trans.mean()), trans_med=float(np.median(trans)))
