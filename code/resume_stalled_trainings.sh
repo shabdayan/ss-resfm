@@ -7,7 +7,7 @@
 set -u
 REPO="$(cd "$(dirname "$0")" && pwd)"; cd "$REPO"
 PY="$REPO/../.venv38-resfm/bin/python"
-QUEUE="waic-risk"   # policy 2026-08-27: ALL training jobs -> waic-risk; eval jobs -> waic-medium
+QUEUE="waic-risk"   # policy 2026-08-31: trainings -> waic-risk; EVALS -> waic-medium and take priority over trainings
 QNAMES=$(bjobs -w 2>/dev/null | awk '{print $7}')
 # Congestion guard: under heavy load bjobs can return nothing even though jobs
 # exist; treating that as "empty queue" caused mass duplicate resubmission
@@ -65,6 +65,10 @@ JOBS=(
  "resfm_finelr_lr1e4_30k|confs/multiscene_resfm_shallow_finelr_lr1e4_30k.conf|resfm_shallow_27scenes_finelr_lr1e4_30k|29999"
  "uesfm_sa_rf_lr1e3|confs/multiscene_uesfm_sa_rf_lr1e3.conf|uesfm_27scenes_sa_rf_lr1e3"
  "esfm_star_af|confs/multiscene_esfm_star_af.conf|esfm_star_af_27scenes"
+ "resfm_faithful_s21|confs/multiscene_resfm_shallow_faithful_s21.conf|resfm_shallow_27scenes_faithful_s21"
+ "resfm_faithful_s22|confs/multiscene_resfm_shallow_faithful_s22.conf|resfm_shallow_27scenes_faithful_s22"
+ "resfm_faithful_s23|confs/multiscene_resfm_shallow_faithful_s23.conf|resfm_shallow_27scenes_faithful_s23"
+ "resfm_faithful_s24|confs/multiscene_resfm_shallow_faithful_s24.conf|resfm_shallow_27scenes_faithful_s24"
 )
 for row in "${JOBS[@]}"; do
   IFS='|' read -r exp conf resdir final ngpu pyexe <<< "$row"
