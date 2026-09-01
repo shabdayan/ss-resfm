@@ -1,0 +1,72 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs,amsmath,times,enumitem}
+\title{\vspace{-1.5cm}SS-RESfM: decisions to settle before submission\\\large which RESfM baseline anchors our comparison}
+\author{}\date{}
+\begin{document}\maketitle\vspace{-1.2cm}
+
+\section*{Background in one paragraph}
+We have three supervised RESfM variants, all evaluated on identical tracks, pipeline and
+environment. \textbf{RESfM-scratch} is trained by us under our uniform protocol (checkpoint
+selected by validation reprojection error, infinity-point margin $10^{-4}$, applied identically to
+every arm so the outlier mechanism is the only variable). \textbf{RESfM-faithful} is the same
+training with the authors' two released secondary values restored (checkpoint selected by
+classification \emph{Accuracy}, margin $10^{-3}$). \textbf{RESfM-released} are the authors'
+published weights. Measured differences (translation mean, post-BA):
+
+\begin{center}\footnotesize
+\begin{tabular}{lcccccc}
+\toprule
+ & MegaDepth & 1DSfM & 1DSfM-hard & Strecha & BlendedMVS & Olsson\\
+\midrule
+RESfM-scratch (5 seeds) & 0.37$\pm$0.12 & 10.50$\pm$1.45 & 19.16$\pm$3.42 & 0.39$\pm$0.72 & 0.35$\pm$0.04 & 7.37$\pm$2.63\\
+RESfM-faithful          & 0.50 & 9.75 & 17.58 & 0.14 & 0.37 & 8.76\\
+RESfM-released          & 0.21 & 11.12 & 15.29 & 0.20 & 0.33 & 9.10\\
+\midrule
+SS-RESfM best arm       & 0.36--0.50 & \textbf{8.93} & \textbf{12.42} & 1.97 & \textbf{0.14} & \textbf{2.91}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The authors' Accuracy rule selects epoch ${\sim}5.5$k; reprojection-based selection
+selects ${\sim}16.5$k. Faithful is therefore weaker on five of six datasets: our uniform protocol
+\emph{helps} the baseline, and every margin we report against RESfM-scratch is a lower bound.
+
+\section*{Questions}
+\begin{enumerate}[leftmargin=*,itemsep=6pt]
+\item \textbf{Which baseline anchors the headline comparison?} RESfM-scratch (stronger, cleanest
+control, conservative for us) or RESfM-faithful (the authors' shipped configuration, weaker, gives
+us wins on five of six datasets including in-distribution parity)? Our concern with faithful-as-primary:
+a reviewer, or the RESfM authors themselves, can observe that we selected checkpoints for our arms
+by the better rule while the baseline used the worse one.
+
+\item \textbf{How do we handle the released checkpoint?} It is the strongest supervised artifact
+in distribution ($0.209$ vs.\ our $0.36$--$0.50$), yet it \emph{loses} to us out of distribution on
+our tracks (1DSfM $11.12$ vs.\ $8.93$; BlendedMVS $0.33$ vs.\ $0.14$) and collapses on Olsson
+($9.10$). Reference row plus an explicit ``no SOTA in distribution'' statement, or a stronger framing?
+
+\item \textbf{What is the strongest claim we are willing to defend?} Candidates:
+(a) mechanism-isolated study, no SOTA claim (current draft);
+(b) ``against RESfM trained from scratch under the authors' released configuration, on identical
+tracks, SS-RESfM wins five of six benchmarks'';
+(c) something stronger.
+
+\item \textbf{Is the checkpoint-selection result a contribution in its own right?} Classification
+accuracy is a poor proxy for reconstruction quality (epoch $5.5$k vs.\ $16.5$k; ${\sim}0.15$ worse
+on MegaDepth). It also cannot be used by a label-free method at all, since it requires
+ground-truth outlier labels --- which is part of our argument for reprojection-based selection.
+
+\item \textbf{Does the answer differ by venue?} CVPR reviewers tend to expect explicit
+state-of-the-art positioning; an ICLR/analysis framing tolerates the scoped version. We currently
+plan the mechanism paper for CVPR and a separate label-ceiling/selection paper for ICLR.
+
+\item \textbf{Do we withdraw the 3DV submission?} Withdrawal frees the mechanism paper for CVPR
+(deadline after the 3DV decision, so nothing is lost by waiting) but forfeits a likely publication.
+Related: are both papers worth running in parallel, or should we consolidate?
+\end{enumerate}
+
+\section*{Supporting material}
+Full results (translation, rotation, registered cameras; five-seed bands; classical GLOMAP/COLMAP
+baselines; ESFM$^{\ast}$ clean-track reference) are in the companion document
+\texttt{RESULTS\_master\_table.pdf}.
+\end{document}
