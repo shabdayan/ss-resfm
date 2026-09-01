@@ -391,7 +391,11 @@ robust BA, and seed; only the outlier mechanism and its supervision differ. Refe
 three evaluation repeats (TTT is run-to-run nondeterministic; appendix).
 All self-supervised arms and the supervised
 baseline are five-seed bands (seeds $20$--$24$, mean$\pm$std of per-seed dataset means);
-reference and classical rows are single runs. Lower panels: rotation and registered-camera fraction (metric
+reference and classical rows are single runs, except
+$^{\S}$RESfM~(released), where the band is over five \emph{evaluation} seeds on the
+authors' fixed weights (MegaDepth, 1DSfM, Strecha, BlendedMVS): with the network held
+constant the pipeline is near-deterministic, which is the control for reading the
+training-seed bands above (App.~\ref{app:prepost}). Lower panels: rotation and registered-camera fraction (metric
 priority: translation, then rotation, then $N_r$, following RESfM). ESFM$^{\ast}$:
 vanilla ESFM trained and tested on ground-truth-cleaned tracks (clean-track reference;
 its mean is failure-scene-dominated, as in RESfM's own Table~1).}
@@ -411,7 +415,7 @@ remove       & 0.51$\pm$0.08/0.13 & 9.1$\pm$2.2/$\mathbf{1.7\pm 0.2}$ & $\mathbf
 remove+TTT   & 0.56$\pm$0.07/0.14 & $\mathbf{8.9\pm 1.2}$/2.0 & 15.2$\pm$1.0/11.3 & 3.01$\pm$0.07/1.70 & 0.22$\pm$0.10/0.18 & 3.6$\pm$0.4/1.9\\
 RESfM-scratch (supervised)  & $\mathbf{0.37\pm 0.12}$/$\mathbf{0.07}$ & 10.5$\pm$1.5/3.4 & 19.2$\pm$3.4/16.5 & $\mathbf{0.39\pm 0.72}$/$\mathbf{0.01}$ & 0.35$\pm$0.04/0.33 & 7.4$\pm$2.6/$\mathbf{0.95}$\\
 \midrule
-RESfM (released)            & 0.209 & 11.12 & 15.29 & 0.197 & 0.330 & 9.10\\
+RESfM (released)$^{\S}$    & 0.203$\pm$0.008 & 10.71$\pm$0.27 & 15.29 & 0.20$\pm$0.00 & 0.33$\pm$0.00 & 9.10\\
 RESfM (paper)               & 0.169 & -- & -- & -- & -- & --\\
 RESfM-faithful (authors' ckpt selection) & 0.496 & 12.00 & 17.58 & 0.144 & 0.489 & 8.77\\
 ESFM$^{\ast}$ (clean tracks) & 0.462 & 13.84 & 15.20 & 1.16 & 0.327 & --\\
@@ -812,8 +816,10 @@ worth recording because two statements in the main text depend on it.
 
 A direct control separates the two sources. Re-evaluating the authors' \emph{fixed}
 released weights under five evaluation seeds gives $0.203\pm0.008$ on MegaDepth
-(pre-BA $1.730\pm0.005$): with the network held constant, bundle adjustment is close to
-deterministic. The large bands below therefore reflect genuine differences between
+(pre-BA $1.730\pm0.005$), $10.71\pm0.27$ on 1DSfM, and \emph{identical} values to two
+decimals on Strecha ($0.20$) and BlendedMVS ($0.33$): with the network held constant,
+bundle adjustment is close to deterministic, and exactly deterministic on the small
+clean sets. The large bands below therefore reflect genuine differences between
 independently trained networks, amplified by BA, and not evaluation noise.
 
 First, essentially all seed variability is created by bundle adjustment, not by training:
@@ -867,7 +873,7 @@ RESfM-scratch & 1.76$\pm$0.05 $\to$ 0.37$\pm$0.12 & 22.13$\pm$0.27 $\to$ 10.50$\
 \multicolumn{7}{l}{\emph{single-run reference rows (no seed band; pre $\to$ post only)}}\\[1pt]
 RESfM-faithful & 1.94 $\to$ 0.50 & 22.26 $\to$ 9.75 & 35.41 $\to$ 17.58 & 0.29 $\to$ 0.14 & 0.44 $\to$ 0.37 & 12.01 $\to$ 8.76\\
 RESfM-faithful @$10^{-4}$ & 2.23 $\to$ 0.60 & 22.88 $\to$ 6.72 & 34.98 $\to$ 16.21 & 1.27 $\to$ 0.22 & 0.32 $\to$ 0.17 & 12.00 $\to$ 8.11\\
-RESfM-released$^{\S}$ & 1.730$\pm$0.005 $\to$ 0.203$\pm$0.008 & 22.42 $\to$ 11.12 & 35.26 $\to$ 15.29 & 0.97 $\to$ 0.20 & 0.42 $\to$ 0.33 & 12.11 $\to$ 9.10\\
+RESfM-released$^{\S}$ & 1.730$\pm$0.005 $\to$ 0.203$\pm$0.008 & 22.42 $\to$ 10.71$\pm$0.27 & 35.26 $\to$ 15.29 & 0.97 $\to$ 0.20$\pm$0.00 & 0.42 $\to$ 0.33$\pm$0.00 & 12.11 $\to$ 9.10\\
 RESfM @$10^{-4}$, 30k & 2.08 $\to$ 0.36 & 23.14 $\to$ 6.12 & 35.76 $\to$ 13.88 & 1.92 $\to$ 1.64 & 0.29 $\to$ 0.18 & 11.94 $\to$ 8.27\\
 \bottomrule
 \end{tabular}}%
