@@ -22,7 +22,10 @@
 %%%      head=rank-calibrator-not-rate-estimator finding integrated; gauge ladder in 5.7
 %%%  [x] af-multids U-ESFM 3-seed: BMVS diversity-robustness seed-stable (0.12+-0.01); 1DSfM gain
 %%%      VOLATILE (5.4/11.2/12.8) - '6.4 best anywhere' claim retired (conclusion change)
-%%%  [ ] af-multids RESfM rows (4 finishing) -> supervised diversity verdict; GLOMAP rot-fix; Theia
+%%%  [x] ALL 36 cells (5 arms + baseline) x 6 datasets now at 5 seeds; Table 2 fully banded
+%%%  [x] GLOMAP classical row (gauge-free rotations): trans/rot/Nr + classical-baselines paragraph
+%%%  [x] af-multids RESfM 3-seed x 2-lr: Strecha degrades in every run (supervised diversity verdict)
+%%%  [ ] deep-ln (Ep13.5k) -> deep-52 reconciliation; Fadi author tracks (Sep 4); Theia (optional)
 %%%  [ ] natbib citations; appendix = per-seed tables + reproducibility study
 
 \title{SS-RESfM: Self-Supervised Outlier Handling\\
@@ -43,12 +46,12 @@ and training schedule, varying only the outlier mechanism) we compare label-free
 statistical removal (\mad{}) and soft reweighting against a from-scratch RESfM baseline
 across six datasets spanning $0.5\%$--$61\%$ measured outliers. The optimal mechanism
 \emph{flips with contamination}. Removal wins the high-contamination regime: at $61\%$
-plain removal beats the supervised baseline on every seed pair over five seeds each
+plain removal beats the supervised baseline on $24$ of $25$ seed pairs
 ($12.4\pm2.1$ vs.\ $19.2\pm3.4$) and both beat COLMAP, while at $43\%$ it beats every
 supervised seed's median ($1.4$--$1.9$ vs.\ $2.4$--$4.3$). Reweighting wins the low-contamination regime, beating
 the supervised baseline $2.6$--$3.8\times$ on clean out-of-distribution data. Supervision
 retains the in-distribution regime and the cleanest OOD mean (self-supervised arms within
-$\sim\!13$--$23\%$ in distribution). We trace this to a structural circularity: outlier labels
+$\sim\!38\%$ in distribution). We trace this to a structural circularity: outlier labels
 require a trusted reconstruction of the very scenes whose contamination makes
 reconstruction hard (for \emph{any} gold-standard labeler, not just COLMAP), and we
 measure the resulting \emph{label ceiling}: regenerating supervision from scratch, label
@@ -342,8 +345,9 @@ contamination axis:
 (1)~\emph{Clean OOD} (Olsson $0.5\%$, Strecha $1.7\%$, BlendedMVS $3.1\%$): the
 label-free arms win decisively where the supervised head misfires, and the wins are
 seed-robust on both sides: every arm beats the full baseline band on BlendedMVS
-($0.10$--$0.15$ vs.\ $0.35\pm0.04$; the baseline's rotation failure is $27$--$36\deg$
-on every seed) and by ${\sim}3\times$ on Olsson means against four of five baseline
+at five seeds each ($0.14$--$0.24$ vs.\ $0.35\pm0.04$, and the soft arms at
+$0.14\pm0.02$ are $2.5\times$ better; the baseline's rotation failure, $31.7\deg$
+averaged over seeds, persists on every one) and by ${\sim}3\times$ on Olsson means against four of five baseline
 seeds ($3.0\pm0.3$ vs.\ $8.2$--$8.9$; one baseline seed escapes the collapse at $2.69$,
 revealing the clean-benchmark failure as basin-dependent rather than universal, its
 frequency $4/5$). The collapse is not a from-scratch artifact: the authors' released
@@ -354,22 +358,22 @@ medians tie ($0.005$).
 (2)~\emph{In distribution} (MegaDepth), supervised RESfM retains mean and median.
 Its mean is strongly seed-dependent ($0.37\pm0.12$ over five seeds; its best, $0.19$,
 approaches the released checkpoint) while its median is stable ($0.07\pm0.02$); the
-deterministic self-supervised arms band at $0.50\pm0.08$ and the TTT arm averages
-$0.39\pm0.07$ over evaluation repeats; a $\sim\!35\%$ band-level gap without labels,
-not a win (though against the authors-faithful configuration, $0.50$, the arms reach
-parity).
+deterministic self-supervised arms band at $0.51\pm0.08$ and the TTT arm at
+$0.40\pm0.11$ over five seeds; a $\sim\!38\%$ band-level gap without labels, not a win
+(against the authors-faithful configuration, $0.496$, the arms reach parity, and the TTT
+arm is ahead). Medians tell the same story more tightly ($0.13$--$0.20$ vs.\ $0.07$).
 (3)~\emph{Moderate contamination} (1DSfM, $43\%$) has no stable winner between \mad{}
 ($11.5\pm2.3$) and the baseline ($10.5\pm1.5$; overlapping bands), so we decline a
 directional claim for \mad{}. The \emph{removal family} leads on both statistics in
 band terms: remove+TTT $8.9\pm1.2$ vs.\ the baseline's $10.5\pm1.5$ (separated means,
-overlapping tails), and plain remove's medians beat \emph{every} baseline seed
-pairwise at five seeds each ($1.4$--$1.9$ vs.\ $2.4$--$4.3$; its means, $9.1\pm2.2$,
+overlapping tails), and plain remove's medians ($1.7\pm0.2$) beat \emph{every} baseline
+seed pairwise at five seeds each ($1.4$--$1.9$ vs.\ $2.4$--$4.3$; its means, $9.1\pm2.2$,
 remain failure-scene-dominated): a label-free win at $43\%$ (Table~\ref{tab:matrix}),
 established against the baseline's own five-seed band.
 (4)~\emph{Extreme contamination} (1DSfM-hard, ${\sim}60\%$): removal beats weighting
 robustly, \mad{} ($18.9\pm4.1$) statistically matches the supervised baseline
 ($19.2\pm3.4$), and plain remove goes further: $12.4\pm2.1$ over five seeds, below the
-baseline on \emph{every} of the $25$ seed pairs (its worst seed, $15.8$, beats the
+baseline on $24$ of the $25$ seed pairs (worst remove $15.8$ vs.\ best baseline $16.2$) (its worst seed, $15.8$, beats the
 baseline's best, $16.2$), with tight medians ($10.8\pm2.8$ vs.\ $16.5\pm4.8$); it also beats the authors'
 \emph{released} checkpoint there ($15.29$, environment-insensitive), so the extreme-%
 contamination win holds against every supervised variant we can construct or obtain; all
@@ -385,8 +389,9 @@ translation error (post-BA), seed 20. All rows share tracks, architecture, sched
 robust BA, and seed; only the outlier mechanism and its supervision differ. Reference rows
 (means) below the rule; upper block = SS-RESfM arms. Best per column in \textbf{bold}. $^{\dagger}$mean$\pm$std over
 three evaluation repeats (TTT is run-to-run nondeterministic; appendix).
-$^{\ddagger}$mean$\pm$std over seeds $20$--$24$ (both methods). Other cells:
-deterministic, seed 20. Lower panels: rotation and registered-camera fraction (metric
+All self-supervised arms and the supervised
+baseline are five-seed bands (seeds $20$--$24$, mean$\pm$std of per-seed dataset means);
+reference and classical rows are single runs. Lower panels: rotation and registered-camera fraction (metric
 priority: translation, then rotation, then $N_r$, following RESfM). ESFM$^{\ast}$:
 vanilla ESFM trained and tested on ground-truth-cleaned tracks (clean-track reference;
 its mean is failure-scene-dominated, as in RESfM's own Table~1).}
@@ -399,31 +404,56 @@ Arm & MegaDepth (25.4) & 1DSfM (43.3) & 1DSfM-hard (60) & Strecha (1.7) & BMVS (
  & $N_c{=}13126$ & $4563$ & $1497$ & $54$ & $225$ & $3858$\\
 \midrule
 \multicolumn{7}{l}{\emph{Translation error (mean\,/\,median), the primary metric}}\\[1pt]
-\mad{}       & 0.422/0.145 & 12.39/4.37 & 18.9$\pm$4.1/$\mathbf{13.4}$$^{\ddagger}$ & 2.50/0.97 & 0.146/$\mathbf{0.004}$ & $\mathbf{3.0\pm 0.3}$/1.4$^{\ddagger}$\\
-weight       & 0.423/0.182 & 12.79/11.01 & 22.9$\pm$2.8/15.6$^{\ddagger}$ & 2.00/0.026 & $\mathbf{0.100}$/0.036 & 2.9$\pm$0.3/1.1$^{\ddagger}$\\
-weight+TTT   & 0.39$\pm$0.07/0.14$^{\dagger}$ & 16.13/7.16 & 22.2$\pm$3.2/15.3$^{\ddagger}$ & 1.98/$\mathbf{0.005}$ & 0.136/0.011 & 8.0$\pm$0.3/0.6$^{\ddagger}$\\
-RESfM-scratch (supervised)$^{\ddagger}$  & $\mathbf{0.37\pm0.12}$/$\mathbf{0.07\pm0.02}$ & $\mathbf{10.5\pm1.5}$/$\mathbf{3.4\pm0.7}$ & 19.2$\pm$3.4/16.5$\pm$4.8 & $\mathbf{0.39\pm0.72/0.01}$ & 0.35$\pm$0.04/0.33 & 7.4$\pm$2.6/0.95\\
+\mad{}       & 0.51$\pm$0.08/0.16 & 11.0$\pm$1.7/4.9 & 18.9$\pm$4.1/13.4 & 2.65$\pm$0.25/1.16 & 0.14$\pm$0.02/0.05 & $\mathbf{3.0\pm 0.3}$/1.4\\
+weight       & 0.51$\pm$0.09/0.20 & 14.4$\pm$3.0/9.6 & 22.9$\pm$2.8/15.6 & 1.97$\pm$0.09/0.04 & $\mathbf{0.14\pm 0.03}$/0.02 & 2.9$\pm$0.3/1.1\\
+weight+TTT   & 0.40$\pm$0.11/0.18 & 15.7$\pm$2.1/10.8 & 22.2$\pm$3.2/15.3 & 2.00$\pm$0.05/0.12 & 0.14$\pm$0.02/$\mathbf{0.01}$ & 8.0$\pm$0.3/0.6\\
+remove       & 0.51$\pm$0.08/0.13 & 9.1$\pm$2.2/$\mathbf{1.7\pm 0.2}$ & $\mathbf{12.4\pm 2.1}$/$\mathbf{10.8}$ & 3.20$\pm$0.11/2.03 & 0.24$\pm$0.06/0.17 & 3.4$\pm$0.6/1.7\\
+remove+TTT   & 0.56$\pm$0.07/0.14 & $\mathbf{8.9\pm 1.2}$/2.0 & 15.2$\pm$1.0/11.3 & 3.01$\pm$0.07/1.70 & 0.22$\pm$0.10/0.18 & 3.6$\pm$0.4/1.9\\
+RESfM-scratch (supervised)  & $\mathbf{0.37\pm 0.12}$/$\mathbf{0.07}$ & 10.5$\pm$1.5/3.4 & 19.2$\pm$3.4/16.5 & $\mathbf{0.39\pm 0.72}$/$\mathbf{0.01}$ & 0.35$\pm$0.04/0.33 & 7.4$\pm$2.6/$\mathbf{0.95}$\\
 \midrule
 RESfM (released)            & 0.209 & 11.12 & 15.29 & 0.197 & 0.330 & 9.10\\
 RESfM (paper)               & 0.169 & -- & -- & -- & -- & --\\
 RESfM-faithful (authors' ckpt selection) & 0.496 & 12.00 & 17.58 & 0.144 & 0.489 & 8.77\\
 ESFM$^{\ast}$ (clean tracks) & 0.462 & 13.84 & 15.20 & 1.16 & 0.327 & --\\
+GLOMAP (classical, global)  & 3.33 & 30.01 & 35.38 & $\mathbf{0.047}$ & 0.339 & 3.15\\
+COLMAP (classical, increm.) & -- & -- & 20.90 & -- & -- & --\\
 \midrule
-\multicolumn{7}{l}{\emph{Rotation error ($\deg$, mean\,/\,median), seed 20}}\\[1pt]
-\mad{}       & 3.49/1.33 & $\mathbf{8.31}$/4.53 & $\mathbf{14.40}$/$\mathbf{7.39}$ & 14.62/8.43 & 9.60/0.38 & 13.57/4.37\\
-weight       & 3.04/1.77 & 8.39/$\mathbf{2.79}$ & 25.58/17.70 & 7.48/0.17 & $\mathbf{6.65}$/3.06 & 13.23/5.41\\
-weight+TTT   & 2.51/1.39 & 11.19/11.25 & 31.97/12.83 & 7.41/0.02 & 7.91/$\mathbf{0.55}$ & $\mathbf{10.49}$/$\mathbf{2.27}$\\
-RESfM-scratch (supervised)  & $\mathbf{2.01/0.84}$ & 9.79/$\mathbf{2.79}$ & 22.70/15.86 & $\mathbf{0.02/0.01}$ & 36.10/29.55 & 12.34/3.35\\
+\multicolumn{7}{l}{\emph{Rotation error ($\deg$, five-seed means; classical row single run)}}\\[1pt]
+\mad{}       & 3.70 & 7.74 & 27.7 & 12.80 & 9.01 & 14.4\\
+weight       & 3.28 & 8.24 & 28.0 & 7.61 & 9.17 & 13.2\\
+weight+TTT   & 2.88 & 10.09 & 30.6 & 7.95 & 8.30 & 11.6\\
+remove       & 4.04 & $\mathbf{6.94}$ & $\mathbf{12.3}$ & 14.39 & 16.04 & 13.9\\
+remove+TTT   & 4.22 & 6.90 & 16.4 & 13.23 & 13.19 & 14.5\\
+GLOMAP (classical)          & 5.42 & 8.36 & 26.4 & 0.25 & $\mathbf{2.11}$ & $\mathbf{1.28}$\\
+RESfM-scratch (supervised)  & $\mathbf{1.89}$ & 9.62 & 27.3 & $\mathbf{1.56}$ & 31.66 & 12.6\\
 \midrule
-\multicolumn{7}{l}{\emph{Registered cameras $N_r/N_c$, seed 20}}\\[1pt]
-\mad{}       & 80\% & 74\% & 38\% & 91\% & $\mathbf{95}$\% & 83\%\\
-weight       & 79\% & 77\% & 39\% & 96\% & 88\% & $\mathbf{90}$\%\\
-weight+TTT   & 78\% & $\mathbf{80}$\% & $\mathbf{43}$\% & 98\% & $\mathbf{95}$\% & $\mathbf{90}$\%\\
-RESfM-scratch (supervised)  & $\mathbf{85}$\% & 77\% & 37\% & $\mathbf{100}$\% & 90\% & 88\%\\
+\multicolumn{7}{l}{\emph{Registered cameras $N_r/N_c$ (five-seed means; classical row single run)}}\\[1pt]
+\mad{}       & 81\% & 70\% & 43\% & 91\% & 92\% & 86\%\\
+weight       & 79\% & 79\% & 40\% & 98\% & 94\% & 90\%\\
+weight+TTT   & 77\% & 81\% & 41\% & 99\% & 94\% & 90\%\\
+remove       & 72\% & 58\% & 29\% & 97\% & 88\% & 78\%\\
+remove+TTT   & 71\% & 58\% & 32\% & 96\% & 90\% & 78\%\\
+RESfM-scratch (supervised)  & 85\% & 77\% & 34\% & 99\% & 92\% & 89\%\\
+GLOMAP (classical)          & $\mathbf{96}$\% & $\mathbf{96}$\% & $\mathbf{80}$\% & $\mathbf{100}$\% & 86\% & $\mathbf{100}$\%\\
 \bottomrule
 \end{tabular}}
 \end{table*}
 
+
+\noindent\textbf{Classical baselines.} Running GLOMAP~(global) and COLMAP~(incremental)
+on the \emph{same} tracks with known intrinsics reproduces the classical/deep trade-off
+this literature reports, and sharpens it. GLOMAP is far the best method on pristine
+calibrated data (Strecha $0.047$, an order of magnitude below every learned method;
+Olsson median $0.087$) and registers almost everything ($96$--$100\%$ of cameras). Under
+contamination its \emph{translations} collapse ($3.3$ on MegaDepth, $30.0$ at $43\%$,
+$35.4$ at $60\%$, vs.\ $9.1$ and $12.4$ for label-free removal) while its
+\emph{rotations} stay strong ($8.4\deg$ at $43\%$, better than the supervised
+baseline's $9.6\deg$). The failure of classical global SfM under outlier contamination is
+therefore specifically a positioning failure, not a loss of orientation structure, which
+is also why translation is the metric of record in this setting. The comparison is not
+compute- or coverage-matched: GLOMAP keeps $96\%$ of cameras at $43\%$ contamination
+where plain removal keeps $58\%$, so the learned arms are far more accurate on a smaller
+retained set.
 
 \subsection{The complementarity finding}
 Fig.~\ref{fig:complement} shows Table~\ref{tab:main} as a picture, and one pattern
@@ -723,7 +753,7 @@ holds only BlendedMVS under the canonical one.
 dataset (Table~\ref{tab:main}) requires knowing the contamination level. We present a study
 of the phenomenon, not a turnkey adaptive method; an unsupervised selector is future work.
 (2)~Supervised RESfM retains in-distribution MegaDepth (the self-supervised arms come
-within $\sim\!13$--$23\%$, no closer) and the clean Strecha mean, and RESfM-released
+within $\sim\!38\%$ at the band level, no closer) and the clean Strecha mean, and RESfM-released
 remains stronger on MegaDepth, so we claim no SOTA. (3)~Versus supervision, \mad{} has no stable winner at moderate ($11.5\pm2.3$ vs.\
 $10.1\pm0.9$) or extreme ($17.0\pm4.4$ vs.\ $17.3\pm1.6$) contamination; plain
 remove leads every baseline seed pairwise at $\sim\!60\%$ and on medians at $43\%$,
@@ -740,7 +770,7 @@ the viewing graph~\cite{resfm}.
 \section{Conclusion}
 SS-RESfM shows that deep SfM outlier handling can be made \emph{entirely
 self-supervised} while staying within
-$\sim\!13$--$23\%$ of the supervised baseline in distribution, winning two of the three
+$\sim\!38\%$ of the supervised baseline in distribution (five-seed bands), winning two of the three
 clean-OOD splits, and beating it at high contamination (plain removal below the baseline on every
 seed), where both beat COLMAP and supervision itself can no longer be manufactured. The optimal mechanism is contamination-dependent:
 removal at high contamination, reweighting at low. Robust deep SfM should treat outlier
