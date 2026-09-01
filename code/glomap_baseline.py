@@ -61,19 +61,36 @@ def align_and_error(rec, Ps_gt, K, m):
     _, _, _, _, d = umeyama(A, B)
     mirrored = d < 0
     if mirrored:
-        # mirror the estimate about the world x-axis: positions and rotations
+        # Mirror only the POSITIONS into a right-handed frame for the similarity fit.
+        # Orientations are NOT mirrored: a reflection is not a rotation, and the
+        # rotation error below is computed gauge-free from relative rotations, so it
+        # needs no frame alignment at all.
         M = np.diag([-1.0, 1.0, 1.0])
         est_c = {i: M @ c for i, c in est_c.items()}
-        est_R = {i: M @ R @ M for i, R in est_R.items()}
         A = np.array([est_c[i] for i in common])
     Rsim, scale, muA, muB, _ = umeyama(A, B)
-    trans_err = []; rot_err = []
+    trans_err = []
     for i in common:
         c_al = scale * Rsim @ est_c[i] + (muB - scale * Rsim @ muA)
         trans_err.append(np.linalg.norm(c_al - gt_c[i]))
-        R_al = est_R[i] @ Rsim.T
-        cosv = (np.trace(R_al @ gt_R[i].T) - 1) / 2
-        rot_err.append(np.degrees(np.arccos(np.clip(cosv, -1, 1))))
+    # Rotation: gauge-free. Compare RELATIVE rotations R_a R_b^T, which are invariant
+    # to the global frame (and to any mirroring of the world), so no alignment is
+    # applied. Per camera we average its pairwise errors against a capped sample of
+    # partners, giving a per-camera error array comparable to the other baselines.
+    rng = np.random.RandomState(0)
+    idx = list(common)
+    rot_err = []
+    for a in idx:
+        partners = idx if len(idx) <= 40 else list(rng.choice(idx, 40, replace=False))
+        e = []
+        for b in partners:
+            if b == a:
+                continue
+            rel_est = est_R[a] @ est_R[b].T
+            rel_gt = gt_R[a] @ gt_R[b].T
+            cosv = (np.trace(rel_est @ rel_gt.T) - 1) / 2
+            e.append(np.degrees(np.arccos(np.clip(cosv, -1, 1))))
+        rot_err.append(np.mean(e) if e else 0.0)
     return len(common), np.array(rot_err), np.array(trans_err), mirrored
 
 GLOMAP_ENV = os.path.expanduser("~/micromamba/root/envs/glomap")
