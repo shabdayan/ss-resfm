@@ -802,4 +802,54 @@ tracks will be released upon publication.
 
 \end{thebibliography}
 
+
+\appendix
+\section{Pre- versus post-BA seed variability}\label{app:prepost}
+Table~\ref{tab:prepost} reports, for every arm and dataset, the five-seed band of the
+\emph{network} output (pre-BA) next to the band after robust bundle adjustment. The
+behaviour is what one expects of a non-linear optimiser with multiple basins, and it is
+worth recording because two statements in the main text depend on it.
+
+First, essentially all seed variability is created by bundle adjustment, not by training:
+pre-BA bands are $\pm0.02$--$0.1$ (relative spread below $1\%$ on every contaminated
+dataset), while the same cells after BA carry $\pm1.7$--$4.1$. The networks are highly
+reproducible across seeds; the pipeline's variance enters at the BA stage. This is the
+seed-level counterpart of the environment-level chaotic basin selection documented in the
+reproducibility study, now measured over $36$ independent cells.
+
+Second, the removal arms do not produce better raw geometry than supervision --- they
+produce geometry that robust BA can repair. Pre-BA the supervised baseline leads
+everywhere (MegaDepth $1.76$ vs.\ ${\sim}3.03$; 1DSfM $22.1$ vs.\ $25.3$--$26.6$), yet
+plain removal improves by $2.9\times$ through BA at $60\%$ contamination
+($36.3\to12.4$) against the baseline's $1.9\times$ ($35.8\to19.2$), and by $5.0\times$
+on Olsson ($17.1\to3.4$) against $1.5\times$ ($11.0\to7.4$). Feeding BA a cleaner
+observation set, rather than a more accurate initialisation, is the mechanism behind the
+high-contamination result.
+
+A third observation concerns the baseline specifically: its clean-OOD instability is
+already present \emph{before} BA (Strecha $0.68\pm0.78$, Olsson $11.01\pm2.27$, versus
+$\pm0.02$--$0.5$ for every self-supervised arm), locating that failure in supervised
+training rather than in evaluation.
+
+\begin{table*}[t]\centering\footnotesize
+\caption{\textbf{Pre-BA $\to$ post-BA translation error}, mean$\pm$std over five training
+seeds (seeds $20$--$24$). Pre-BA bands are one to two orders of magnitude tighter than
+post-BA bands.}
+\label{tab:prepost}
+\setlength{\tabcolsep}{3pt}%
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccccc}
+\toprule
+Arm & MegaDepth & 1DSfM & 1DSfM-hard & Strecha & BlendedMVS & Olsson\\
+\midrule
+\mad{} & 3.03$\pm$0.02 $\to$ 0.51$\pm$0.08 & 26.14$\pm$0.04 $\to$ 11.04$\pm$1.68 & 36.33$\pm$0.07 $\to$ 18.92$\pm$4.05 & 3.77$\pm$0.24 $\to$ 2.65$\pm$0.25 & 0.58$\pm$0.03 $\to$ 0.14$\pm$0.02 & 16.38$\pm$0.45 $\to$ 3.01$\pm$0.34\\
+weight & 3.04$\pm$0.03 $\to$ 0.51$\pm$0.09 & 26.60$\pm$0.09 $\to$ 14.35$\pm$2.97 & 36.26$\pm$0.04 $\to$ 22.92$\pm$2.79 & 2.57$\pm$0.19 $\to$ 1.97$\pm$0.09 & 0.51$\pm$0.01 $\to$ 0.14$\pm$0.03 & 15.86$\pm$0.28 $\to$ 2.91$\pm$0.33\\
+weight+TTT & 3.01$\pm$0.03 $\to$ 0.40$\pm$0.11 & 26.63$\pm$0.10 $\to$ 15.72$\pm$2.10 & 36.20$\pm$0.12 $\to$ 22.24$\pm$3.17 & 2.63$\pm$0.21 $\to$ 2.00$\pm$0.05 & 0.50$\pm$0.02 $\to$ 0.14$\pm$0.02 & 13.41$\pm$0.19 $\to$ 8.03$\pm$0.30\\
+remove & 3.03$\pm$0.02 $\to$ 0.51$\pm$0.08 & 25.34$\pm$0.10 $\to$ 9.13$\pm$2.17 & 36.32$\pm$0.09 $\to$ 12.42$\pm$2.05 & 4.22$\pm$0.19 $\to$ 3.20$\pm$0.11 & 0.62$\pm$0.01 $\to$ 0.24$\pm$0.06 & 17.05$\pm$0.39 $\to$ 3.41$\pm$0.57\\
+remove+TTT & 3.04$\pm$0.02 $\to$ 0.56$\pm$0.07 & 25.23$\pm$0.13 $\to$ 8.93$\pm$1.20 & 36.32$\pm$0.07 $\to$ 15.15$\pm$0.98 & 4.31$\pm$0.18 $\to$ 3.01$\pm$0.07 & 0.63$\pm$0.02 $\to$ 0.22$\pm$0.10 & 17.03$\pm$0.47 $\to$ 3.63$\pm$0.35\\
+RESfM-scratch & 1.76$\pm$0.05 $\to$ 0.37$\pm$0.12 & 22.13$\pm$0.27 $\to$ 10.50$\pm$1.45 & 35.80$\pm$0.43 $\to$ 19.16$\pm$3.42 & 0.68$\pm$0.78 $\to$ 0.39$\pm$0.72 & 0.45$\pm$0.01 $\to$ 0.35$\pm$0.04 & 11.01$\pm$2.27 $\to$ 7.37$\pm$2.63\\
+\bottomrule
+\end{tabular}}%
+\end{table*}
+
 \end{document}
