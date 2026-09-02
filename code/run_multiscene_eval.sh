@@ -32,7 +32,7 @@ TEMPLATE="${REPO_ROOT}/confs/uesfm_eval.conf.template"
 CONF_DIR="${REPO_ROOT}/confs/multiscene_eval_generated"
 PY="${EVAL_PYTHON:-${REPO_ROOT}/../.venv/bin/python}"
 
-QUEUE="waic-medium"
+QUEUE="waic-risk"  # policy 2026-09-02: ALL jobs (evals and trainings) -> waic-risk; evals still take priority over trainings
 DRY_RUN=false
 SEED=20  # paper/RESfM-code default; use --seed N for the multi-seed median protocol
 JOBPREFIX="ueval"  # LSF job-name prefix; override with --jobprefix so distinct fleets
