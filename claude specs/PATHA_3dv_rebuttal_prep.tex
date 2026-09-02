@@ -1,0 +1,115 @@
+\documentclass[10pt,letterpaper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{times}
+\usepackage{amsmath,amssymb,booktabs,xcolor}
+\usepackage[colorlinks]{hyperref}
+\renewcommand{\deg}{^{\circ}}
+\title{\vspace{-1.5em}3DV 2027 Submission \#524 --- Rebuttal / Camera-Ready Preparation\\
+\large Anticipated challenges and prepared responses (post-deadline evidence)}
+\author{Internal working document --- not for submission as-is}
+\date{September 2, 2026}
+\begin{document}
+\maketitle
+\vspace{-1.5em}
+
+\section*{Purpose}
+The submission and its supplementary are frozen. This document collects, for each
+anticipated reviewer challenge, the prepared response and the post-deadline evidence
+backing it. Supplementary \emph{Version B} (\texttt{PATHA\_supp\_reproducibility\_vB.pdf})
+holds the camera-ready-quality write-up of items 1--2; this document is the playbook.
+
+\section{The learning-rate challenge (highest risk)}
+\textbf{Challenge.} ``You train the baseline at RESfM's released $10^{-3}$ but your arms
+at $10^{-4}$. Retraining the supervised baseline at $10^{-4}$ may close your
+out-of-distribution margins.''
+
+\textbf{What a reviewer would find.} It is true and we have measured it: the baseline
+retrained at $10^{-4}$ improves on contaminated OOD --- 1DSfM $5.90$ (vs.\ $11.03$
+declared), 1DSfM-hard $12.81$ (vs.\ $16.22$), BlendedMVS $0.14$ (vs.\ $0.38$) --- while
+degrading in-distribution ($0.53$ vs.\ $0.34$) and on Strecha ($1.73$ vs.\ $0.006$).
+
+\textbf{Prepared response (four points, all measured).}
+\begin{enumerate}\itemsep2pt
+\item \emph{The policy was disclosed, not hidden}: the paper's Protocol section states the
+per-method base learning rate and the convergence-timing rationale; neither method is
+truncation-limited.
+\item \emph{Not an under-training artifact}: a $30$k-epoch replicate at $10^{-4}$
+plateaus mid-schedule (best epoch $16$k; never improves through $29{,}999$), so the OOD
+gain is a regularization effect of the lower rate, not unfinished training. Its full row:
+MegaDepth $0.36$, 1DSfM $6.12$, hard $13.88$, Strecha $1.64$, BMVS $0.18$, Olsson $8.27$.
+\item \emph{The asymmetry runs against us, not for us}: the symmetric change on our side
+(label-free arms at $10^{-3}$) helps nowhere --- the per-method policy is each method at
+its own best-converging rate, not a knob tuned in our favor.
+\item \emph{The headline clean-benchmark findings are lr-robust}: the Olsson collapse
+persists at both rates ($8.3$--$8.5$) and Strecha degrades at $10^{-4}$; and even against
+the strongest supervised variant (the $30$k/$10^{-4}$ row), label-free plain removal
+still leads at $60\%$ contamination ($12.4\pm2.1$ vs.\ $13.9$).
+\end{enumerate}
+\textbf{Concession to offer if pressed}: scope the $43\%$ removal-family margin as
+``vs.\ the released-configuration baseline''; the removal medians ($1.68\pm0.19$) remain
+ahead of the $10^{-4}$ baseline's 1DSfM medians as well.
+
+\section{The single-seed challenge}
+\textbf{Challenge.} ``All numbers are seed 20; the conclusions may be seed luck.''
+
+\textbf{Prepared response.} Post-deadline we retrained \emph{every} arm and the baseline
+under five seeds ($20$--$24$) and re-ran the full evaluation ($36$ cells, plus a
+$2{,}352$-evaluation paired replication where the evaluation seed equals the training
+seed). Results (Version B, Sec.~E):
+\begin{itemize}\itemsep2pt
+\item $60\%$ contamination: worst removal seed $15.8$ $<$ best baseline seed $16.2$
+(every pairing).
+\item $43\%$: every removal median ($1.4$--$1.9$) beats every baseline median
+($2.4$--$4.3$).
+\item Olsson collapse: $4$/$5$ scratch seeds, plus the released checkpoint ($9.10$) and
+three authors-faithful retrains ($8.66$--$9.02$); every mad/weight/remove arm seed lands
+at $2.9$--$3.6$.
+\item BlendedMVS: mad/weight arms $0.14\pm0.02$ below every baseline seed
+($0.35\pm0.04$).
+\item Eval-seed control: released weights under five evaluation seeds move by
+$\pm0.008$; the paired replication reproduces every band within a fraction of its std.
+The variance is in training, amplified by BA --- not in our evaluation.
+\item Prior work in this line reports single-seed results (RESfM: ``We fix the seed to
+20''); we are, to our knowledge, the first in this benchmark family to report full
+training-seed bands.
+\end{itemize}
+
+\section{The baseline-fidelity challenge}
+\textbf{Challenge.} ``Your RESfM-from-scratch ($0.344$) is weaker than the released
+checkpoint ($0.209$) and the paper's $0.169$ --- maybe your baseline is just badly
+trained.''
+
+\textbf{Prepared response.} (a) The frozen supplementary already traces the
+released-vs-paper gap to environment-level BA basin selection (bidirectional,
+scene-concentrated flips; $17$/$36$ scenes \emph{better} in our runs); differences
+$\lesssim0.05$ are environment noise. (b) Post-deadline, three authors-faithful retrains
+(authors' exact validation metric and margin) give MegaDepth $0.22$--$0.50$ ---
+straddling our declared $0.344$ --- while showing the \emph{same} OOD failures (Olsson
+$8.7$--$9.0$, BMVS $0.35$--$0.38$). The baseline's in-distribution level is
+seed-volatile for every recipe; its clean-OOD failures are recipe- and seed-robust.
+(c) The five-seed scratch band ($0.37\pm0.12$) contains the best faithful seeds.
+
+\section{The TTT-nondeterminism challenge}
+\textbf{Challenge.} ``Your weight+TTT numbers vary run to run; how much of the paper
+rests on that?''
+
+\textbf{Prepared response.} Quantified in the frozen supplementary ($\pm0.07$ on TTT
+means; deterministic no-TTT cells reproduce exactly). None of the headline claims
+($60\%$, $43\%$, Olsson, BlendedMVS) rests on a TTT cell; the paired five-seed program
+confirms the TTT cells are the only ones that move ($\sim0.13$) under evaluation
+re-seeding.
+
+\section{Camera-ready plan}
+\begin{enumerate}\itemsep2pt
+\item Replace main-paper Tables 2, 5, 6, 7 with the extended versions (rotation, $N_r$,
+$N_c$) already staged in the supplementary (Sec.~J), translation cells upgraded to
+five-seed bands.
+\item Fold Version B's Sec.~E (five-seed bands, variance source, lr sensitivity) into
+the supplementary proper; retire the single-seed limitation.
+\item Correct ``every seed'' phrasing for the Olsson collapse to the $4$/$5$-plus-references
+statement; add the faithful-retrain replication row.
+\item Disclose the $10^{-4}$ baseline row as a reference row with the four-point
+response of Sec.~1 condensed to a footnote-length remark.
+\end{enumerate}
+
+\end{document}
