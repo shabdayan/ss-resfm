@@ -820,7 +820,14 @@ released weights under five evaluation seeds gives $0.203\pm0.008$ on MegaDepth
 decimals on Strecha ($0.20$) and BlendedMVS ($0.33$): with the network held constant,
 bundle adjustment is close to deterministic, and exactly deterministic on the small
 clean sets. The large bands below therefore reflect genuine differences between
-independently trained networks, amplified by BA, and not evaluation noise.
+independently trained networks, amplified by BA, and not evaluation noise. A full
+paired-seed replication confirms this at scale: re-running all $2{,}352$ evaluations with
+the evaluation seed set equal to each cell's training seed (rather than fixed at $20$)
+reproduces every five-seed band within a fraction of its std --- e.g.\ the baseline row
+moves from $0.37\pm0.12$ to $0.38\pm0.14$ on MegaDepth and is unchanged to two decimals
+on Strecha, BlendedMVS, and Olsson --- with the largest shifts in the TTT cells
+($\sim\!0.13$), consistent with their run-to-run nondeterminism. The choice of
+evaluation seed is immaterial to every conclusion in this paper.
 
 First, on the contaminated datasets nearly all seed variability is created by bundle
 adjustment, not by training: pre-BA bands are $\pm0.02$--$0.13$ for the self-supervised
