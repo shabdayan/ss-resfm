@@ -61,9 +61,10 @@ seed). Results (Version B, Sec.~E):
 (every pairing).
 \item $43\%$: every removal median ($1.4$--$1.9$) beats every baseline median
 ($2.4$--$4.3$).
-\item Olsson collapse: $4$/$5$ scratch seeds, plus the released checkpoint ($9.10$) and
-three authors-faithful retrains ($8.66$--$9.02$); every mad/weight/remove arm seed lands
-at $2.9$--$3.6$.
+\item Olsson collapse: $4$/$5$ scratch seeds \emph{and} $4$/$5$ authors-faithful
+retrains ($8.66$--$9.02$; one escape at $2.32$, mirroring the scratch escape at $2.69$),
+plus the released checkpoint ($9.10$); every mad/weight/remove arm seed lands at
+$2.9$--$3.6$.
 \item BlendedMVS: mad/weight arms $0.14\pm0.02$ below every baseline seed
 ($0.35\pm0.04$).
 \item Eval-seed control: released weights under five evaluation seeds move by
@@ -82,12 +83,13 @@ trained.''
 \textbf{Prepared response.} (a) The frozen supplementary already traces the
 released-vs-paper gap to environment-level BA basin selection (bidirectional,
 scene-concentrated flips; $17$/$36$ scenes \emph{better} in our runs); differences
-$\lesssim0.05$ are environment noise. (b) Post-deadline, three authors-faithful retrains
-(authors' exact validation metric and margin) give MegaDepth $0.22$--$0.50$ ---
-straddling our declared $0.344$ --- while showing the \emph{same} OOD failures (Olsson
-$8.7$--$9.0$, BMVS $0.35$--$0.38$). The baseline's in-distribution level is
-seed-volatile for every recipe; its clean-OOD failures are recipe- and seed-robust.
-(c) The five-seed scratch band ($0.37\pm0.12$) contains the best faithful seeds.
+$\lesssim0.05$ are environment noise. (b) Post-deadline, \emph{five} authors-faithful
+retrains (authors' exact validation metric and margin, seeds $20$--$24$) give a MegaDepth
+band of $0.32\pm0.11$ --- statistically indistinguishable from our declared scratch band
+$0.37\pm0.12$ --- and reproduce the scratch band on \emph{every} dataset, including the
+same OOD failures (Olsson collapse in $4$/$5$ seeds, $8.66$--$9.02$; BMVS
+$0.35\pm0.03$) and even the one-bad-Strecha-seed pattern. The two recipes draw from the
+same distribution; our baseline is not a weak retrain.
 
 \section{The TTT-nondeterminism challenge}
 \textbf{Challenge.} ``Your weight+TTT numbers vary run to run; how much of the paper

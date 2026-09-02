@@ -855,7 +855,12 @@ $0.68\pm0.78$, Olsson $11.01\pm2.27$, versus $\pm0.18$--$0.24$ and $\pm0.19$--$0
 the self-supervised arms), locating that failure in supervised training rather than in
 bundle adjustment or evaluation. Per scene the failure is bimodal and seed-contingent
 rather than noisy: entry-P10 costs $0.04$--$0.06$ on three seeds and $4.0$/$7.0$ on the
-other two; dtu106 sits at $250$--$260$ on four seeds and $53$ on one. The same signature
+other two; dtu106 sits at $250$--$260$ on four seeds and $53$ on one. Five
+authors-faithful retrains (seeds $20$--$24$, the authors' validation metric and margin)
+reproduce the scratch baseline's band on every dataset --- including the
+one-bad-Strecha-seed pattern and the four-of-five Olsson collapse ($8.66$--$9.02$ with a
+single $2.32$ escape, mirroring the scratch $2.69$) --- so these failure modes belong to
+the supervised recipe, not to our retraining of it. The same signature
 appears in-distribution at smaller amplitude --- individual MegaDepth scenes swing
 $3$--$4\times$ across seeds (0060: $1.0$--$3.3$; 0231: $0.5$--$2.2$) while opposite-signed
 swings cancel in the dataset mean, and the baseline's median per-scene std is about twice
@@ -896,9 +901,9 @@ weight+TTT & 3.01$\pm$0.03 $\to$ 0.40$\pm$0.11 & 26.63$\pm$0.10 $\to$ 15.72$\pm$
 remove & 3.03$\pm$0.02 $\to$ 0.51$\pm$0.08 & 25.34$\pm$0.10 $\to$ 9.13$\pm$2.17 & 36.32$\pm$0.09 $\to$ 12.42$\pm$2.05 & 4.22$\pm$0.19 $\to$ 3.20$\pm$0.11 & 0.62$\pm$0.01 $\to$ 0.24$\pm$0.06 & 17.05$\pm$0.39 $\to$ 3.41$\pm$0.57\\
 remove+TTT & 3.04$\pm$0.02 $\to$ 0.56$\pm$0.07 & 25.23$\pm$0.13 $\to$ 8.93$\pm$1.20 & 36.32$\pm$0.07 $\to$ 15.15$\pm$0.98 & 4.31$\pm$0.18 $\to$ 3.01$\pm$0.07 & 0.63$\pm$0.02 $\to$ 0.22$\pm$0.10 & 17.03$\pm$0.47 $\to$ 3.63$\pm$0.35\\
 RESfM-scratch & 1.76$\pm$0.05 $\to$ 0.37$\pm$0.12 & 22.13$\pm$0.27 $\to$ 10.50$\pm$1.45 & 35.80$\pm$0.43 $\to$ 19.16$\pm$3.42 & 0.68$\pm$0.78 $\to$ 0.39$\pm$0.72 & 0.45$\pm$0.01 $\to$ 0.35$\pm$0.04 & 11.01$\pm$2.27 $\to$ 7.37$\pm$2.63\\
+RESfM-faithful & 1.80$\pm$0.09 $\to$ 0.32$\pm$0.11 & 22.20$\pm$0.16 $\to$ 11.12$\pm$1.54 & 35.74$\pm$0.22 $\to$ 17.93$\pm$3.64 & 0.64$\pm$0.65 $\to$ 0.38$\pm$0.66 & 0.46$\pm$0.01 $\to$ 0.35$\pm$0.03 & 11.12$\pm$2.66 $\to$ 7.53$\pm$2.92\\
 \midrule
 \multicolumn{7}{l}{\emph{single-run reference rows (no seed band; pre $\to$ post only)}}\\[1pt]
-RESfM-faithful & 1.94 $\to$ 0.50 & 22.26 $\to$ 9.75 & 35.41 $\to$ 17.58 & 0.29 $\to$ 0.14 & 0.44 $\to$ 0.37 & 12.01 $\to$ 8.76\\
 RESfM-faithful @$10^{-4}$ & 2.23 $\to$ 0.60 & 22.88 $\to$ 6.72 & 34.98 $\to$ 16.21 & 1.27 $\to$ 0.22 & 0.32 $\to$ 0.17 & 12.00 $\to$ 8.11\\
 RESfM-released$^{\S}$ & 1.730$\pm$0.005 $\to$ 0.203$\pm$0.008 & 22.42 $\to$ 10.71$\pm$0.27 & 35.26 $\to$ 15.29 & 0.97 $\to$ 0.20$\pm$0.00 & 0.42 $\to$ 0.33$\pm$0.00 & 12.11 $\to$ 9.10\\
 RESfM @$10^{-4}$, 30k & 2.08 $\to$ 0.36 & 23.14 $\to$ 6.12 & 35.76 $\to$ 13.88 & 1.92 $\to$ 1.64 & 0.29 $\to$ 0.18 & 11.94 $\to$ 8.27\\
