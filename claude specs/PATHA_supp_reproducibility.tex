@@ -238,8 +238,8 @@ Scene & $N_c$ & \%out & $N_r$ & $e_R$ & $e_t$ & $N_r$ & $e_R$ & $e_t$ & $N_r$ & 
 \end{tabular}}%
 \end{table*}
 
-Tables~\ref{tab:supp_perscene_1dsfm} and~\ref{tab:supp_perscene_md1} report the per-scene
-post-BA translation and rotation errors and registered-camera fractions underlying the
+Tables~\ref{tab:supp_perscene_1dsfm} and~\ref{tab:supp_perscene_md} report the per-scene
+post-BA translation and rotation errors and registered-camera counts underlying the
 main paper's dataset-level numbers (seed 20, the declared pipeline): the ten 1DSfM scenes and the 36 MegaDepth test
 scenes, for the three self-supervised arms (madweight, weight, weight+TTT) and the
 supervised RESfM baseline trained from scratch under the identical
@@ -250,7 +250,7 @@ analysis in the main paper; on MegaDepth the four arms are close on most scenes 
 dataset-level gap is dominated by a handful of high-error scenes. Per scene, the
 catastrophic scenes (Ellis\_Island, Tower\_of\_London) fail in both metrics, though
 rotation does not always track translation (weight's Vienna\_Cathedral failure is
-translation-specific: $22.71/0.46$), and $N_r$ stays in the $58$--$92\%$ range on 1DSfM
+translation-specific: $22.71/0.46$), and $N_r$ stays in the $58$--$92\%$ range of each scene's images on 1DSfM
 with no arm systematically dropping scenes.
 Table~\ref{tab:supp_fullmetrics} completes the dataset-level record with rotation and
 registered-camera counts alongside translation. Rotation broadly agrees with translation
