@@ -741,7 +741,19 @@ gain and only the contaminated mid-band coincided with one (1DSfM $11.0/11.5/8.8
 differences within single-seed noise on this benchmark, so consistent with, though not
 established by, these runs). If it holds, the implication is pointed: the data that
 helps is precisely the data whose COLMAP labels degrade (cf.\ the label ceiling), making
-supervised diversity scaling self-limiting. The
+supervised diversity scaling self-limiting.
+
+A four-cell control (single seed each, canonical schedule) sharpens the architecture
+question: on the Olsson clean benchmark, the supervised collapse persists for a
+\emph{deep} network on the MegaDepth-only pool ($8.58$) and for a \emph{shallow} network
+on the diversified $52$-scene pool ($9.30$), yet vanishes for deep networks on the
+diversified pool ($2.26$ plain; $2.83$ with LayerNorm/residual --- so normalization is
+not the ingredient). Neither capacity nor data diversity alone rescues the supervised
+recipe; only their combination does. The label-free arms reach the same level
+($2.9$--$3.6$) from the \emph{shallow, single-pool} configuration --- the cheapest cell
+of the grid --- which reframes the comparison: self-supervision buys at $1{\times}3$
+capacity on $27$ scenes what supervision needs both depth and a curated multi-dataset
+pool to approach. The
 label-free arms diverge by mechanism, and the canonical-schedule three-seed replication
 (authors' configuration, $52$ scenes) now separates the robust from the fragile:
 \mad{}'s clean-OOD diversity-robustness is seed-stable (BlendedMVS $0.12\pm0.01$ vs.\
