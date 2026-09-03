@@ -251,7 +251,6 @@ marked in bold and underlined. weight+TTT values are single draws of a run-to-ru
 nondeterministic evaluation (Sec.~\ref{sec:ttt}).}
 \label{tab:supp_perscene_md}
 \setlength{\tabcolsep}{2.5pt}%
-\resizebox{\textwidth}{!}{%
 \begin{tabular}{lrrrrrrrrrrrrrrr}
 \toprule
 & & & \multicolumn{3}{c}{madweight} & \multicolumn{3}{c}{weight} & \multicolumn{3}{c}{weight+TTT} & \multicolumn{3}{c}{RESfM}\\
@@ -296,7 +295,7 @@ Scene & $N_c$ & \%out & $N_r$ & $e_R$ & $e_t$ & $N_r$ & $e_R$ & $e_t$ & $N_r$ & 
 0240 & 298 & 12\% & 275 & $\underline{\mathbf{2.23}}$ & $\underline{\mathbf{0.25}}$ & 275 & 4.64 & 0.34 & 272 & 5.32 & 0.46 & 282 & 3.02 & 0.35\\
 0007 & 290 & 12\% & 106 & $\underline{\mathbf{0.07}}$ & $\underline{\mathbf{0.01}}$ & 269 & 1.86 & 0.09 & 261 & 3.28 & 0.14 & 104 & 0.99 & 0.04\\
 \bottomrule
-\end{tabular}}%
+\end{tabular}
 \end{table*}
 
 \begin{table*}[t]\centering\footnotesize
@@ -305,7 +304,6 @@ Table~\ref{tab:supp_perscene_md}; seed 20, scenes ordered by outlier fraction. W
 underlined.}
 \label{tab:supp_perscene_1dsfm}
 \setlength{\tabcolsep}{2.5pt}%
-\resizebox{\textwidth}{!}{%
 \begin{tabular}{lrrrrrrrrrrrrrrr}
 \toprule
 & & & \multicolumn{3}{c}{madweight} & \multicolumn{3}{c}{weight} & \multicolumn{3}{c}{weight+TTT} & \multicolumn{3}{c}{RESfM}\\
@@ -323,7 +321,7 @@ Montreal\_Notre\_Dame & 450 & 36\% & 311 & 0.59 & 0.94 & 325 & $\underline{\math
 Alamo & 577 & 29\% & 467 & 2.45 & 1.77 & 507 & 2.74 & 2.18 & 497 & 2.49 & $\underline{\mathbf{1.67}}$ & 502 & $\underline{\mathbf{2.42}}$ & 1.73\\
 Madrid\_Metropolis & 341 & 29\% & 249 & 5.72 & 9.63 & 301 & 2.84 & 4.37 & 295 & 2.35 & 3.52 & 287 & $\underline{\mathbf{1.82}}$ & $\underline{\mathbf{3.38}}$\\
 \bottomrule
-\end{tabular}}%
+\end{tabular}
 \end{table*}
 
 Tables~\ref{tab:supp_perscene_md} and~\ref{tab:supp_perscene_1dsfm} report the per-scene
@@ -399,7 +397,18 @@ Olsson & 83\% & 90\% & 90\% & 88\%\\
 \end{tabular}
 \end{table*}
 
-\begin{table*}[t]\centering\footnotesize
+
+\section{Implementation details}\label{sec:impl}
+Table~\ref{tab:supp_config} lists the full training and evaluation configuration. Both
+methods share every setting except the base learning rate ($10^{-4}$ self-supervised,
+$10^{-3}$ supervised, each selected on its own training objective) and the supervision
+source (COLMAP-derived labels vs.\ the adaptive percentile pseudo-labels).
+
+
+
+\clearpage
+\onecolumn
+\begin{table}[tb]\centering\footnotesize
 \caption{\textbf{Training and evaluation configuration.} All arms in the main paper use
 these settings; the only per-method difference is the base learning rate.}
 \label{tab:supp_config}
@@ -431,18 +440,7 @@ Test-time fine-tuning & 1{,}001 iterations, LR $5\times10^{-3}$,\\
 Bundle adjustment & pyceres/pycolmap robust BA, as RESfM\\
 \bottomrule
 \end{tabular}
-\end{table*}
-
-\section{Implementation details}\label{sec:impl}
-Table~\ref{tab:supp_config} lists the full training and evaluation configuration. Both
-methods share every setting except the base learning rate ($10^{-4}$ self-supervised,
-$10^{-3}$ supervised, each selected on its own training objective) and the supervision
-source (COLMAP-derived labels vs.\ the adaptive percentile pseudo-labels).
-
-
-
-\clearpage
-\onecolumn
+\end{table}
 \section{Per-scene label degradation}\label{sec:labelceiling}
 Table~\ref{tab:supp_labelceiling} gives the per-scene data behind the main paper's
 label-ceiling analysis: for each of the 18 scenes we measure the contamination level, the
@@ -452,8 +450,8 @@ the precision and recall of those labels against ground truth. The aggregate tre
 
 
 
-\begin{table}[h]\centering\footnotesize
-\caption{\textbf{Per-scene label-degradation results.} For each scene: contamination (fraction of track observations that are GT outliers), COLMAP-label coverage (fraction of observations receiving a label), and precision/recall of the COLMAP-derived outlier labels against GT, sorted by contamination. Recall collapses above ${\sim}15\%$ contamination.}
+\begin{table}[t]\centering\footnotesize
+\caption{\textbf{Per-scene label-degradation results.} For each scene: contamination (fraction of track observations that are GT outliers), COLMAP-label coverage (fraction of observations receiving a label), and precision/recall of the COLMAP-derived outlier labels against GT, sorted by contamination. Above ${\sim}15\%$ contamination, label recall never exceeds $0.50$: the labels miss at least half of the true outliers.}
 \label{tab:supp_labelceiling}
 \setlength{\tabcolsep}{3.5pt}%
 \begin{tabular}{llcccc}
@@ -557,68 +555,78 @@ RESfM-scratch (supervised)  & $\mathbf{85}$\% & 77\% & 37\% & $\mathbf{100}$\% &
 \end{table*}
 
 \begin{table*}[t]\centering\footnotesize
-\caption{\textbf{Extended full shallow mechanism matrix} (extends main-paper Table~5;
-seed 20; $^{\ddagger}$mean$\pm$std over seeds 20--22). Translation panel repeats the main
-table; rotation and $N_r$ panels: seed-20 means / fractions. Olsson column: means.
-Best per column in bold.}
+\caption{\textbf{Extended full shallow mechanism matrix, five-seed bands} (extends
+main-paper Table~5). All entries are mean$\pm$std over five training seeds
+(seeds $20$--$24$); $^{(n)}$ marks cells currently backed by fewer seeds (their
+remaining seed evaluations are in flight). $N_r$ is the percentage of the dataset's
+ground-truth cameras surviving robust BA and the 5-pixel quality mask.}
 \label{tab:x_matrix}
-\setlength{\tabcolsep}{4pt}%
-\begin{tabular}{lccccc}
+\setlength{\tabcolsep}{3pt}%
+\begin{tabular}{lcccccc}
 \toprule
-Arm & MD & 1DSfM & Strecha & BMVS & Olsson\\
+Arm & MD & 1DSfM & 1DSfM-hard & Strecha & BMVS & Olsson\\
 \midrule
-\multicolumn{6}{l}{\emph{Translation error (mean\,/\,median), the primary metric}}\\[1pt]
-remove       & 0.60/0.19 & 9.1$\pm$2.8/$\mathbf{1.6\pm 0.2}$$^{\ddagger}$ & 3.02/1.68 & 0.27/0.19 & 2.81\\
-remove+TTT   & 0.49/0.13 & $\mathbf{8.7\pm 1.1}$/2.2$\pm$1.1$^{\ddagger}$ & 2.97/1.56 & 0.19/0.07 & 4.07\\
-hybrid       & 0.37/0.20 & 16.0$\pm$1.4/6.7$\pm$4.4$^{\ddagger}$ & 2.70/1.39 & 0.10/0.03 & 2.82\\
-hybrid+TTT   & 0.39/0.14 & 15.4$\pm$1.1/10.7$\pm$3.5$^{\ddagger}$ & 3.52/2.65 & 0.13/$\mathbf{0.00}$ & 3.19\\
-madweight    & 0.42/0.15 & 11.5$\pm$2.3/6.0$\pm$1.4$^{\ddagger}$ & 2.50/0.97 & 0.15/0.004 & $\mathbf{2.57}$\\
-weight       & 0.42/0.18 & 15.8$\pm$3.1/10.9$\pm$2.1$^{\ddagger}$ & 2.00/0.03 & $\mathbf{0.10}$/0.04 & 2.65\\
-weight+TTT   & 0.39/0.14 & 17.0$\pm$1.3/10.9$\pm$4.1$^{\ddagger}$ & 1.98/$\mathbf{0.005}$ & 0.14/0.01 & 7.74\\
-RESfM (sup.) & $\mathbf{0.34/0.07}$ & 11.03/2.93 & $\mathbf{0.006/0.005}$ & 0.38/0.35 & 8.47\\
+\multicolumn{7}{l}{\emph{Translation error (mean$\pm$std over training seeds)}}\\[1pt]
+remove & 0.51$\pm$0.08 & 9.13$\pm$2.17 & 12.42$\pm$2.05 & 3.20$\pm$0.11 & 0.24$\pm$0.06 & 3.41$\pm$0.57\\
+remove+TTT & 0.56$\pm$0.07 & 8.93$\pm$1.20 & 15.15$\pm$0.98 & 3.01$\pm$0.07 & 0.22$\pm$0.10 & 3.63$\pm$0.35\\
+hybrid & 0.48$\pm$0.10$^{(3)}$ & 15.99$\pm$1.36$^{(3)}$ & 26.35$^{(1)}$ & 3.09$\pm$0.45$^{(3)}$ & 0.13$\pm$0.03$^{(3)}$ & 2.82$^{(1)}$\\
+hybrid+TTT & 0.47$\pm$0.13$^{(3)}$ & 15.38$\pm$1.07$^{(3)}$ & 24.99$^{(1)}$ & 3.19$\pm$0.31$^{(3)}$ & 0.14$\pm$0.02$^{(3)}$ & 3.19$^{(1)}$\\
+madweight & 0.51$\pm$0.08 & 11.04$\pm$1.68 & 18.92$\pm$4.05 & 2.65$\pm$0.25 & 0.14$\pm$0.02 & 3.01$\pm$0.34\\
+weight & 0.51$\pm$0.09 & 14.35$\pm$2.97 & 22.92$\pm$2.79 & 1.97$\pm$0.09 & 0.14$\pm$0.03 & 2.91$\pm$0.33\\
+weight+TTT & 0.41$\pm$0.14$^{(3)}$ & 15.72$\pm$2.10 & 22.24$\pm$3.17 & 2.00$\pm$0.05 & 0.14$\pm$0.02 & 8.03$\pm$0.30\\
+RESfM (sup.) & 0.37$\pm$0.12 & 10.50$\pm$1.45 & 19.16$\pm$3.42 & 0.39$\pm$0.72 & 0.35$\pm$0.04 & 7.37$\pm$2.63\\
 \midrule
-\multicolumn{6}{l}{\emph{Rotation error ($\deg$, means)}}\\[1pt]
-remove       & 4.87 & 5.50 & 12.96 & 19.83 & 12.97\\
-remove+TTT   & 4.05 & $\mathbf{5.31}$ & 12.81 & 12.52 & 15.60\\
-hybrid       & 2.81 & 6.98 & 13.04 & 7.45 & 12.54\\
-hybrid+TTT   & 2.99 & 11.32 & 16.62 & 7.80 & 13.76\\
-madweight    & 3.49 & 8.31 & 14.62 & 9.60 & 13.57\\
-weight       & 3.04 & 8.39 & 7.48 & $\mathbf{6.65}$ & 13.23\\
-weight+TTT   & 2.51 & 11.19 & 7.41 & 7.91 & $\mathbf{10.49}$\\
-RESfM (sup.) & $\mathbf{2.01}$ & 9.79 & $\mathbf{0.02}$ & 36.10 & 12.34\\
+\multicolumn{7}{l}{\emph{Rotation error ($\deg$, mean$\pm$std)}}\\[1pt]
+remove & 4.04$\pm$0.60 & 6.94$\pm$1.76 & 12.27$\pm$2.84 & 14.39$\pm$1.03 & 16.04$\pm$4.71 & 13.89$\pm$1.44\\
+remove+TTT & 4.22$\pm$0.36 & 6.90$\pm$1.85 & 16.40$\pm$1.09 & 13.23$\pm$0.78 & 13.19$\pm$6.05 & 14.53$\pm$2.01\\
+hybrid & 3.32$\pm$0.76$^{(3)}$ & 8.32$\pm$1.74$^{(3)}$ & 28.75$^{(1)}$ & 14.42$\pm$1.99$^{(3)}$ & 8.83$\pm$1.46$^{(3)}$ & 12.54$^{(1)}$\\
+hybrid+TTT & 3.24$\pm$0.30$^{(3)}$ & 10.85$\pm$0.90$^{(3)}$ & 32.53$^{(1)}$ & 14.64$\pm$1.72$^{(3)}$ & 8.23$\pm$1.50$^{(3)}$ & 13.76$^{(1)}$\\
+madweight & 3.70$\pm$0.30 & 7.74$\pm$0.94 & 27.65$\pm$8.01 & 12.80$\pm$2.57 & 9.01$\pm$2.37 & 14.44$\pm$0.51\\
+weight & 3.28$\pm$0.49 & 8.24$\pm$1.97 & 27.95$\pm$3.55 & 7.61$\pm$0.31 & 9.17$\pm$2.22 & 13.24$\pm$0.94\\
+weight+TTT & 2.98$\pm$0.68$^{(3)}$ & 10.09$\pm$1.30 & 30.60$\pm$3.78 & 7.95$\pm$0.73 & 8.30$\pm$1.21 & 11.60$\pm$1.19\\
+RESfM (sup.) & 1.89$\pm$0.46 & 9.62$\pm$0.63 & 27.30$\pm$5.06 & 1.56$\pm$2.54 & 31.66$\pm$4.19 & 12.62$\pm$0.82\\
 \midrule
-\multicolumn{6}{l}{\emph{Registered cameras $N_r$}}\\[1pt]
-remove       & 71\% & 59\% & 96\% & 87\% & 80\%\\
-remove+TTT   & 68\% & 59\% & 94\% & 90\% & 80\%\\
-hybrid       & 78\% & $\mathbf{82}$\% & 67\% & 90\% & 88\%\\
-hybrid+TTT   & 77\% & 80\% & 76\% & $\mathbf{95}$\% & 89\%\\
-madweight    & 80\% & 74\% & 91\% & $\mathbf{95}$\% & 83\%\\
-weight       & 79\% & 77\% & 96\% & 88\% & $\mathbf{90}$\%\\
-weight+TTT   & 78\% & 80\% & 98\% & $\mathbf{95}$\% & $\mathbf{90}$\%\\
-RESfM (sup.) & $\mathbf{85}$\% & 77\% & $\mathbf{100}$\% & 90\% & 88\%\\
+\multicolumn{7}{l}{\emph{Registered cameras $N_r$ (\%, mean$\pm$std)}}\\[1pt]
+remove & 71.9$\pm$0.9 & 58.0$\pm$1.2 & 28.8$\pm$0.9 & 97.4$\pm$1.7 & 87.8$\pm$2.0 & 78.3$\pm$1.4\\
+remove+TTT & 70.7$\pm$1.8 & 57.5$\pm$2.3 & 32.0$\pm$1.1 & 95.6$\pm$1.7 & 89.7$\pm$2.0 & 78.3$\pm$1.2\\
+hybrid & 76.8$\pm$1.0$^{(3)}$ & 81.9$\pm$0.4$^{(3)}$ & 41.2$^{(1)}$ & 71.6$\pm$4.7$^{(3)}$ & 91.9$\pm$1.9$^{(3)}$ & 87.5$^{(1)}$\\
+hybrid+TTT & 77.5$\pm$0.6$^{(3)}$ & 81.3$\pm$0.9$^{(3)}$ & 43.2$^{(1)}$ & 72.2$\pm$6.4$^{(3)}$ & 94.1$\pm$0.7$^{(3)}$ & 88.6$^{(1)}$\\
+madweight & 81.4$\pm$1.1 & 69.8$\pm$2.4 & 42.6$\pm$4.9 & 91.5$\pm$4.1 & 92.2$\pm$1.7 & 85.7$\pm$1.9\\
+weight & 78.5$\pm$1.4 & 79.0$\pm$2.9 & 40.2$\pm$2.3 & 97.8$\pm$1.5 & 93.5$\pm$3.3 & 89.9$\pm$1.2\\
+weight+TTT & 77.5$\pm$0.8$^{(3)}$ & 81.2$\pm$1.3 & 41.2$\pm$3.1 & 98.5$\pm$1.5 & 94.4$\pm$0.9 & 90.0$\pm$0.4\\
+RESfM (sup.) & 84.6$\pm$1.2 & 77.3$\pm$1.6 & 34.3$\pm$3.6 & 99.3$\pm$1.0 & 91.7$\pm$1.8 & 89.3$\pm$1.5\\
 \bottomrule
 \end{tabular}
 \end{table*}
 
 
-\begin{table*}[t]\footnotesize
-\begin{minipage}[t]{0.55\textwidth}\centering
-\caption{\textbf{Extended removal-statistic ablation} (extends main-paper Table~6; head
-reweighting fixed). Translation first, then rotation, then $N_r$ (1DSfM, seed 20).}
+\begin{table*}[t]\centering\footnotesize
+\caption{\textbf{Extended removal-statistic ablation, five-seed bands} (extends
+main-paper Table~6; head reweighting fixed). Same conventions as Table~\ref{tab:x_matrix}.}
 \label{tab:x_madstat}
 \setlength{\tabcolsep}{3pt}%
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{lccccc}
+\begin{tabular}{lcccccc}
 \toprule
-Statistic & 1DSfM trans & med.\ s20/21/22 & 1DSfM rot$^{\ddagger}$ & $N_r$ & BMVS\\
+Statistic & MD & 1DSfM & 1DSfM-hard & Strecha & BMVS & Olsson\\
 \midrule
-MAD (madweight) & 11.5$\pm$2.3 & $\mathbf{4.4\,/\,7.0\,/\,6.6}$ & 8.0$\pm$0.8 & $\mathbf{74}$\% & 0.15\\
-Huber & $\mathbf{11.5\pm 1.6}$ & 3.8 / 12.4 / 5.3 & $\mathbf{7.6\pm 0.4}$ & 71\% & $\mathbf{0.11}$\\
-STD & 15.2$\pm$1.2 & 13.3 / 9.0 / 12.9 & 9.0$\pm$0.2 & $\mathbf{74}$\% & 0.15\\
+\multicolumn{7}{l}{\emph{Translation error (mean$\pm$std over training seeds)}}\\[1pt]
+MAD (madweight) & 0.51$\pm$0.08 & 11.04$\pm$1.68 & 18.92$\pm$4.05 & 2.65$\pm$0.25 & 0.14$\pm$0.02 & 3.01$\pm$0.34\\
+Huber & 0.60$\pm$0.03$^{(3)}$ & 11.49$\pm$1.63$^{(3)}$ & 16.85$^{(1)}$ & 2.73$\pm$0.11$^{(3)}$ & 0.14$\pm$0.03$^{(3)}$ & 3.04$^{(1)}$\\
+STD & 0.52$\pm$0.07$^{(3)}$ & 15.23$\pm$1.21$^{(3)}$ & 23.22$^{(1)}$ & 2.36$\pm$0.24$^{(3)}$ & 0.25$\pm$0.09$^{(3)}$ & 2.93$^{(1)}$\\
+\midrule
+\multicolumn{7}{l}{\emph{Rotation error ($\deg$, mean$\pm$std)}}\\[1pt]
+MAD (madweight) & 3.70$\pm$0.30 & 7.74$\pm$0.94 & 27.65$\pm$8.01 & 12.80$\pm$2.57 & 9.01$\pm$2.37 & 14.44$\pm$0.51\\
+Huber & 4.44$\pm$0.23$^{(3)}$ & 7.60$\pm$0.36$^{(3)}$ & 24.48$^{(1)}$ & 13.66$\pm$1.94$^{(3)}$ & 8.64$\pm$2.07$^{(3)}$ & 15.12$^{(1)}$\\
+STD & 3.83$\pm$1.15$^{(3)}$ & 8.98$\pm$0.20$^{(3)}$ & 27.34$^{(1)}$ & 9.92$\pm$2.36$^{(3)}$ & 17.23$\pm$6.87$^{(3)}$ & 13.44$^{(1)}$\\
+\midrule
+\multicolumn{7}{l}{\emph{Registered cameras $N_r$ (\%, mean$\pm$std)}}\\[1pt]
+MAD (madweight) & 81.4$\pm$1.1 & 69.8$\pm$2.4 & 42.6$\pm$4.9 & 91.5$\pm$4.1 & 92.2$\pm$1.7 & 85.7$\pm$1.9\\
+Huber & 80.7$\pm$2.6$^{(3)}$ & 70.9$\pm$0.8$^{(3)}$ & 38.3$^{(1)}$ & 92.6$\pm$1.9$^{(3)}$ & 90.7$\pm$7.5$^{(3)}$ & 85.5$^{(1)}$\\
+STD & 78.9$\pm$0.5$^{(3)}$ & 75.1$\pm$1.5$^{(3)}$ & 41.8$^{(1)}$ & 91.4$\pm$3.9$^{(3)}$ & 91.7$\pm$2.4$^{(3)}$ & 87.9$^{(1)}$\\
 \bottomrule
-\end{tabular}}
-\end{minipage}\hfill
-\begin{minipage}[t]{0.42\textwidth}\centering
+\end{tabular}
+\end{table*}
+\begin{table*}[t]\centering\footnotesize
 \caption{\textbf{Extended per-scene selection} (extends main-paper Table~7; mean
 translation, then rotation, then $N_r$; seed 20). The oracle (italics) selects by
 ground-truth \emph{translation} error over five mechanisms; its rotation and $N_r$ are
@@ -648,7 +656,6 @@ Strecha    & $\mathbf{96}$\% & 91\% & $\mathbf{96}$\% & $\mathit{98\%}$\\
 BlendedMVS & 88\% & $\mathbf{95}$\% & 88\% & $\mathit{90\%}$\\
 \bottomrule
 \end{tabular}
-\end{minipage}
 \end{table*}
 
 \end{document}
