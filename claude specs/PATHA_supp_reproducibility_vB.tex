@@ -76,10 +76,10 @@ paper's per-scene Table~1 values.}
 \toprule
 Condition & Trans & Rot ($\deg$) & $N_r$\\
 \midrule
-Published (paper Table 1) & 0.169 & 1.29 & 298.9\\
-Our env (pip/OpenBLAS), 5-seed mean & 0.203 & 1.82 & 303.9\\
-Our env, seed 20 & 0.209 & 1.89 & 303.6\\
-Authors' exact stack (conda/MKL) & 0.217 & 1.92 & 303.7\\
+Published (paper Table 1) & 0.169 & 1.29 & 298\\
+Our env (pip/OpenBLAS), 5-seed mean & 0.203 & 1.82 & 304\\
+Our env, seed 20 & 0.209 & 1.89 & 304\\
+Authors' exact stack (conda/MKL) & 0.217 & 1.92 & 304\\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -103,8 +103,8 @@ is the CUDA build of PyTorch, forced by GPU-driver compatibility; the BA stage i
 CPU-only.) Re-evaluating all 36 scenes in this matched environment gives
 translation/rotation errors of $0.217/1.92\deg$, statistically indistinguishable from
 our environment's $0.209/1.89\deg$, and not the published $0.169/1.29\deg$. Registration is
-equally stable: all three of our conditions register $303.6$--$303.9$ cameras per scene
-on average (Table~\ref{tab:supp_reprocond}), slightly more than the published $298.9$,
+equally stable: all three of our conditions register $304$ cameras per scene
+on average (Table~\ref{tab:supp_reprocond}), slightly more than the published $298$,
 so the higher mean error is not an artifact of evaluating fewer cameras.
 
 \section{Mechanism: chaotic basin selection in robust BA}\label{sec:mech}
