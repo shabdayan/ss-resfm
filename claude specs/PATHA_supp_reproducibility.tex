@@ -152,38 +152,10 @@ noise floor.
 
 \section{Per-scene results}\label{sec:perscene}
 \begin{table*}[t]\centering\footnotesize
-\caption{\textbf{Per-scene 1DSfM results} (layout follows RESfM's Table~1). For each
+\caption{\textbf{Per-scene MegaDepth results} (layout follows RESfM's Table~1). For each
 scene we show the number of input images ($N_c$) and the fraction of outlier
 observations; for each model, the number of registered cameras ($N_r$) and mean
-rotation ($e_R$, degrees) and translation ($e_t$) errors, post-BA, seed 20. Scenes are
-ordered by outlier fraction. Winning results per scene are marked in bold and
-underlined.}
-\label{tab:supp_perscene_1dsfm}
-\setlength{\tabcolsep}{2.5pt}%
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{lrrrrrrrrrrrrrrr}
-\toprule
-& & & \multicolumn{3}{c}{madweight} & \multicolumn{3}{c}{weight} & \multicolumn{3}{c}{weight+TTT} & \multicolumn{3}{c}{RESfM}\\
-\cmidrule(lr){4-6}\cmidrule(lr){7-9}\cmidrule(lr){10-12}\cmidrule(lr){13-15}
-Scene & $N_c$ & \%out & $N_r$ & $e_R$ & $e_t$ & $N_r$ & $e_R$ & $e_t$ & $N_r$ & $e_R$ & $e_t$ & $N_r$ & $e_R$ & $e_t$\\
-\midrule
-Ellis\_Island & 227 & 56\% & 180 & $\underline{\mathbf{17.16}}$ & 17.59 & 171 & 17.37 & $\underline{\mathbf{15.90}}$ & 177 & 17.74 & 17.11 & 192 & 18.15 & 16.02\\
-NYC\_Library & 332 & 54\% & 282 & 2.32 & 2.94 & 261 & $\underline{\mathbf{1.16}}$ & $\underline{\mathbf{1.19}}$ & 279 & 10.30 & 3.39 & 285 & 12.99 & 6.28\\
-Vienna\_Cathedral & 836 & 51\% & 537 & 7.42 & 7.30 & 484 & $\underline{\mathbf{0.46}}$ & 22.71 & 651 & 26.80 & 33.57 & 492 & 1.09 & $\underline{\mathbf{2.29}}$\\
-Notre\_Dame & 553 & 48\% & 507 & 3.33 & 0.68 & 491 & 1.00 & 0.34 & 485 & $\underline{\mathbf{0.83}}$ & $\underline{\mathbf{0.33}}$ & 493 & 1.08 & 0.49\\
-Yorkminster & 437 & 45\% & 299 & 8.05 & $\underline{\mathbf{5.79}}$ & 371 & 14.95 & 30.87 & 380 & 12.20 & 10.79 & 309 & $\underline{\mathbf{6.88}}$ & 8.77\\
-Piazza\_del\_Popolo & 338 & 42\% & 218 & $\underline{\mathbf{0.43}}$ & $\underline{\mathbf{0.94}}$ & 265 & 19.54 & 10.66 & 254 & 20.46 & 17.05 & 255 & 3.15 & 2.49\\
-Tower\_of\_London & 472 & 42\% & 317 & 35.61 & 76.34 & 337 & 23.30 & $\underline{\mathbf{28.29}}$ & 314 & $\underline{\mathbf{17.91}}$ & 72.61 & 299 & 49.66 & 67.95\\
-Montreal\_Notre\_Dame & 450 & 36\% & 311 & 0.59 & 0.94 & 325 & $\underline{\mathbf{0.55}}$ & 11.35 & 320 & 0.81 & 1.24 & 400 & 0.59 & $\underline{\mathbf{0.93}}$\\
-Alamo & 577 & 29\% & 467 & 2.45 & 1.77 & 507 & 2.74 & 2.18 & 497 & 2.49 & $\underline{\mathbf{1.67}}$ & 502 & $\underline{\mathbf{2.42}}$ & 1.73\\
-Madrid\_Metropolis & 341 & 29\% & 249 & 5.72 & 9.63 & 301 & 2.84 & 4.37 & 295 & 2.35 & 3.52 & 287 & $\underline{\mathbf{1.82}}$ & $\underline{\mathbf{3.38}}$\\
-\bottomrule
-\end{tabular}}%
-\end{table*}
-
-\begin{table*}[t]\centering\footnotesize
-\caption{\textbf{Per-scene MegaDepth results} (layout follows RESfM's Table~1). Columns
-as in Table~\ref{tab:supp_perscene_1dsfm}; seed 20. Above the middle rule are Group~1
+rotation ($e_R$, degrees) and translation ($e_t$) errors, post-BA, seed 20. Above the middle rule are Group~1
 scenes ($<1000$ images); below are Group~2 scenes ($>1000$ images, subsampled to $300$
 for testing), each group ordered by outlier fraction. Winning results per scene are
 marked in bold and underlined. weight+TTT values are single draws of a run-to-run
@@ -238,9 +210,36 @@ Scene & $N_c$ & \%out & $N_r$ & $e_R$ & $e_t$ & $N_r$ & $e_R$ & $e_t$ & $N_r$ & 
 \end{tabular}}%
 \end{table*}
 
-Tables~\ref{tab:supp_perscene_1dsfm} and~\ref{tab:supp_perscene_md} report the per-scene
+\begin{table*}[t]\centering\footnotesize
+\caption{\textbf{Per-scene 1DSfM results} (layout follows RESfM's Table~1). Columns as in
+Table~\ref{tab:supp_perscene_md}; seed 20, scenes ordered by outlier fraction. Winning results per scene are marked in bold and
+underlined.}
+\label{tab:supp_perscene_1dsfm}
+\setlength{\tabcolsep}{2.5pt}%
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrrrrrrrrrr}
+\toprule
+& & & \multicolumn{3}{c}{madweight} & \multicolumn{3}{c}{weight} & \multicolumn{3}{c}{weight+TTT} & \multicolumn{3}{c}{RESfM}\\
+\cmidrule(lr){4-6}\cmidrule(lr){7-9}\cmidrule(lr){10-12}\cmidrule(lr){13-15}
+Scene & $N_c$ & \%out & $N_r$ & $e_R$ & $e_t$ & $N_r$ & $e_R$ & $e_t$ & $N_r$ & $e_R$ & $e_t$ & $N_r$ & $e_R$ & $e_t$\\
+\midrule
+Ellis\_Island & 227 & 56\% & 180 & $\underline{\mathbf{17.16}}$ & 17.59 & 171 & 17.37 & $\underline{\mathbf{15.90}}$ & 177 & 17.74 & 17.11 & 192 & 18.15 & 16.02\\
+NYC\_Library & 332 & 54\% & 282 & 2.32 & 2.94 & 261 & $\underline{\mathbf{1.16}}$ & $\underline{\mathbf{1.19}}$ & 279 & 10.30 & 3.39 & 285 & 12.99 & 6.28\\
+Vienna\_Cathedral & 836 & 51\% & 537 & 7.42 & 7.30 & 484 & $\underline{\mathbf{0.46}}$ & 22.71 & 651 & 26.80 & 33.57 & 492 & 1.09 & $\underline{\mathbf{2.29}}$\\
+Notre\_Dame & 553 & 48\% & 507 & 3.33 & 0.68 & 491 & 1.00 & 0.34 & 485 & $\underline{\mathbf{0.83}}$ & $\underline{\mathbf{0.33}}$ & 493 & 1.08 & 0.49\\
+Yorkminster & 437 & 45\% & 299 & 8.05 & $\underline{\mathbf{5.79}}$ & 371 & 14.95 & 30.87 & 380 & 12.20 & 10.79 & 309 & $\underline{\mathbf{6.88}}$ & 8.77\\
+Piazza\_del\_Popolo & 338 & 42\% & 218 & $\underline{\mathbf{0.43}}$ & $\underline{\mathbf{0.94}}$ & 265 & 19.54 & 10.66 & 254 & 20.46 & 17.05 & 255 & 3.15 & 2.49\\
+Tower\_of\_London & 472 & 42\% & 317 & 35.61 & 76.34 & 337 & 23.30 & $\underline{\mathbf{28.29}}$ & 314 & $\underline{\mathbf{17.91}}$ & 72.61 & 299 & 49.66 & 67.95\\
+Montreal\_Notre\_Dame & 450 & 36\% & 311 & 0.59 & 0.94 & 325 & $\underline{\mathbf{0.55}}$ & 11.35 & 320 & 0.81 & 1.24 & 400 & 0.59 & $\underline{\mathbf{0.93}}$\\
+Alamo & 577 & 29\% & 467 & 2.45 & 1.77 & 507 & 2.74 & 2.18 & 497 & 2.49 & $\underline{\mathbf{1.67}}$ & 502 & $\underline{\mathbf{2.42}}$ & 1.73\\
+Madrid\_Metropolis & 341 & 29\% & 249 & 5.72 & 9.63 & 301 & 2.84 & 4.37 & 295 & 2.35 & 3.52 & 287 & $\underline{\mathbf{1.82}}$ & $\underline{\mathbf{3.38}}$\\
+\bottomrule
+\end{tabular}}%
+\end{table*}
+
+Tables~\ref{tab:supp_perscene_md} and~\ref{tab:supp_perscene_1dsfm} report the per-scene
 post-BA translation and rotation errors and registered-camera counts underlying the
-main paper's dataset-level numbers (seed 20, the declared pipeline): the ten 1DSfM scenes and the 36 MegaDepth test
+main paper's dataset-level numbers (seed 20, the declared pipeline): the 36 MegaDepth test scenes and the ten 1DSfM
 scenes, for the three self-supervised arms (madweight, weight, weight+TTT) and the
 supervised RESfM baseline trained from scratch under the identical
 recipe. The per-scene view makes two aggregate statements concrete: on 1DSfM no single
