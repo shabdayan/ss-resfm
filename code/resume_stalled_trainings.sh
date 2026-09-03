@@ -77,6 +77,16 @@ JOBS=(
  "resfm_deep_selfclean|confs/multiscene_resfm_deep_selfclean.conf|resfm_deep_27scenes_selfclean"
  "resfm_multids_selfclean|confs/multiscene_resfm_multids_selfclean.conf|resfm_shallow_multids_v2_selfclean"
  "resfm_multids_deep_selfclean|confs/multiscene_resfm_multids_deep_selfclean.conf|resfm_deep_multids_v2_ln_selfclean"
+ "rf10k_s20|confs/multiscene_resfm_faithful_10k_s20.conf|resfm_shallow_27scenes_faithful_10k_s20|9999"
+ "rf10k_s21|confs/multiscene_resfm_faithful_10k_s21.conf|resfm_shallow_27scenes_faithful_10k_s21|9999"
+ "rf10k_s22|confs/multiscene_resfm_faithful_10k_s22.conf|resfm_shallow_27scenes_faithful_10k_s22|9999"
+ "rf10k_s23|confs/multiscene_resfm_faithful_10k_s23.conf|resfm_shallow_27scenes_faithful_10k_s23|9999"
+ "rf10k_s24|confs/multiscene_resfm_faithful_10k_s24.conf|resfm_shallow_27scenes_faithful_10k_s24|9999"
+ "sc10k_s20|confs/multiscene_resfm_selfclean_10k_s20.conf|resfm_shallow_27scenes_selfclean_10k_s20|9999"
+ "sc10k_s21|confs/multiscene_resfm_selfclean_10k_s21.conf|resfm_shallow_27scenes_selfclean_10k_s21|9999"
+ "sc10k_s22|confs/multiscene_resfm_selfclean_10k_s22.conf|resfm_shallow_27scenes_selfclean_10k_s22|9999"
+ "sc10k_s23|confs/multiscene_resfm_selfclean_10k_s23.conf|resfm_shallow_27scenes_selfclean_10k_s23|9999"
+ "sc10k_s24|confs/multiscene_resfm_selfclean_10k_s24.conf|resfm_shallow_27scenes_selfclean_10k_s24|9999"
 )
 for row in "${JOBS[@]}"; do
   IFS='|' read -r exp conf resdir final ngpu pyexe <<< "$row"
