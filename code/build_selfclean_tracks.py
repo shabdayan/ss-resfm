@@ -46,6 +46,7 @@ def main():
     ap.add_argument("--conf", required=True)
     ap.add_argument("--ckpt", required=True)
     ap.add_argument("--outname", default="megadepth_selfclean")
+    ap.add_argument("--srcdir", default="megadepth", help="datasets/<srcdir> holding the pool npz (e.g. multitrain)")
     ap.add_argument("--thresh", type=float, default=0.5)
     args = ap.parse_args()
 
@@ -67,10 +68,10 @@ def main():
     os.makedirs(outdir, exist_ok=True)
 
     for scan in scenes:
-        src = os.path.join(HERE, "datasets", "megadepth", f"{scan}.npz")
+        src = os.path.join(HERE, "datasets", args.srcdir, f"{scan}.npz")
         d = dict(np.load(src, allow_pickle=True))
         c2 = ConfigFactory.parse_file(os.path.join(HERE, args.conf))
-        c2.put("dataset.dataset", "megadepth")
+        c2.put("dataset.dataset", args.srcdir)
         c2.put("dataset.scan", scan)
         data = SceneData.create_scene_data(c2).to(device)
         M_data = data.M.cpu().numpy()
