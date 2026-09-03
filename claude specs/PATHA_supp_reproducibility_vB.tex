@@ -14,6 +14,9 @@
 \renewcommand{\floatpagefraction}{0.8}
 \renewcommand{\dblfloatpagefraction}{0.8}
 \setcounter{dbltopnumber}{3}
+\setcounter{topnumber}{4}
+\setcounter{totalnumber}{6}
+\renewcommand{\textfraction}{0.05}
 
 \title{Supplementary Material (Version B):\\
 Environment Sensitivity and Reproducibility of Post-BA SfM Benchmarks}
@@ -480,7 +483,6 @@ MegaDepth & 0047 & 54.9 & 0.37 & 0.83 & 0.50\\
 \end{tabular}
 \end{table}
 
-\clearpage
 \section{Extended main-paper tables (camera-ready)}\label{sec:extended}
 Tables~\ref{tab:x_main}--\ref{tab:x_selector} extend the main paper's Tables~2, 5, 6, and
 7 with rotation error and registered-camera counts alongside translation, following
@@ -599,7 +601,9 @@ RESfM (sup.) & $\mathbf{85}$\% & 77\% & $\mathbf{100}$\% & 90\% & 88\%\\
 \end{tabular}
 \end{table*}
 
-\begin{table}[t]\centering\footnotesize
+
+\begin{table*}[t]\footnotesize
+\begin{minipage}[t]{0.55\textwidth}\centering
 \caption{\textbf{Extended removal-statistic ablation} (extends main-paper Table~6; head
 reweighting fixed). Translation first, then rotation, then $N_r$ (1DSfM, seed 20).}
 \label{tab:x_madstat}
@@ -613,17 +617,15 @@ MAD (madweight) & 11.5$\pm$2.3 & $\mathbf{4.4\,/\,7.0\,/\,6.6}$ & 8.0$\pm$0.8 & 
 Huber & $\mathbf{11.5\pm 1.6}$ & 3.8 / 12.4 / 5.3 & $\mathbf{7.6\pm 0.4}$ & 71\% & $\mathbf{0.11}$\\
 STD & 15.2$\pm$1.2 & 13.3 / 9.0 / 12.9 & 9.0$\pm$0.2 & $\mathbf{74}$\% & 0.15\\
 \bottomrule
-\end{tabular}}%
-\end{table}
-
-\begin{table}[t]\centering\footnotesize
+\end{tabular}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.42\textwidth}\centering
 \caption{\textbf{Extended per-scene selection} (extends main-paper Table~7; mean
 translation, then rotation, then $N_r$; seed 20). The oracle (italics) selects by
 ground-truth \emph{translation} error over five mechanisms; its rotation and $N_r$ are
 those of the selected arms.}
 \label{tab:x_selector}
 \setlength{\tabcolsep}{3pt}%
-\resizebox{\linewidth}{!}{%
 \begin{tabular}{lcccc}
 \toprule
 Dataset & weight & madwt & contam & oracle (GT)\\
@@ -646,7 +648,8 @@ MegaDepth  & 79\% & $\mathbf{80}$\% & $\mathbf{80}$\% & $\mathit{75\%}$\\
 Strecha    & $\mathbf{96}$\% & 91\% & $\mathbf{96}$\% & $\mathit{98\%}$\\
 BlendedMVS & 88\% & $\mathbf{95}$\% & 88\% & $\mathit{90\%}$\\
 \bottomrule
-\end{tabular}}%
-\end{table}
+\end{tabular}
+\end{minipage}
+\end{table*}
 
 \end{document}
