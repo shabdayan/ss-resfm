@@ -411,7 +411,7 @@ Registration is contamination-dependent: the supervised baseline registers the m
 cameras in distribution ($85\%$) and on clean Strecha ($100\%$), while under high
 contamination the label-free arms retain more ($38$--$43\%$ vs.\ $37\%$ on 1DSfM-hard).
 In the ablation (Table~\ref{tab:x_madstat}) rotation and registration are
-statistic-insensitive on 1DSfM (band means $7.6$--$9.0\deg$, $70$--$75\%$): the statistic
+statistic-insensitive on 1DSfM (band means $7.7$--$8.9\deg$, $70$--$75\%$): the statistic
 matters through translation. The selection oracle (Table~\ref{tab:x_selector}) improves both metrics on MegaDepth
 --- translation $0.116$ vs.\ $0.422$ for the best fixed arm and $0.344$ for the
 supervised RESfM-from-scratch baseline; rotation $1.22\deg$ vs.\ the baseline's
@@ -474,8 +474,7 @@ RESfM-scratch (supervised)  & $\mathbf{85}$\% & 77\% & 37\% & $\mathbf{100}$\% &
 \begin{table*}[t]\centering\footnotesize
 \caption{\textbf{Extended full shallow mechanism matrix, five-seed bands} (extends
 main-paper Table~5). All entries are mean$\pm$std over five independent training seeds
-($20$--$24$); $^{(n)}$ marks cells currently backed by fewer seeds (remaining seed
-evaluations in flight). $N_r$ is the percentage of the dataset's ground-truth cameras
+($20$--$24$). $N_r$ is the percentage of the dataset's ground-truth cameras
 surviving robust BA and the 5-pixel quality mask.}
 \label{tab:x_matrix}
 \setlength{\tabcolsep}{3pt}%
@@ -486,8 +485,8 @@ Arm & MD & 1DSfM & 1DSfM-hard & Strecha & BMVS & Olsson\\
 \multicolumn{7}{l}{\emph{Translation error (mean$\pm$std over training seeds)}}\\[1pt]
 remove & 0.51$\pm$0.08 & 9.13$\pm$2.17 & 12.42$\pm$2.05 & 3.20$\pm$0.11 & 0.24$\pm$0.06 & 3.41$\pm$0.57\\
 remove+TTT & 0.56$\pm$0.07 & 8.93$\pm$1.20 & 15.15$\pm$0.98 & 3.01$\pm$0.07 & 0.22$\pm$0.10 & 3.63$\pm$0.35\\
-hybrid & 0.48$\pm$0.10$^{(3)}$ & 15.99$\pm$1.36$^{(3)}$ & 23.25$\pm$5.14$^{(3)}$ & 3.09$\pm$0.45$^{(3)}$ & 0.13$\pm$0.03$^{(3)}$ & 2.76$\pm$0.08$^{(2)}$\\
-hybrid+TTT & 0.47$\pm$0.13$^{(3)}$ & 15.38$\pm$1.07$^{(3)}$ & 24.99$^{(1)}$ & 3.19$\pm$0.31$^{(3)}$ & 0.14$\pm$0.02$^{(3)}$ & 3.19$^{(1)}$\\
+hybrid & 0.45$\pm$0.08 & 16.23$\pm$2.20 & 22.98$\pm$4.02 & 3.25$\pm$0.45 & 0.14$\pm$0.02 & 2.90$\pm$0.23\\
+hybrid+TTT & 0.43$\pm$0.11 & 15.13$\pm$1.04 & 23.00$\pm$3.06 & 3.13$\pm$0.24 & 0.14$\pm$0.02 & 3.06$\pm$0.39\\
 madweight & 0.51$\pm$0.08 & 11.04$\pm$1.68 & 18.92$\pm$4.05 & 2.65$\pm$0.25 & 0.14$\pm$0.02 & 3.01$\pm$0.34\\
 weight & 0.51$\pm$0.09 & 14.35$\pm$2.97 & 22.92$\pm$2.79 & 1.97$\pm$0.09 & 0.14$\pm$0.03 & 2.91$\pm$0.33\\
 weight+TTT & 0.40$\pm$0.11 & 15.72$\pm$2.10 & 22.24$\pm$3.17 & 2.00$\pm$0.05 & 0.14$\pm$0.02 & 8.03$\pm$0.30\\
@@ -496,8 +495,8 @@ RESfM (sup.) & 0.37$\pm$0.12 & 10.50$\pm$1.45 & 19.16$\pm$3.42 & 0.39$\pm$0.72 &
 \multicolumn{7}{l}{\emph{Rotation error ($\deg$, mean$\pm$std)}}\\[1pt]
 remove & 4.04$\pm$0.60 & 6.94$\pm$1.76 & 12.27$\pm$2.84 & 14.39$\pm$1.03 & 16.04$\pm$4.71 & 13.89$\pm$1.44\\
 remove+TTT & 4.22$\pm$0.36 & 6.90$\pm$1.85 & 16.40$\pm$1.09 & 13.23$\pm$0.78 & 13.19$\pm$6.05 & 14.53$\pm$2.01\\
-hybrid & 3.32$\pm$0.76$^{(3)}$ & 8.32$\pm$1.74$^{(3)}$ & 28.03$\pm$1.96$^{(3)}$ & 14.42$\pm$1.99$^{(3)}$ & 8.82$\pm$1.46$^{(3)}$ & 12.33$\pm$0.29$^{(2)}$\\
-hybrid+TTT & 3.24$\pm$0.30$^{(3)}$ & 10.85$\pm$0.90$^{(3)}$ & 32.53$^{(1)}$ & 14.64$\pm$1.72$^{(3)}$ & 8.23$\pm$1.50$^{(3)}$ & 13.76$^{(1)}$\\
+hybrid & 3.08$\pm$0.71 & 7.89$\pm$1.49 & 28.21$\pm$2.10 & 15.15$\pm$1.98 & 9.01$\pm$1.07 & 13.35$\pm$1.60\\
+hybrid+TTT & 2.99$\pm$0.45 & 10.19$\pm$1.10 & 30.63$\pm$3.18 & 14.69$\pm$1.41 & 8.30$\pm$1.21 & 13.73$\pm$2.32\\
 madweight & 3.70$\pm$0.30 & 7.74$\pm$0.94 & 27.65$\pm$8.01 & 12.80$\pm$2.57 & 9.01$\pm$2.37 & 14.44$\pm$0.51\\
 weight & 3.28$\pm$0.49 & 8.24$\pm$1.97 & 27.95$\pm$3.55 & 7.61$\pm$0.31 & 9.17$\pm$2.22 & 13.24$\pm$0.94\\
 weight+TTT & 2.88$\pm$0.55 & 10.09$\pm$1.30 & 30.60$\pm$3.78 & 7.95$\pm$0.73 & 8.30$\pm$1.21 & 11.60$\pm$1.19\\
@@ -506,8 +505,8 @@ RESfM (sup.) & 1.89$\pm$0.46 & 9.62$\pm$0.63 & 27.30$\pm$5.06 & 1.56$\pm$2.54 & 
 \multicolumn{7}{l}{\emph{Registered cameras $N_r$ (\%, mean$\pm$std)}}\\[1pt]
 remove & 71.9$\pm$0.9 & 58.0$\pm$1.2 & 28.8$\pm$0.9 & 97.4$\pm$1.7 & 87.8$\pm$2.0 & 78.3$\pm$1.4\\
 remove+TTT & 70.7$\pm$1.8 & 57.5$\pm$2.3 & 32.0$\pm$1.1 & 95.6$\pm$1.7 & 89.7$\pm$2.0 & 78.3$\pm$1.2\\
-hybrid & 76.8$\pm$1.0$^{(3)}$ & 81.9$\pm$0.4$^{(3)}$ & 40.8$\pm$6.9$^{(3)}$ & 71.6$\pm$4.7$^{(3)}$ & 91.9$\pm$1.9$^{(3)}$ & 85.9$\pm$2.4$^{(2)}$\\
-hybrid+TTT & 77.5$\pm$0.6$^{(3)}$ & 81.3$\pm$0.9$^{(3)}$ & 43.2$^{(1)}$ & 72.2$\pm$6.4$^{(3)}$ & 94.1$\pm$0.7$^{(3)}$ & 88.6$^{(1)}$\\
+hybrid & 76.1$\pm$1.9 & 80.2$\pm$2.7 & 41.2$\pm$5.0 & 71.5$\pm$3.4 & 93.0$\pm$2.0 & 87.7$\pm$0.7\\
+hybrid+TTT & 76.6$\pm$1.6 & 82.0$\pm$1.2 & 41.5$\pm$4.5 & 70.7$\pm$5.6 & 94.4$\pm$0.8 & 87.7$\pm$1.3\\
 madweight & 81.4$\pm$1.1 & 69.8$\pm$2.4 & 42.6$\pm$4.9 & 91.5$\pm$4.1 & 92.2$\pm$1.7 & 85.7$\pm$1.9\\
 weight & 78.5$\pm$1.4 & 79.0$\pm$2.9 & 40.2$\pm$2.3 & 97.8$\pm$1.5 & 93.5$\pm$3.3 & 89.9$\pm$1.2\\
 weight+TTT & 76.8$\pm$1.6 & 81.2$\pm$1.3 & 41.2$\pm$3.1 & 98.5$\pm$1.5 & 94.4$\pm$0.9 & 90.0$\pm$0.4\\
@@ -528,18 +527,18 @@ Statistic & MD & 1DSfM & 1DSfM-hard & Strecha & BMVS & Olsson\\
 \midrule
 \multicolumn{7}{l}{\emph{Translation error (mean$\pm$std over training seeds)}}\\[1pt]
 MAD (madweight) & 0.51$\pm$0.08 & 11.04$\pm$1.68 & 18.92$\pm$4.05 & 2.65$\pm$0.25 & 0.14$\pm$0.02 & 3.01$\pm$0.34\\
-Huber & 0.60$\pm$0.03$^{(3)}$ & 11.49$\pm$1.63$^{(3)}$ & 16.85$^{(1)}$ & 2.73$\pm$0.11$^{(3)}$ & 0.14$\pm$0.03$^{(3)}$ & 3.04$^{(1)}$\\
-STD & 0.52$\pm$0.07$^{(3)}$ & 15.23$\pm$1.21$^{(3)}$ & 23.22$^{(1)}$ & 2.36$\pm$0.24$^{(3)}$ & 0.25$\pm$0.09$^{(3)}$ & 2.93$^{(1)}$\\
+Huber & 0.59$\pm$0.03 & 14.01$\pm$3.65 & 20.26$\pm$2.87 & 2.71$\pm$0.09 & 0.13$\pm$0.03 & 2.94$\pm$0.51\\
+STD & 0.53$\pm$0.06 & 13.47$\pm$2.92 & 21.88$\pm$3.06 & 2.42$\pm$0.33 & 0.20$\pm$0.09 & 2.79$\pm$0.45\\
 \midrule
 \multicolumn{7}{l}{\emph{Rotation error ($\deg$, mean$\pm$std)}}\\[1pt]
 MAD (madweight) & 3.70$\pm$0.30 & 7.74$\pm$0.94 & 27.65$\pm$8.01 & 12.80$\pm$2.57 & 9.01$\pm$2.37 & 14.44$\pm$0.51\\
-Huber & 4.44$\pm$0.23$^{(3)}$ & 7.60$\pm$0.36$^{(3)}$ & 24.48$^{(1)}$ & 13.66$\pm$1.94$^{(3)}$ & 8.64$\pm$2.07$^{(3)}$ & 15.12$^{(1)}$\\
-STD & 3.83$\pm$1.15$^{(3)}$ & 8.98$\pm$0.20$^{(3)}$ & 27.34$^{(1)}$ & 9.92$\pm$2.36$^{(3)}$ & 17.23$\pm$6.87$^{(3)}$ & 13.44$^{(1)}$\\
+Huber & 4.57$\pm$0.37 & 8.17$\pm$0.92 & 30.66$\pm$4.25 & 14.35$\pm$1.92 & 7.95$\pm$1.54 & 14.13$\pm$1.54\\
+STD & 3.73$\pm$0.85 & 8.88$\pm$0.81 & 28.27$\pm$3.47 & 10.27$\pm$2.38 & 13.82$\pm$6.80 & 13.05$\pm$1.06\\
 \midrule
 \multicolumn{7}{l}{\emph{Registered cameras $N_r$ (\%, mean$\pm$std)}}\\[1pt]
 MAD (madweight) & 81.4$\pm$1.1 & 69.8$\pm$2.4 & 42.6$\pm$4.9 & 91.5$\pm$4.1 & 92.2$\pm$1.7 & 85.7$\pm$1.9\\
-Huber & 80.7$\pm$2.6$^{(3)}$ & 70.9$\pm$0.8$^{(3)}$ & 38.3$^{(1)}$ & 92.6$\pm$1.9$^{(3)}$ & 90.7$\pm$7.5$^{(3)}$ & 85.5$^{(1)}$\\
-STD & 78.9$\pm$0.5$^{(3)}$ & 75.1$\pm$1.5$^{(3)}$ & 41.8$^{(1)}$ & 91.4$\pm$3.9$^{(3)}$ & 91.7$\pm$2.4$^{(3)}$ & 87.9$^{(1)}$\\
+Huber & 80.7$\pm$2.1 & 72.9$\pm$2.8 & 38.7$\pm$3.3 & 93.0$\pm$1.5 & 91.5$\pm$5.5 & 85.0$\pm$2.0\\
+STD & 79.2$\pm$0.8 & 75.4$\pm$1.2 & 39.8$\pm$2.9 & 93.7$\pm$4.6 & 93.0$\pm$2.3 & 87.1$\pm$1.3\\
 \bottomrule
 \end{tabular}
 \end{table*}
