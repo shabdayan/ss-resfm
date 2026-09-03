@@ -483,12 +483,16 @@ MegaDepth & 0047 & 54.9 & 0.37 & 0.83 & 0.50\\
 \section{Extended main-paper tables (camera-ready)}\label{sec:extended}
 Tables~\ref{tab:x_main}--\ref{tab:x_selector} extend the main paper's Tables~2, 5, 6, and
 7 with rotation error and registered-camera counts alongside translation, following
-RESfM's metric emphasis (translation first, then rotation, then $N_r$). All
-values come from the same seed-20 evaluations behind the main paper (rotation panels and
-$N_r$ at seed 20; translation panels repeat the main-paper cells including their seed
-bands). \textbf{In the camera-ready we will replace main-paper Tables~2, 5, 6, and 7 with
+RESfM's metric emphasis (translation first, then rotation, then $N_r$):
+Table~\ref{tab:x_main} extends the main comparison (Table~2),
+Table~\ref{tab:x_matrix} the full mechanism matrix (Table~5),
+Table~\ref{tab:x_madstat} the removal-statistic ablation (Table~6), and
+Table~\ref{tab:x_selector} the per-scene selection (Table~7).
+Table~\ref{tab:x_main} reports the seed-20 evaluations behind the main paper;
+Tables~\ref{tab:x_matrix} and~\ref{tab:x_madstat} report mean$\pm$std over five
+independent training seeds ($20$--$24$) for every dataset and metric. \textbf{In the camera-ready we will replace main-paper Tables~2, 5, 6, and 7 with
 these extended versions}, with the translation cells additionally carrying the five-seed
-training-seed bands of Sec.~\ref{sec:seedbands} (Table~\ref{tab:supp_prepost}). Reading the additions: rotation broadly agrees with translation
+training-seed bands of Sec.~\ref{sec:seedbands} (Table~\ref{tab:supp_prepost}). Reading the additions (Table~\ref{tab:x_main}): rotation broadly agrees with translation
 (the supervised BlendedMVS failure is even larger in rotation, $36\deg$; the
 high-contamination ordering is preserved), though the best arm can differ per metric (on
 MegaDepth, weight+TTT leads translation while the supervised baseline leads rotation).
@@ -496,26 +500,28 @@ Registration is contamination-dependent: the supervised baseline registers the m
 cameras in distribution ($85\%$) and on clean Strecha ($100\%$), while under high
 contamination the label-free arms retain more ($38$--$43\%$ vs.\ $37\%$ on 1DSfM-hard).
 In the ablation (Table~\ref{tab:x_madstat}) rotation and registration are
-statistic-insensitive ($7.6$--$9.0\deg$, $71$--$74\%$): the statistic matters through the
-translation medians. The selection oracle (Table~\ref{tab:x_selector}) improves rotation
-as well as translation (MegaDepth $1.22\deg$ vs.\ the supervised $2.01\deg$) but
-registers fewer 1DSfM cameras ($66\%$): selecting by translation error can sacrifice
-registration.
+statistic-insensitive on 1DSfM (band means $7.6$--$9.0\deg$, $70$--$75\%$): the statistic
+matters through translation. The selection oracle (Table~\ref{tab:x_selector}) improves both metrics on MegaDepth
+--- translation $0.116$ vs.\ $0.422$ for the best fixed arm and $0.344$ for the
+supervised RESfM-from-scratch baseline; rotation $1.22\deg$ vs.\ the baseline's
+$2.01\deg$ --- but registers fewer 1DSfM cameras ($66\%$ vs.\ $74$--$77\%$ for the
+fixed arms): selecting by translation error can sacrifice registration.
 
 \noindent\textbf{Two notions of registration, and an error-vs-coverage trade-off.} Two
 registration notions must be distinguished. Main-paper Table~4's ``Registered'' column
 reports \emph{pose coverage}: every learned arm outputs a pose for every camera
 (``all''), whereas COLMAP genuinely fails to register $36\%$ of the cameras. $N_r$ here
 is stricter: the cameras surviving robust BA and the $5$-pixel reprojection quality mask,
-i.e.\ the set over which the reported errors are computed. Under this stricter notion the
+i.e.\ the set over which the reported errors are computed. Under this stricter notion (Table~\ref{tab:x_matrix}, $N_r$ panel) the
 plain-removal arms attain their low errors over a \emph{reduced} registered set: on
-1DSfM plain remove registers $59\%$ vs.\ the supervised baseline's $77\%$, and on
-1DSfM-hard $28\%$ vs.\ $37\%$ (remove+TTT: $59\%$/$32\%$), consistent with
+1DSfM plain remove registers $58\%$ vs.\ the supervised baseline's $77\%$, and on
+1DSfM-hard $29\%$ vs.\ $34\%$ (remove+TTT: $58\%$/$32\%$), consistent with
 aggressive pruning disconnecting weakly-supported cameras (main-paper limitation~5). The
 camera-ready will state this caveat alongside the plain-remove claims (``over the cameras
-it retains''). madweight, by contrast, is \emph{registration-matched} to the supervised
-baseline ($74\%$/$38\%$ vs.\ $77\%$/$37\%$), so its statistical match at extreme
-contamination and its clean-OOD wins are not coverage artifacts, and the soft arms
+it retains''). madweight, by contrast, registers comparably to the supervised baseline on 1DSfM
+($70\%$ vs.\ $77\%$) and \emph{more} under extreme contamination ($43\%$ vs.\
+$34\%$ on 1DSfM-hard), so its statistical match at extreme contamination and its
+clean-OOD wins are not coverage artifacts, and the soft arms
 register at least as many cameras as supervision under high contamination. These
 readings, together with the paragraph above, are intended for the camera-ready main text
 (the Metrics paragraph, Secs.~5.1 and 5.5, and limitation~5).
