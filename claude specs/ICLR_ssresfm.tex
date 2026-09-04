@@ -753,7 +753,19 @@ recipe; only their combination does. The label-free arms reach the same level
 ($2.9$--$3.6$) from the \emph{shallow, single-pool} configuration --- the cheapest cell
 of the grid --- which reframes the comparison: self-supervision buys at $1{\times}3$
 capacity on $27$ scenes what supervision needs both depth and a curated multi-dataset
-pool to approach. The
+pool to approach.
+
+A two-stage control sharpens what kind of failure the collapse is. Retraining the
+supervised recipe from scratch on tracks pre-cleaned by its own best outlier head (with
+label-free reprojection-based checkpoint selection) does nothing at the full $20$k+$20$k
+budget --- all five seeds collapse ($8.3$--$12.0$) --- but a \emph{compute-matched}
+$10$k+$10$k version escapes in three of five seeds ($1.69$/$2.01$/$2.29$, matching the
+best cells of the grid) while the other two collapse ($7.8$/$12.1$), with the same
+bimodality on Strecha ($0.01$--$0.2$ vs.\ $1.9$/$2.4$). The good basin is therefore
+\emph{reachable} from the shallow single-pool configuration --- the collapse is basin
+selection, not a capacity or data impossibility --- but no supervised-lineage recipe we
+tested reaches it reliably: across seeds, clean-OOD reliability is delivered only by the
+label-free arms and by depth$\times$diversity. The
 label-free arms diverge by mechanism, and the canonical-schedule three-seed replication
 (authors' configuration, $52$ scenes) now separates the robust from the fragile:
 \mad{}'s clean-OOD diversity-robustness is seed-stable (BlendedMVS $0.12\pm0.01$ vs.\
