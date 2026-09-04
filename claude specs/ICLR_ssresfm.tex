@@ -77,12 +77,12 @@ collections. Its correspondences are heavily contaminated by outliers (wrong mat
 that survive pairwise geometric verification), particularly in Internet photo collections
 where repeated and symmetric structure produces spurious epipolar geometries. Classical
 pipelines reject outliers with RANSAC and robust bundle adjustment (BA); recent deep
-equivariant methods (ESFM~\cite{esfm}, RESfM~\cite{resfm}) instead learn a
+equivariant methods (ESFM~\citep{esfm}, RESfM~\citep{resfm}) instead learn a
 \emph{sets-of-sets} permutation-equivariant network that regresses cameras from point
 tracks and, in RESfM, adds a supervised per-point \emph{inlier/outlier classification
-module}. RESfM's labels are derived from a COLMAP~\cite{colmap} reconstruction in two
+module}. RESfM's labels are derived from a COLMAP~\citep{colmap} reconstruction in two
 stages: first by track membership, then refined by a $4$-pixel reprojection test against
-COLMAP-pose triangulation~\cite{resfm}.
+COLMAP-pose triangulation~\citep{resfm}.
 
 We take a different route. Rather than supervise the head with COLMAP labels, \textbf{SS-RESfM}
 trains it \emph{self-supervised}: an adaptive confidence-weighted loss forms confident
@@ -142,10 +142,10 @@ mean$\pm$std alone would hide.
 
 \section{Related Work}
 \textbf{Deep equivariant SfM.} Learning-based SfM regresses cameras from point tracks with
-permutation-equivariant networks. ESFM~\cite{esfm} casts uncalibrated SfM as deep projective
+permutation-equivariant networks. ESFM~\citep{esfm} casts uncalibrated SfM as deep projective
 factorization over a measurement tensor, trained with an unsupervised reprojection loss;
-GASFM~\cite{gasfm} uses a graph-attention variant. Both assume outliers were already removed
-by two-view geometric verification. RESfM~\cite{resfm} targets contaminated internet
+GASFM~\citep{gasfm} uses a graph-attention variant. Both assume outliers were already removed
+by two-view geometric verification. RESfM~\citep{resfm} targets contaminated internet
 collections with a \emph{sets-of-sets} architecture plus a supervised per-point
 inlier/outlier classification module and a robust BA, reporting accuracy close to its own
 clean-track upper bound (``ESFM$^\ast$'') and on par with classical Theia/GLOMAP
@@ -158,10 +158,10 @@ study the outlier-handling stage in isolation.
 RANSAC/two-view filtering are the central difficulty in internet-scale SfM. Classical
 pipelines suppress them with M-estimators and robust BA; RESfM casts rejection as
 supervised classification. We contrast supervised classification against \emph{label-free}
-statistical removal via the median absolute deviation (MAD)~\cite{mad} and soft
+statistical removal via the median absolute deviation (MAD)~\citep{mad} and soft
 reweighting, and show their relative merit is contamination-dependent.
 
-\noindent\textbf{Robust bundle adjustment.} Following~\cite{resfm}, we apply a robust BA
+\noindent\textbf{Robust bundle adjustment.} Following~\citep{resfm}, we apply a robust BA
 that removes high-reprojection and low-visibility points, keeps the largest connected
 component, re-triangulates, and re-optimizes. This stage is identical across all our arms.
 
@@ -173,7 +173,7 @@ uniformly across mechanisms.
 \subsection{Background}
 The input is a (sparse) point-track tensor $M$ of $m$ tracks across $n$ cameras, built by
 concatenating pairwise RANSAC-verified SIFT matches. The sets-of-sets permutation-equivariant
-network~\cite{resfm,esfm} maps $M$ to per-camera poses and a \emph{per-point} outlier score
+network~\citep{resfm,esfm} maps $M$ to per-camera poses and a \emph{per-point} outlier score
 $s\in[0,1]$ (points in the same track may receive different scores). Crucially, unlike RESfM,
 whose classification head is trained with a BCE loss against \emph{COLMAP-derived}
 inlier/outlier labels, SS-RESfM trains this head \emph{self-supervised}, with an adaptive
@@ -191,7 +191,7 @@ Fig.~\ref{fig:method}:
 \begin{itemize}\itemsep2pt
 \item\textbf{remove} (the RESfM analogue): drop a point if $s>\tau$; keep with $w{=}1$
 otherwise. We use RESfM's default $\tau{=}0.6$ and its $\tau{=}0.8$ for the low-outlier,
-single-camera Strecha/BlendedMVS sets~\cite{resfm}.
+single-camera Strecha/BlendedMVS sets~\citep{resfm}.
 \item\textbf{weight}: soft, $w=1-s$, no removal.
 \item\textbf{hybrid}: three-band: keep ($s$ below a low percentile), soft-weight (middle),
 drop ($s$ above a high percentile).
@@ -224,12 +224,12 @@ uniformly to every dataset); see Table~\ref{tab:datasets}.
 \toprule
 Dataset & RESfM\% & ours\% & Regime\\
 \midrule
-Strecha~\cite{strecha} & 2.7 & 1.7 & clean, LIDAR GT\\
-BlendedMVS~\cite{blendedmvs} & 3.6 & 3.1 & low-outlier\\
-MegaDepth~\cite{megadepth} & 25.6 & 25.4 & contam., \emph{in-dist.}\\
-1DSfM~\cite{onedsfm} & 31.9 & 43.3 & contam., OOD\\
+Strecha~\citep{strecha} & 2.7 & 1.7 & clean, LIDAR GT\\
+BlendedMVS~\citep{blendedmvs} & 3.6 & 3.1 & low-outlier\\
+MegaDepth~\citep{megadepth} & 25.6 & 25.4 & contam., \emph{in-dist.}\\
+1DSfM~\citep{onedsfm} & 31.9 & 43.3 & contam., OOD\\
 1DSfM-hard & -- & $\sim$60 & extreme, OOD\\
-Olsson~\cite{olsson} & -- & 0.5 & outlier-free\\
+Olsson~\citep{olsson} & -- & 0.5 & outlier-free\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -245,7 +245,7 @@ in-distribution, while 1DSfM/1DSfM-hard/Strecha/BlendedMVS/Olsson are cross-data
 
 \subsection{Protocol, baselines, and track provenance}\label{sec:protocol}
 Following RESfM's public training code and default configuration, all networks train for
-$20{,}000$ epochs with seed $20$ (the seed reported by RESfM~\cite{resfm}) as the primary
+$20{,}000$ epochs with seed $20$ (the seed reported by RESfM~\citep{resfm}) as the primary
 seed; the self-supervised arms are additionally replicated with seeds $21$/$22$, and cells
 marked $^{\ddagger}$ report mean$\pm$std over the three seeds, \emph{including the
 supervised baseline}, whose own seed band is reported throughout (its MegaDepth mean is
@@ -495,34 +495,9 @@ $2$--$3\%$, the two tie in distribution, and removal dominates from $43\%$ upwar
 $13.0\pm2.6$ vs.\ $\sim\!22$ at $60\%$). This mechanism-level flip, the answer to our central
 question, is stable across schedules and seeds.
 
-\subsection{Learning-rate robustness of the baseline}\label{sec:lrgrid}
-Our protocol gives each method its best learning rate at the canonical $20$k budget
-($10^{-3}$ for the supervised arms, RESfM's released value; $10^{-4}$ for the
-self-supervised arms). To test how much the conclusions depend on this choice we trained
-the supervised baseline at $10^{-4}$ as well. In distribution the released value is
-clearly right ($0.344$ vs.\ $0.533$), and at $10^{-4}$ the supervised model is
-truncation-limited (best checkpoint at the final epoch). Out of distribution, however,
-the picture splits: the baseline's Olsson collapse persists at \emph{both} rates
-($8.47$ vs.\ $8.54$), i.e.\ the clean-benchmark supervised failure is lr-robust,
-whereas its BlendedMVS, 1DSfM, and 1DSfM-hard deficits shrink substantially at the lower
-rate ($0.379\!\to\!0.139$, $11.0\!\to\!5.9$, $16.2\!\to\!12.8$): the
-under-trained low-rate model overfits MegaDepth less and generalizes better. Two follow-ups
-complete the grid. A $30$k-budget replicate at $10^{-4}$ plateaus (best validation at
-epoch $16$k, never improving through $30$k), and its evaluation sharpens the picture:
-that checkpoint reaches \emph{near-parity in distribution} ($0.365$ vs.\ the $10^{-3}$
-baseline's $0.344$) while keeping the OOD gains (1DSfM $6.1$, 1DSfM-hard $13.9$,
-BlendedMVS $0.18$), making it the strongest supervised variant out of distribution
-(single seed). The Olsson ($8.27$) and Strecha ($1.64$) failures persist, and label-free
-plain removal still leads at extreme contamination ($12.4\pm2.1$ vs.\ $13.9$); the OOD
-advantage of the low rate is a regularization effect, not an under-training artifact. And the self-supervised
-arms show \emph{no} symmetric effect: trained at $10^{-3}$ they are worse on every
-dataset (madweight MegaDepth $0.75$ vs.\ $0.42$, 1DSfM $15.7$ vs.\ $12.4$, Olsson
-$10.1$ vs.\ $2.6$). Each method's declared rate is therefore its empirical best-of-two,
-and the off-rate OOD gain is specific to supervision, consistent with a
-COLMAP-label-fitted classifier overfitting in distribution. We scope our claims
-accordingly: the Olsson and Strecha findings and the mechanism flip itself are
-lr-robust, while the magnitude of the supervised OOD deficit at BlendedMVS and high
-contamination depends on the baseline's learning rate.
+\noindent\emph{Baseline learning-rate robustness, the full mechanism matrix, the
+MAD/STD/Huber ablation, per-scene selection, and qualitative results:
+Apps.~\ref{app:lrgrid}--\ref{app:qual}.}
 
 \subsection{Why label-free removal wins under high contamination}\label{sec:whyremoval}
 Two factors explain why the supervised advantage erodes as contamination rises.
@@ -533,7 +508,7 @@ MegaDepth's labels derive from its curated reference reconstructions, the
 trusted-reconstruction condition under which, per Table~\ref{tab:ceiling}, supervision
 is sound, and the strong in-distribution result is consistent with this). Second, and more
 fundamentally, supervision itself degrades in this regime: RESfM's labeling (Appendix~C
-of~\cite{resfm}) assumes a COLMAP reconstruction and ground-truth poses per training
+of~\citep{resfm}) assumes a COLMAP reconstruction and ground-truth poses per training
 scene: readily obtained for curated data, but exactly what one lacks on the contaminated
 collections where robustness is most needed. \mad{} requires neither: it recomputes the
 outlier test per-scene from reprojection statistics, so it is unaffected by domain shift
@@ -614,7 +589,159 @@ no longer be manufactured.
 
 
 
-\subsection{Full mechanism matrix}
+\subsection{Preliminary: training-pool diversity and the label ceiling}
+A preliminary experiment (single seed, under a coarser five-milestone decay schedule;
+cf.\ \S\ref{sec:protocol}) retrains both methods on progressively diversified pools: MegaDepth-27
+$\to$ $+$ETH3D ($39$ scenes, added data ${\sim}8\%$ contaminated) $\to$ $+$VGG/T\&T ($52$
+scenes, adding a ${\sim}16\%$-contaminated mid-band). The supervised baseline's clean-OOD
+accuracy degrades \emph{monotonically} with diversity (Strecha
+$0.006\!\to\!0.77\!\to\!2.83$); in distribution the same diversification is nearly
+free (MegaDepth $0.33\!\to\!0.32\!\to\!0.44$, the first step within noise), so the
+collapse is specific to clean OOD generalization, not a general capacity cost. Meanwhile the clean addition yielded no high-contamination
+gain and only the contaminated mid-band coincided with one (1DSfM $11.0/11.5/8.8$;
+differences within single-seed noise on this benchmark, so consistent with, though not
+established by, these runs). If it holds, the implication is pointed: the data that
+helps is precisely the data whose COLMAP labels degrade (cf.\ the label ceiling), making
+supervised diversity scaling self-limiting.
+
+A four-cell control (single seed each, canonical schedule) sharpens the architecture
+question: on the Olsson clean benchmark, the supervised collapse persists for a
+\emph{deep} network on the MegaDepth-only pool ($8.58$) and for a \emph{shallow} network
+on the diversified $52$-scene pool ($9.30$), yet vanishes for deep networks on the
+diversified pool ($2.26$ plain; $2.83$ with LayerNorm/residual --- so normalization is
+not the ingredient). Neither capacity nor data diversity alone rescues the supervised
+recipe; only their combination does. The label-free arms reach the same level
+($2.9$--$3.6$) from the \emph{shallow, single-pool} configuration --- the cheapest cell
+of the grid --- which reframes the comparison: self-supervision buys at $1{\times}3$
+capacity on $27$ scenes what supervision needs both depth and a curated multi-dataset
+pool to approach.
+
+A two-stage control sharpens what kind of failure the collapse is. Retraining the
+supervised recipe from scratch on tracks pre-cleaned by its own best outlier head (with
+label-free reprojection-based checkpoint selection) does nothing at the full $20$k+$20$k
+budget --- all five seeds collapse ($8.3$--$12.0$) --- but a \emph{compute-matched}
+$10$k+$10$k version escapes in three of five seeds ($1.69$/$2.01$/$2.29$, matching the
+best cells of the grid) while the other two collapse ($7.8$/$12.1$), with the same
+bimodality on Strecha ($0.01$--$0.2$ vs.\ $1.9$/$2.4$). The good basin is therefore
+\emph{reachable} from the shallow single-pool configuration --- the collapse is basin
+selection, not a capacity or data impossibility --- but no supervised-lineage recipe we
+tested reaches it reliably: across seeds, clean-OOD reliability is delivered only by the
+label-free arms and by depth$\times$diversity. Nor do the two remedies compose: applying
+the same two-stage cleaning \emph{on top of} the depth$\times$diversity configuration
+destroys its fix (Olsson $9.94$ vs.\ $2.83$ one-stage) --- pre-cleaning strips the very
+training signal the diverse pool provides --- while incidentally producing the best
+BlendedMVS result in the study ($0.10$). Data surgery and data diversity are
+substitute-seeking interventions that interfere, not stack. The
+label-free arms diverge by mechanism, and the canonical-schedule three-seed replication
+(authors' configuration, $52$ scenes) now separates the robust from the fragile:
+\mad{}'s clean-OOD diversity-robustness is seed-stable (BlendedMVS $0.12\pm0.01$ vs.\
+the baseline's $0.35\pm0.04$), whereas its high-contamination gain is real only in the
+best case: 1DSfM $5.4/11.2/12.8$ across seeds ($9.8\pm3.9$), overlapping the
+single-pool band ($11.5\pm2.3$). Diversification can yield large gains at $43\%$ but
+does not do so reliably, and yields none at $60\%$ ($20.1\pm1.2$); soft weighting
+collapses on clean OOD like the baseline at the retired schedule ($2.9$--$4.0$) and
+holds only BlendedMVS under the canonical one.
+
+\section{Limitations}
+(1)~No single deployable configuration wins all datasets; selecting the best mechanism per
+dataset (Table~\ref{tab:main}) requires knowing the contamination level. We present a study
+of the phenomenon, not a turnkey adaptive method; an unsupervised selector is future work.
+(2)~Supervised RESfM retains in-distribution MegaDepth (the self-supervised arms come
+within $\sim\!38\%$ at the band level, no closer) and the clean Strecha mean, and RESfM-released
+remains stronger on MegaDepth, so we claim no SOTA. (3)~\mad{} matches rather than beats supervision at moderate and extreme contamination;
+plain remove leads every baseline seed pairwise at $\sim\!60\%$ and on medians at
+$43\%$, but its wins come over a reduced registered-camera set (\S\ref{sec:protocol}),
+and the \emph{magnitude} of the supervised deficit at BlendedMVS and high contamination
+is learning-rate-dependent (App.~\ref{app:lrgrid}) --- the Olsson collapse and the
+mechanism flip are not.
+(4)~OOD tracks are self-constructed: OOD numbers are controlled within our pipeline, not
+comparable to RESfM's published OOD numbers. (5)~Two symmetric-structure scenes (Ellis
+Island, Tower of London) fail for all methods; these are the cases where excess removal
+can disconnect the viewing graph~\citep{resfm}.
+
+\section{Conclusion}
+SS-RESfM makes deep SfM outlier handling \emph{entirely self-supervised} while staying
+within $\sim\!38\%$ of the supervised baseline in distribution, winning two of three
+clean-OOD splits --- reliably, on every training seed --- and beating it at high
+contamination on every seed pair, where both beat COLMAP and supervision itself can no
+longer be manufactured. The optimal mechanism is contamination-dependent: removal at
+high contamination, reweighting at low. Robust deep SfM should treat outlier handling as
+adaptive and self-supervised; code, configurations, and the rebuilt OOD tracks will be
+released upon publication.
+
+\label{sec:endcontent}%
+\begin{thebibliography}{99}\small
+
+\bibitem[Khatib et al.(2025)]{resfm} Khatib, Kasten, Moran, Galun, and Basri. RESfM: Robust Deep Equivariant Structure from Motion. ICLR 2025.
+
+\bibitem[Moran et al.(2021)]{esfm} Moran, Koslowsky, Kasten, Maron, Galun, and Basri. Deep Permutation Equivariant Structure from Motion. ICCV 2021.
+
+\bibitem[Brynte et al.(2024)]{gasfm} Brynte, Iglesias, Olsson, and Kahl. Learning Structure-from-Motion with Graph Attention Networks. CVPR 2024.
+
+\bibitem[Sch\"onberger and Frahm(2016)]{colmap} Sch\"onberger and Frahm. Structure-from-Motion Revisited. CVPR 2016.
+
+\bibitem[Rousseeuw and Croux(1993)]{mad} Rousseeuw and Croux. Alternatives to the Median Absolute Deviation. JASA 1993.
+
+\bibitem[Wilson and Snavely(2014)]{onedsfm} Wilson and Snavely. Robust Global Translations with 1DSfM. ECCV 2014.
+
+\bibitem[Li and Snavely(2018)]{megadepth} Li and Snavely. MegaDepth: Learning Single-View Depth Prediction from Internet Photos. CVPR 2018.
+
+\bibitem[Strecha et al.(2008)]{strecha} Strecha, von Hansen, Van Gool, Fua, and Thoennessen. On Benchmarking Camera Calibration and Multi-View Stereo for High-Resolution Imagery. CVPR 2008.
+
+\bibitem[Yao et al.(2020)]{blendedmvs} Yao et al. BlendedMVS: A Large-Scale Dataset for Generalized Multi-View Stereo Networks. CVPR 2020.
+
+\bibitem[Olsson and Enqvist(2011)]{olsson} Olsson and Enqvist. Stable Structure from Motion for Unordered Image Collections. SCIA 2011.
+
+\end{thebibliography}
+
+
+\appendix
+\section{Qualitative results}\label{app:qual}
+Fig.~\ref{fig:qual} overlays BA-aligned camera centers on ground truth for 1DSfM
+NYC\_Library. Label-free \mad{} ($2.94$) leaves far fewer gross-drift cameras than the
+supervised from-scratch baseline ($6.28$), which shows more and larger gross drifts.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{PATHA_fig3_qualitative.pdf}
+\caption{\textbf{Qualitative 1DSfM (NYC\_Library, 32.6\% outliers).} BA-aligned camera
+centers vs.\ GT (open markers); large dots\,+\,connectors mark gross-drift cameras. \mad{}
+(left, $2.94$) has fewer and shorter drifts than RESfM-from-scratch (right, $6.28$).}
+\label{fig:qual}
+\end{figure}
+
+
+\section{Learning-rate robustness of the baseline}\label{app:lrgrid}\label{sec:lrgrid}
+Our protocol gives each method its best learning rate at the canonical $20$k budget
+($10^{-3}$ for the supervised arms, RESfM's released value; $10^{-4}$ for the
+self-supervised arms). To test how much the conclusions depend on this choice we trained
+the supervised baseline at $10^{-4}$ as well. In distribution the released value is
+clearly right ($0.344$ vs.\ $0.533$), and at $10^{-4}$ the supervised model is
+truncation-limited (best checkpoint at the final epoch). Out of distribution, however,
+the picture splits: the baseline's Olsson collapse persists at \emph{both} rates
+($8.47$ vs.\ $8.54$), i.e.\ the clean-benchmark supervised failure is lr-robust,
+whereas its BlendedMVS, 1DSfM, and 1DSfM-hard deficits shrink substantially at the lower
+rate ($0.379\!\to\!0.139$, $11.0\!\to\!5.9$, $16.2\!\to\!12.8$): the
+under-trained low-rate model overfits MegaDepth less and generalizes better. Two follow-ups
+complete the grid. A $30$k-budget replicate at $10^{-4}$ plateaus (best validation at
+epoch $16$k, never improving through $30$k), and its evaluation sharpens the picture:
+that checkpoint reaches \emph{near-parity in distribution} ($0.365$ vs.\ the $10^{-3}$
+baseline's $0.344$) while keeping the OOD gains (1DSfM $6.1$, 1DSfM-hard $13.9$,
+BlendedMVS $0.18$), making it the strongest supervised variant out of distribution
+(single seed). The Olsson ($8.27$) and Strecha ($1.64$) failures persist, and label-free
+plain removal still leads at extreme contamination ($12.4\pm2.1$ vs.\ $13.9$); the OOD
+advantage of the low rate is a regularization effect, not an under-training artifact. And the self-supervised
+arms show \emph{no} symmetric effect: trained at $10^{-3}$ they are worse on every
+dataset (madweight MegaDepth $0.75$ vs.\ $0.42$, 1DSfM $15.7$ vs.\ $12.4$, Olsson
+$10.1$ vs.\ $2.6$). Each method's declared rate is therefore its empirical best-of-two,
+and the off-rate OOD gain is specific to supervision, consistent with a
+COLMAP-label-fitted classifier overfitting in distribution. We scope our claims
+accordingly: the Olsson and Strecha findings and the mechanism flip itself are
+lr-robust, while the magnitude of the supervised OOD deficit at BlendedMVS and high
+contamination depends on the baseline's learning rate.
+
+
+\section{Full mechanism matrix}\label{app:matrix}
 Table~\ref{tab:matrix} completes the mechanism study (all arms, RESfM-aligned schedule,
 seed 20). Notably, at $43\%$ the \emph{plain-removal} family leads every arm including the
 supervised baseline, and the full three-seed band confirms it: remove+TTT
@@ -649,7 +776,8 @@ RESfM (sup.) & $\mathbf{0.34/0.07}$ & 11.03/2.93 & $\mathbf{0.006/0.005}$ & 0.38
 \end{tabular}}%
 \end{table}
 
-\subsection{Which robust statistic? MAD vs.\ STD vs.\ Huber}
+
+\section{Which robust statistic? MAD vs.\ STD vs.\ Huber}\label{app:stat}
 \mad{} removes by a robust statistic of the reprojection error; we ablate the statistic
 holding the head reweighting fixed: MAD (median${}+\alpha\cdot1.4826\,$MAD, $50\%$
 breakdown), a Huber M-estimate of scale (IRLS), and non-robust STD
@@ -676,7 +804,8 @@ STD & 15.2$\pm$1.2 & 13.3 / 9.0 / 12.9 & 0.15\\
 \end{tabular}
 \end{table}
 
-\subsection{Per-scene complementarity and the limits of contamination-based selection}
+
+\section{Per-scene complementarity and the limits of contamination-based selection}\label{app:selector}
 Fig.~\ref{fig:perscene} tests the flip \emph{per scene}: each scene's outlier rate vs.\
 the signed advantage of the best removal mechanism over soft weighting. On OOD data,
 weight wins the low-contamination scenes and removal the high-contamination ones; the
@@ -737,129 +866,7 @@ BlendedMVS & $\mathbf{0.100}$ & 0.146 & 0.100 & 0.083 & $\mathit{0.083}$\\
 \end{tabular}
 \end{table}
 
-\subsection{Qualitative}
-Fig.~\ref{fig:qual} overlays BA-aligned camera centers on ground truth for 1DSfM
-NYC\_Library. Label-free \mad{} ($2.94$) leaves far fewer gross-drift cameras than the
-supervised from-scratch baseline ($6.28$), which shows more and larger gross drifts.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{PATHA_fig3_qualitative.pdf}
-\caption{\textbf{Qualitative 1DSfM (NYC\_Library, 32.6\% outliers).} BA-aligned camera
-centers vs.\ GT (open markers); large dots\,+\,connectors mark gross-drift cameras. \mad{}
-(left, $2.94$) has fewer and shorter drifts than RESfM-from-scratch (right, $6.28$).}
-\label{fig:qual}
-\end{figure}
-
-\subsection{Preliminary: training-pool diversity and the label ceiling}
-A preliminary experiment (single seed, under a coarser five-milestone decay schedule;
-cf.\ \S\ref{sec:protocol}) retrains both methods on progressively diversified pools: MegaDepth-27
-$\to$ $+$ETH3D ($39$ scenes, added data ${\sim}8\%$ contaminated) $\to$ $+$VGG/T\&T ($52$
-scenes, adding a ${\sim}16\%$-contaminated mid-band). The supervised baseline's clean-OOD
-accuracy degrades \emph{monotonically} with diversity (Strecha
-$0.006\!\to\!0.77\!\to\!2.83$); in distribution the same diversification is nearly
-free (MegaDepth $0.33\!\to\!0.32\!\to\!0.44$, the first step within noise), so the
-collapse is specific to clean OOD generalization, not a general capacity cost. Meanwhile the clean addition yielded no high-contamination
-gain and only the contaminated mid-band coincided with one (1DSfM $11.0/11.5/8.8$;
-differences within single-seed noise on this benchmark, so consistent with, though not
-established by, these runs). If it holds, the implication is pointed: the data that
-helps is precisely the data whose COLMAP labels degrade (cf.\ the label ceiling), making
-supervised diversity scaling self-limiting.
-
-A four-cell control (single seed each, canonical schedule) sharpens the architecture
-question: on the Olsson clean benchmark, the supervised collapse persists for a
-\emph{deep} network on the MegaDepth-only pool ($8.58$) and for a \emph{shallow} network
-on the diversified $52$-scene pool ($9.30$), yet vanishes for deep networks on the
-diversified pool ($2.26$ plain; $2.83$ with LayerNorm/residual --- so normalization is
-not the ingredient). Neither capacity nor data diversity alone rescues the supervised
-recipe; only their combination does. The label-free arms reach the same level
-($2.9$--$3.6$) from the \emph{shallow, single-pool} configuration --- the cheapest cell
-of the grid --- which reframes the comparison: self-supervision buys at $1{\times}3$
-capacity on $27$ scenes what supervision needs both depth and a curated multi-dataset
-pool to approach.
-
-A two-stage control sharpens what kind of failure the collapse is. Retraining the
-supervised recipe from scratch on tracks pre-cleaned by its own best outlier head (with
-label-free reprojection-based checkpoint selection) does nothing at the full $20$k+$20$k
-budget --- all five seeds collapse ($8.3$--$12.0$) --- but a \emph{compute-matched}
-$10$k+$10$k version escapes in three of five seeds ($1.69$/$2.01$/$2.29$, matching the
-best cells of the grid) while the other two collapse ($7.8$/$12.1$), with the same
-bimodality on Strecha ($0.01$--$0.2$ vs.\ $1.9$/$2.4$). The good basin is therefore
-\emph{reachable} from the shallow single-pool configuration --- the collapse is basin
-selection, not a capacity or data impossibility --- but no supervised-lineage recipe we
-tested reaches it reliably: across seeds, clean-OOD reliability is delivered only by the
-label-free arms and by depth$\times$diversity. Nor do the two remedies compose: applying
-the same two-stage cleaning \emph{on top of} the depth$\times$diversity configuration
-destroys its fix (Olsson $9.94$ vs.\ $2.83$ one-stage) --- pre-cleaning strips the very
-training signal the diverse pool provides --- while incidentally producing the best
-BlendedMVS result in the study ($0.10$). Data surgery and data diversity are
-substitute-seeking interventions that interfere, not stack. The
-label-free arms diverge by mechanism, and the canonical-schedule three-seed replication
-(authors' configuration, $52$ scenes) now separates the robust from the fragile:
-\mad{}'s clean-OOD diversity-robustness is seed-stable (BlendedMVS $0.12\pm0.01$ vs.\
-the baseline's $0.35\pm0.04$), whereas its high-contamination gain is real only in the
-best case: 1DSfM $5.4/11.2/12.8$ across seeds ($9.8\pm3.9$), overlapping the
-single-pool band ($11.5\pm2.3$). Diversification can yield large gains at $43\%$ but
-does not do so reliably, and yields none at $60\%$ ($20.1\pm1.2$); soft weighting
-collapses on clean OOD like the baseline at the retired schedule ($2.9$--$4.0$) and
-holds only BlendedMVS under the canonical one.
-
-\section{Limitations}
-(1)~No single deployable configuration wins all datasets; selecting the best mechanism per
-dataset (Table~\ref{tab:main}) requires knowing the contamination level. We present a study
-of the phenomenon, not a turnkey adaptive method; an unsupervised selector is future work.
-(2)~Supervised RESfM retains in-distribution MegaDepth (the self-supervised arms come
-within $\sim\!38\%$ at the band level, no closer) and the clean Strecha mean, and RESfM-released
-remains stronger on MegaDepth, so we claim no SOTA. (3)~Versus supervision, \mad{} has no stable winner at moderate ($11.5\pm2.3$ vs.\
-$10.1\pm0.9$) or extreme ($17.0\pm4.4$ vs.\ $17.3\pm1.6$) contamination; plain
-remove leads every baseline seed pairwise at $\sim\!60\%$ and on medians at $43\%$,
-its means at $43\%$ separating from the baseline band without full pairwise dominance;
-and plain removal's wins come over a reduced registered-camera set
-(\S\ref{sec:protocol}). (3b)~The magnitude of the supervised OOD deficit at BlendedMVS
-and high contamination is learning-rate-dependent (\S\ref{sec:lrgrid}); the Olsson
-collapse and the mechanism flip are not.
-(4)~OOD tracks are self-constructed; OOD numbers are controlled within our pipeline
-and not comparable to RESfM's published OOD numbers. (5)~Two symmetric-structure scenes (Ellis Island, Tower of London) fail for all
-methods and inflate 1DSfM means; these are the cases where excess removal can disconnect
-the viewing graph~\cite{resfm}.
-
-\section{Conclusion}
-SS-RESfM shows that deep SfM outlier handling can be made \emph{entirely
-self-supervised} while staying within
-$\sim\!38\%$ of the supervised baseline in distribution (five-seed bands), winning two of the three
-clean-OOD splits, and beating it at high contamination (plain removal below the baseline on every
-seed), where both beat COLMAP and supervision itself can no longer be manufactured. The optimal mechanism is contamination-dependent:
-removal at high contamination, reweighting at low. Robust deep SfM should treat outlier
-handling as adaptive and self-supervised; code, configurations, and the rebuilt OOD
-tracks will be released upon publication.
-
-\label{sec:endcontent}%
-\begin{thebibliography}{99}\small
-
-\bibitem[Khatib et al.(2025)]{resfm} Khatib, Kasten, Moran, Galun, and Basri. RESfM: Robust Deep Equivariant Structure from Motion. ICLR 2025.
-
-\bibitem[Moran et al.(2021)]{esfm} Moran, Koslowsky, Kasten, Maron, Galun, and Basri. Deep Permutation Equivariant Structure from Motion. ICCV 2021.
-
-\bibitem[Brynte et al.(2024)]{gasfm} Brynte, Iglesias, Olsson, and Kahl. Learning Structure-from-Motion with Graph Attention Networks. CVPR 2024.
-
-\bibitem[Sch\"onberger and Frahm(2016)]{colmap} Sch\"onberger and Frahm. Structure-from-Motion Revisited. CVPR 2016.
-
-\bibitem[Rousseeuw and Croux(1993)]{mad} Rousseeuw and Croux. Alternatives to the Median Absolute Deviation. JASA 1993.
-
-\bibitem[Wilson and Snavely(2014)]{onedsfm} Wilson and Snavely. Robust Global Translations with 1DSfM. ECCV 2014.
-
-\bibitem[Li and Snavely(2018)]{megadepth} Li and Snavely. MegaDepth: Learning Single-View Depth Prediction from Internet Photos. CVPR 2018.
-
-\bibitem[Strecha et al.(2008)]{strecha} Strecha, von Hansen, Van Gool, Fua, and Thoennessen. On Benchmarking Camera Calibration and Multi-View Stereo for High-Resolution Imagery. CVPR 2008.
-
-\bibitem[Yao et al.(2020)]{blendedmvs} Yao et al. BlendedMVS: A Large-Scale Dataset for Generalized Multi-View Stereo Networks. CVPR 2020.
-
-\bibitem[Olsson and Enqvist(2011)]{olsson} Olsson and Enqvist. Stable Structure from Motion for Unordered Image Collections. SCIA 2011.
-
-\end{thebibliography}
-
-
-\appendix
 \section{Pre- versus post-BA seed variability}\label{app:prepost}
 Table~\ref{tab:prepost} reports, for every arm and dataset, the five-seed band of the
 \emph{network} output (pre-BA) next to the band after robust bundle adjustment. The
