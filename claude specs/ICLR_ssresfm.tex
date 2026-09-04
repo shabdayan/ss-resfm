@@ -54,7 +54,7 @@ across six datasets spanning $0.5\%$--$61\%$ measured outliers. The optimal mech
 plain removal beats the supervised baseline on \emph{every} seed pair
 ($12.4\pm2.1$ vs.\ $19.2\pm3.4$) and both beat COLMAP, while at $43\%$ it beats every
 supervised seed's median ($1.4$--$1.9$ vs.\ $2.4$--$4.3$). Reweighting wins the low-contamination regime, beating
-the supervised baseline $2.6$--$3.8\times$ on clean out-of-distribution data --- and,
+the supervised baseline $2.5$--$2.9\times$ on clean out-of-distribution data --- and,
 unlike any supervised recipe we test, does so \emph{reliably}: the label-free arms land
 in a narrow band on every training seed, whereas the supervised baseline collapses on
 the clean benchmark in most seeds under every learning rate, budget, and recipe variant
@@ -376,8 +376,8 @@ revealing the clean-benchmark failure as basin-dependent rather than universal, 
 frequency $4/5$). The collapse is not a from-scratch artifact: the authors' released
 checkpoint also collapses on Olsson ($9.10$; identically, $9.18$, under their pinned
 software stack), as does the authors-faithful configuration ($8.77$). Strecha is the exception: RESfM's mean is better on every seed
-($0.006$--$1.67$ vs.\ $\sim\!2$, though one baseline seed nearly loses it) and the
-medians tie ($0.005$).
+($0.006$--$1.67$ vs.\ $\sim\!2$, though one baseline seed nearly loses it) and at
+seed~20 the best label-free median ties it ($0.005$, Table~\ref{tab:matrix}).
 (2)~\emph{In distribution} (MegaDepth), supervised RESfM retains mean and median.
 Its mean is strongly seed-dependent ($0.37\pm0.12$ over five seeds; its best, $0.19$,
 approaches the released checkpoint) while its median is stable ($0.07\pm0.02$); the
@@ -386,7 +386,7 @@ $0.40\pm0.11$ over five seeds; a $\sim\!38\%$ band-level gap without labels, not
 (against the authors-faithful configuration, $0.496$, the arms reach parity, and the TTT
 arm is ahead). Medians tell the same story more tightly ($0.13$--$0.20$ vs.\ $0.07$).
 (3)~\emph{Moderate contamination} (1DSfM, $43\%$) has no stable winner between \mad{}
-($11.5\pm2.3$) and the baseline ($10.5\pm1.5$; overlapping bands), so we decline a
+($11.0\pm1.7$) and the baseline ($10.5\pm1.5$; overlapping bands), so we decline a
 directional claim for \mad{}. The \emph{removal family} leads on both statistics in
 band terms: remove+TTT $8.9\pm1.2$ vs.\ the baseline's $10.5\pm1.5$ (separated means,
 overlapping tails), and plain remove's medians ($1.7\pm0.2$) beat \emph{every} baseline
@@ -396,14 +396,14 @@ established against the baseline's own five-seed band.
 (4)~\emph{Extreme contamination} (1DSfM-hard, ${\sim}60\%$): removal beats weighting
 robustly, \mad{} ($18.9\pm4.1$) statistically matches the supervised baseline
 ($19.2\pm3.4$), and plain remove goes further: $12.4\pm2.1$ over five seeds, below the
-baseline on $24$ of the $25$ seed pairs (worst remove $15.8$ vs.\ best baseline $16.2$) (its worst seed, $15.8$, beats the
+baseline on every one of the $25$ seed pairs (its worst seed, $15.8$, beats the
 baseline's best, $16.2$), with tight medians ($10.8\pm2.8$ vs.\ $16.5\pm4.8$); it also beats the authors'
 \emph{released} checkpoint there ($15.29$, environment-insensitive), so the extreme-%
 contamination win holds against every supervised variant we can construct or obtain; all
 label-free arms are far ahead of COLMAP (\S\ref{sec:extreme}). Rotation means (Fig.~\ref{fig:complement}, right) follow the same ordering on
-MegaDepth/Strecha/BlendedMVS/Olsson (e.g.\ BlendedMVS $6.6$--$9.6\deg$ self-supervised
-vs.\ $36\deg$ supervised) and mildly favor madweight and weight on 1DSfM
-($8.3$--$8.4\deg$ vs.\ $9.8\deg$; weight+TTT trails at $11.2\deg$) even where translation
+MegaDepth/Strecha/BlendedMVS/Olsson (e.g.\ BlendedMVS $8.3$--$9.2\deg$ for the soft self-supervised arms
+vs.\ $31.7\deg$ supervised) and mildly favor madweight and weight on 1DSfM
+($7.7$--$8.2\deg$ vs.\ $9.6\deg$; weight+TTT trails at $10.1\deg$) even where translation
 favors the baseline. 
 
 \begin{table*}[t]\centering\small
@@ -492,7 +492,7 @@ manufactured (\S\ref{sec:whyremoval}). \emph{Within} the self-supervised family,
 removal-vs-weighting ordering is monotone in contamination: weighting is best at
 $2$--$3\%$, the two tie in distribution, and removal dominates from $43\%$ upward
 (\mad{} $12.4$ vs.\ weight $12.8$, plain remove $8.9$, Table~\ref{tab:matrix};
-$13.0\pm2.6$ vs.\ $\sim\!22$ at $60\%$). This mechanism-level flip, the answer to our central
+$12.4\pm2.1$ vs.\ $\sim\!23$ at $60\%$). This mechanism-level flip, the answer to our central
 question, is stable across schedules and seeds.
 
 \noindent\emph{Baseline learning-rate robustness, the full mechanism matrix, the
@@ -578,10 +578,11 @@ weight+TTT & 26.4/32.0 & all\\
 \bottomrule
 \end{tabular}
 \end{table}
-The mechanism-level ordering extrapolates: over seeds $20$--$22$, plain remove attains
-$13.0\pm2.6$ translation (below the supervised $16.2$, seed 20, on every seed; medians
-$11.9\pm0.6$ vs.\ $13.1$), \mad{} at $17.0\pm4.4$ statistically matches it, every other mechanism (soft, hybrid, and alternative robust
-statistics) lands at $16.9$ or worse (Table~\ref{tab:hard}), and COLMAP degrades severely: its error is computed
+The mechanism-level ordering extrapolates: over seeds $20$--$24$, plain remove attains
+$12.4\pm2.1$ translation, below the supervised band ($19.2\pm3.4$) on every seed pair
+(medians $10.8$ vs.\ $16.5$); \mad{} at $18.9\pm4.1$ statistically matches the
+baseline, and every other mechanism (soft, hybrid, and alternative robust
+statistics) lands at $16.9$ or worse at seed~20 (Table~\ref{tab:hard}), and COLMAP degrades severely: its error is computed
 \emph{only over the $64\%$ of cameras it registers} (a favorable metric) yet still loses.
 Errors are large for every method (these scenes are hard), but the trend matches the
 label-ceiling prediction: the supervised advantage vanishes exactly where supervision can
