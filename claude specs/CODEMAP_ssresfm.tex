@@ -1,0 +1,146 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.9in]{geometry}
+\usepackage{times,booktabs,amsmath,xcolor,longtable}
+\usepackage[colorlinks]{hyperref}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\title{SS-RESfM Code Map:\\Changes to the RESfM Repository and Per-Model Code Paths}
+\author{Project documentation}
+\date{September 2026}
+\begin{document}
+\maketitle
+
+\section{Overview}
+Our repository (\code{code/}) is a fork of the authors' released RESfM code (kept
+pristine at \code{papers and code/resfm-main}). This document records (\S\ref{sec:changes})
+every functional change we made, and (\S\ref{sec:paths}) the exact code path, in execution
+order, behind each model we trained.
+
+\section{Changes to the RESfM repository}\label{sec:changes}
+
+\subsection{Self-supervised training (the core contribution)}
+\begin{itemize}\itemsep2pt
+\item \code{loss\_functions.py}: new
+\code{AdaptiveConfidenceWeightedOutliersLoss} --- forms confident pseudo-labels from
+percentiles of the model's own per-observation reprojection error
+(\code{loss.inlier\_percentile}/\code{outlier\_percentile}, default 20/80), with a
+scale-aware threshold-separation floor ($0.25\times$ median error), a warm-up before
+pseudo-labeling starts, and optional contamination-linked percentiles. Plugged into the
+existing \code{CombinedLoss} ($\alpha\cdot$ESFMLoss $+\beta\cdot$classification;
+\emph{note}: RESfM's own supervised combination keeps the same class name --- the
+supervised variant lives in \code{CombinedLossSupervised}). Selectable
+reprojection-weighting modes (\code{loss.reproj\_weighting}).
+\item \code{train.py}: label-free validation --- checkpoint selection by \code{our\_repro}
+(mean reprojection error on validation scenes) with
+\code{train.validation\_metric\_higher\_is\_better=False}; RESfM's original
+\code{Accuracy} selection retained for faithful runs (plus a fix: classification metrics
+are now actually computed at \code{epoch\_evaluation} via \code{OutliersMetrics}, which
+the released code skipped).
+\end{itemize}
+
+\subsection{Test-time outlier mechanisms (evaluated on any trained head)}
+\begin{itemize}\itemsep2pt
+\item \code{train.py} (\code{epoch\_evaluation}, TEST phase): after the network pass, we
+compute per-observation reprojection errors and write outlier verdicts to
+\code{Final\_outliers.npz}. New conf-selected mechanisms:
+\code{test.outlier\_source=mad} (pure MAD statistic, no head);
+\code{test.mad/std/huber\_remove\_head\_weight} (robust-statistic removal + head
+reweighting of survivors --- madweight/stdweight/huberweight); plain head removal /
+weighting / hybrid via existing thresholds (\code{test.removal\_threshold}).
+\item \code{datasets/Euclidean.py} (\code{get\_raw\_data}): the FINE\_TUNE stage consumes
+\code{Final\_outliers.npz} --- removal masks zero observations, weighting masks
+down-weight them in the fine-tune loss; hybrid combines both. GT-label removal
+(\code{remove\_outliers\_gt}) retained for ESFM$^{\ast}$ runs.
+\end{itemize}
+
+\subsection{Evaluation pipeline and infrastructure}
+\begin{itemize}\itemsep2pt
+\item \code{run\_multiscene\_eval.sh}: per-scene fleet launcher --- instantiates a conf
+per (template, checkpoint dir, scene, seed), submits LSF jobs
+(\code{--jobprefix}, queue policy), heals missing scenes idempotently.
+\item Conf templates (\code{confs/*.conf.template}): per-dataset $\times$ mechanism
+$\times$ architecture evaluation configs (MegaDepth + five OOD datasets).
+\item Multi-seed protocol: per-seed training confs (\code{random\_seed}), seed-suffixed
+eval roots; paired-seed evaluation supported via \code{--seed} (re-seeds the eval conf).
+\item Babysitter chain: \code{resume\_stalled\_trainings.sh} +
+\code{trigger\_ablation\_resume.sh} --- resubmit preempted trainings from the latest
+checkpoint (\code{resume=true}), completion markers, congestion guard.
+\item Checkpoints now embed provenance (\code{conf\_snapshot},
+\code{checkpoint\_provenance}) and the best-validation state.
+\item Lean outputs (default; \code{eval.save\_eval\_diagnostics=True} restores the full
+dumps): per-scene eval no longer writes \code{forFigures} camera dumps, plots, or
+epoch-checkpoint archives, and \code{Final\_outliers.npz} stores masks $+$ a
+\code{valid\_mask} instead of copying \code{M}/\code{Ns}/\code{Ps\_gt}
+($\sim$1\,GB $\to\sim$15\,MB per scene).
+\item Multi-GPU training via Lightning Fabric DDP (scenes sharded across ranks).
+\end{itemize}
+
+\subsection{Data builders and datasets}
+\begin{itemize}\itemsep2pt
+\item OOD track builders (1DSfM incl.\ the 5-scene \emph{hard} split, Strecha,
+BlendedMVS, Olsson, ETH3D, VGG, Tanks\&Temples): raw downloads $\to$ track matrices in
+RESfM's npz format, with measured \code{outlier\_pct}; \code{multitrain/} merges pools
+for the diversity study.
+\item \code{build\_esfm\_star\_tracks.py}: GT-cleaned tracks (ESFM$^{\ast}$ protocol).
+\item \code{build\_selfclean\_tracks.py}: tracks cleaned by a trained head's predictions
+(two-stage protocol; \code{--srcdir} for multi-dataset pools).
+\end{itemize}
+
+\subsection{Baselines, analysis, and verification}
+\begin{itemize}\itemsep2pt
+\item \code{colmap\_baseline.py} / \code{glomap\_baseline.py}: classical SfM on our
+exact tracks (GT intrinsics), with reflection-aware Umeyama alignment and a gauge-free
+relative-rotation metric.
+\item Aggregators and studies: seed-band assembly, label-degradation study
+(\code{aggregate\_label\_degradation.py}), selector study (\code{selector\_study.py}),
+per-scene table generators, and \code{verify\_iclr\_tables.py} (recomputes every paper
+table cell from saved evals).
+\item Architecture flags on \code{models/SetOfSet.py}: \code{DeepSetOfSetOutliersNet}
+exposes \code{use\_layer\_norm}/\code{use\_residual}/\code{dropout\_rate}; block/depth
+configurable for the 2$\times$3 deep variants; original classes untouched for
+byte-faithful baselines.
+\end{itemize}
+
+\section{Per-model code paths (in execution order)}\label{sec:paths}
+All trainings share the spine
+\[
+\text{conf} \to \code{multiple\_scenes\_learning.py} \to \code{datasets/SceneData+Euclidean}
+\to \code{models/SetOfSet.py} \to \code{loss\_functions.py} \to \code{train.py} \text{ loop,}
+\]
+and all evaluations share
+\[
+\code{run\_multiscene\_eval.sh} \to \text{per-scene conf} \to \code{train.py}\,(\text{TEST: head}\to\code{Final\_outliers.npz})
+\to \code{Euclidean.get\_raw\_data}\,(\text{mechanism}) \to \text{FINE\_TUNE} \to \code{utils/ba\_functions}\,(\text{robust BA}) \to \code{evaluation.py}\,(\text{xlsx}).
+\]
+The table lists what differs per model.
+
+\begingroup\small
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{p{3.6cm}p{2.6cm}p{2.6cm}p{2.9cm}p{4.2cm}}
+\toprule
+Model & Network class & Training loss & Ckpt selection & Distinguishing steps\\
+\midrule
+\textbf{SS-RESfM arms} (one training; five eval mechanisms) & \code{SetOfSetOutliersNet} (1$\times$3) & \code{CombinedLoss} + \code{AdaptiveConfidence\-WeightedOutliersLoss} & \code{our\_repro} & Train on MegaDepth-27, no labels. Eval per mechanism: madweight (\code{test.mad\_remove\_head\_weight}), weight / weight+TTT (head scores as weights), remove / remove+TTT (head threshold 0.6), hybrid; TTT = per-scene fine-tune iterations before BA.\\
+\textbf{RESfM-scratch} (declared baseline) & \code{SetOfSetOutliersNet} & \code{CombinedLoss\-Supervised} (BCE on COLMAP labels) & \code{our\_repro} & Identical pipeline; labels from \code{outliers2} in the npz; eval = head removal per RESfM.\\
+\textbf{RESfM-faithful} & same & same & \textbf{\code{Accuracy}} (authors' metric, margin $10^{-3}$) & Only the validation metric/margin differ from scratch; requires the \code{OutliersMetrics} fix.\\
+\textbf{RESfM @$10^{-4}$ / 30k} & same & same & \code{our\_repro} & Base lr and/or 30k schedule (milestones rescaled).\\
+\textbf{ESFM$^{\ast}$ (+af)} & \code{SetOfSetNet} (vanilla, no head) & \code{ESFMLoss} & \code{our\_repro} & \code{build\_esfm\_star\_tracks.py} first (GT-cleaned npz); af variant = authors' in-place zeroing construction.\\
+\textbf{Deep variants} (deep-27, deep-multids, deep-ln) & \code{DeepSetOfSetOutliersNet} (2$\times$3; LN/residual/dropout flags) or plain class with \code{num\_blocks=2} & \code{CombinedLoss\-Supervised} & \code{our\_repro} & multids runs read \code{datasets/multitrain}; eval uses the deep conf templates and \code{esfm\_outliers\_deep} arch tag.\\
+\textbf{Multids (shallow)} & \code{SetOfSetOutliersNet} & supervised or adaptive (per run) & \code{our\_repro} & 52-scene \code{multitrain} pool (MD27+ETH3D+VGG+T\&T); af-multids replicates the authors' full config incl.\ Accuracy selection.\\
+\textbf{Two-stage (selfclean)} family & stage 1 as faithful; stage 2 same class from scratch & stage 1 supervised; stage 2 supervised on cleaned tracks & stage 1 \code{Accuracy}; stage 2 \code{our\_repro} & Order: train stage 1 $\to$ \code{build\_selfclean\_tracks.py} (stage-1 best head cleans the training npz, threshold 0.5) $\to$ train stage 2 on \code{*\_selfclean} dataset $\to$ standard eval. Variants: 20k+20k and compute-matched 10k+10k (halved milestones); deep and multids versions swap the class/pool as above.\\
+\textbf{Classical rows} & --- & --- & --- & \code{colmap\_baseline.py}/\code{glomap\_baseline.py} build a COLMAP database from the same npz tracks $\to$ incremental / global mapping $\to$ reflection-aware alignment $\to$ JSON.\\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\noindent\textbf{Reading order for a single evaluation} (any learned model): (1) the fleet
+script writes a per-scene conf from the template, pointing \code{train\_results} at the
+training's \code{models/} best checkpoint; (2) \code{multiple\_scenes\_learning.py
+--phase FINE\_TUNE} loads the scene npz; (3) a TEST pass of the checkpoint produces
+outlier verdicts (\code{Final\_outliers.npz}); (4) \code{get\_raw\_data} applies the
+mechanism (remove/weight/hybrid) to the tracks; (5) per-scene fine-tuning (1{,}001
+iters, reprojection loss only); (6) robust BA (pyceres/pycolmap); (7)
+\code{evaluation.py} writes \code{Results\_FINE\_TUNE\_stage\_1\_*.xlsx} with pre-BA
+(\code{ts\_mean}) and post-BA (\code{ts\_ba\_final\_mean}) errors, rotation, and
+registered-camera counts --- the source of every number in the papers.
+
+\end{document}
