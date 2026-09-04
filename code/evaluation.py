@@ -134,16 +134,23 @@ def prepare_outliers_predictions(data, pred_outliers, conf):
     # Basic scene metadata
     outputs['scan_name'] = data.scan_name
     outputs['img_list'] = data.img_list
-    outputs['M'] = data.M.cpu().numpy()
-
-    # Ground truth camera parameters
-    outputs['Ns'] = data.Ns.cpu().numpy()
-    outputs['Ps_gt'] = data.y.cpu().numpy()
+    # M/Ns/Ps_gt are copies of the dataset npz and dominate Final_outliers.npz
+    # (~165M of ~166M per scene); no consumer reads them back (Euclidean
+    # get_raw_data uses only the outlier masks), so store them only when
+    # diagnostics are requested.
+    if conf.get_bool('eval.save_eval_diagnostics', default=False):
+        outputs['M'] = data.M.cpu().numpy()
+        # Ground truth camera parameters
+        outputs['Ns'] = data.Ns.cpu().numpy()
+        outputs['Ps_gt'] = data.y.cpu().numpy()
 
     # Outlier GT and prediction
     outputs['outlier_indices'] = data.outlier_indices.cpu().numpy()
 
     valid_mask = dataset_utils.get_M_valid_points(data.M)
+    # Compact substitute for the dropped M: the (C,n) visibility mask is all the
+    # selector study derives from M (vis + counts), at ~1/1000 the size.
+    outputs['valid_mask'] = valid_mask.cpu().numpy()
     predicted_outlier_mask = torch.zeros_like(valid_mask, dtype=data.M.dtype)
     predicted_outlier_mask[valid_mask] = pred_outliers.squeeze()
 

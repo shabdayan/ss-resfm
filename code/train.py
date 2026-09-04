@@ -121,7 +121,10 @@ def epoch_evaluation(data_loader, model, conf, epoch, phase, save_predictions=Fa
                     # cameras (epoch is None = best model) so the shared single-scene
                     # evaluator (evaluate_single_scene.py) can recompute harmonized
                     # metrics from raw outputs. Intermediate epochs are not saved.
-                    if pred_cam is not None and epoch is None:
+                    # forFigures camera dumps (~0.5G/scene) feed only figure scripts /
+                    # evaluate_single_scene.py; skip unless diagnostics requested.
+                    if pred_cam is not None and epoch is None \
+                            and conf.get_bool('eval.save_eval_diagnostics', default=False):
                         dataset_utils.save_cameras(outputs, conf, curr_epoch=epoch, phase=phase)
                     if conf.get_bool('test.mad_remove_head_weight', default=False) \
                             and pred_cam is not None and pred_outliers is not None and phase is Phases.TEST:
@@ -195,7 +198,8 @@ def epoch_evaluation(data_loader, model, conf, epoch, phase, save_predictions=Fa
                         dataset_utils.save_outliers(outliersOutputs, conf, curr_epoch=epoch, phase=phase)
                     if errors is not None:
                         errors.update(errors_per_cam)
-                        if phase != Phases.TEST and plot:
+                        if phase != Phases.TEST and plot \
+                                and conf.get_bool('eval.save_eval_diagnostics', default=False):
                             # Plotting is cosmetic; never let it crash a run (it can
                             # fail on the intermediate subsets of sequential optim).
                             try:
@@ -624,18 +628,24 @@ def train(conf, train_data, model, phase, validation_data=None, test_data=None, 
                     for metric_name in validation_metrics.columns:
                         wandb.log({"Validation_" + metric_name: validation_metrics.loc[scene, metric_name]}, step=epoch)
 
-                path = path_utils.path_to_model(conf, phase, epoch=epoch, best=False)
-                current_model = copy.deepcopy(model)
-                torch.save({
-                    'epoch': epoch,
-                    'model_state_dict': current_model.state_dict(),
-                    'optimizer_state_dict': optimizer.state_dict(),
-                    'scheduler_state_dict': scheduler.state_dict(),
-                    'best_validation_metric': best_validation_metric,
-                    'best_epoch': best_epoch,
-                    'conf': conf_snapshot(conf),
-                    'provenance': checkpoint_provenance(conf, phase, epoch),
-                }, path)
+                # Per-scene eval runs (FINE_TUNE/OPTIMIZATION) never reload these
+                # epoch archives -- only models/ (best) is read back at line ~704.
+                # They cost ~50M/scene x thousands of evals, so skip them unless
+                # eval.save_eval_diagnostics asks for the full archive.
+                if phase not in [Phases.FINE_TUNE, Phases.OPTIMIZATION] \
+                        or conf.get_bool('eval.save_eval_diagnostics', default=False):
+                    path = path_utils.path_to_model(conf, phase, epoch=epoch, best=False)
+                    current_model = copy.deepcopy(model)
+                    torch.save({
+                        'epoch': epoch,
+                        'model_state_dict': current_model.state_dict(),
+                        'optimizer_state_dict': optimizer.state_dict(),
+                        'scheduler_state_dict': scheduler.state_dict(),
+                        'best_validation_metric': best_validation_metric,
+                        'best_epoch': best_epoch,
+                        'conf': conf_snapshot(conf),
+                        'provenance': checkpoint_provenance(conf, phase, epoch),
+                    }, path)
 
                 
         
