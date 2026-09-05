@@ -636,7 +636,14 @@ supervised head, trained on these scenes with reference-quality labels, is beate
 $\sim\!2\times$ at band level by \mad{} ($12.1\pm6.1$ vs.\ $23.4\pm7.8$; four of five
 \mad{} seeds beat every supervised seed; medians $9.8$ vs.\ $20.6$). ``Just train the
 classifier there'' does not work: the high-contamination failure is caused by labeling at
-contamination, not by domain shift. \emph{(ii) The BlendedMVS failure was never domain
+contamination, not by domain shift. The absolute errors deserve decomposition: they are
+not uniformly ``large for everyone.'' On Roman\_Forum, \mad{} produces \emph{usable}
+reconstructions (median $1.6$--$3.5$, rotation $2.3$--$8.2\deg$, in four of five seeds)
+where supervision fails outright (medians $9.5$--$36$); on Union\_Square the supervised
+errors look lower but are computed over only $43$--$55$ of $300$ registered cameras,
+versus \mad{}'s $137$--$186$ --- the error-vs-coverage trade-off of
+\S\ref{sec:protocol} again, with the label-free arm covering $3$--$4\times$ more of
+the scene at moderate error. \emph{(ii) The BlendedMVS failure was never domain
 shift either}: supervision trained \emph{on} BlendedMVS lands at $0.20$--$0.37$ in four
 of five seeds --- indistinguishable from the MegaDepth-trained baseline evaluated OOD
 ($0.35\pm0.04$) --- with a single escape seed ($0.02$), the same bimodality as its
