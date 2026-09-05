@@ -65,7 +65,15 @@ Status legend: [ ] open · [~] in progress / blocked on data · (→ who)
 - [ ] Submission dry-run on OpenReview a few days early (PDF compiles under their
   checker, abstract field, keywords, TLDR).
 
-## F. Nice-to-have (only if time remains)
+## F. Promoted (3-week timeline confirms feasibility)
+- [ ] **MegaDepth track-pipeline robustness check**: source 5–8 test scenes with numeric
+  IDs from a per-scene mirror (try D2-Net/LoFTR undistorted-MegaDepth mirrors first;
+  MegaDepth-X uses landmark names and needs mapping), rebuild tracks with our
+  Appendix-C builder, evaluate EXISTING checkpoints (test-time only, no retraining),
+  report "ordering/margins stable under independent track build" as one appendix
+  paragraph. Closes the builder-confound objection. (→ me, week 1)
+
+## G. Nice-to-have (only if time remains)
 - [ ] Realistic-COLMAP-label third arm for the in-dist experiment (the "price of
   realistic labeling" number) — strongest possible extension, ~1 day of compute.
 - [ ] Seed the multids two-stage (its 1DSfM 7.83 is single-seed; only if we want to
