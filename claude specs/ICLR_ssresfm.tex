@@ -41,12 +41,18 @@ Label-Free Robustness in Deep Structure-from-Motion}
 \maketitle
 
 \begin{abstract}
-State-of-the-art deep equivariant Structure-from-Motion (RESfM) rejects outlier
-correspondences with a \emph{supervised} classifier trained on COLMAP-derived labels. We
-present \textbf{SS-RESfM}, an \emph{entirely self-supervised} alternative: the outlier
-head is trained on confident pseudo-labels formed from percentiles of the model's own
-reprojection error, and no ground-truth or COLMAP labels are used anywhere in training or
-test. Under a strictly controlled protocol (identical tracks, robust bundle adjustment,
+To reconstruct cameras and 3D structure from real image collections, learning-based
+Structure-from-Motion must reject \emph{outliers}: wrong correspondences that survive
+geometric verification. The standard recipe trains an outlier classifier with labels
+derived from an already-trusted reconstruction of the training scenes --- supervision
+that presupposes exactly the capability it is meant to provide. We ask \emph{when this
+recipe fails}, and show its failures are caused by the labels themselves, not by domain
+shift: labels cannot be manufactured where robustness is needed most, and retraining the
+state-of-the-art supervised method (RESfM) \emph{on} a $60\%$-contaminated domain with
+best-case labels still loses $2\times$ to a label-free alternative. That alternative is
+\textbf{SS-RESfM}: RESfM's outlier head trained \emph{entirely self-supervised}, on
+confident pseudo-labels formed from percentiles of the model's own reprojection error,
+with no ground-truth or COLMAP labels anywhere in training or test. Under a strictly controlled protocol (identical tracks, robust bundle adjustment,
 and training schedule, varying only the outlier mechanism) we compare label-free
 statistical removal (\mad{}) and soft reweighting against a from-scratch RESfM baseline
 across six datasets spanning $0.5\%$--$61\%$ measured outliers. The optimal mechanism
