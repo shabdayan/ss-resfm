@@ -19,7 +19,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CODE = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 from appendix_c import (extract_sift, MIN_TRACK_VIEWS, REPROJ_INLIER_PX,
-                        RATIO_THR, RANSAC_PX, MIN_PAIR_INLIERS, _triangulate)
+                        RATIO_THR, RANSAC_PX, MIN_PAIR_INLIERS, label_outliers)
 import cv2
 
 
@@ -104,19 +104,10 @@ def main():
         for c, k in members:
             M[2 * c, j], M[2 * c + 1, j] = kps[c][k]
 
-    # GT-triangulation labels (4px), exactly as build_1dsfm
-    out = np.zeros((m, n), dtype=bool)
+    # GT-pose RANSAC-consensus triangulation labels (4px), the canonical
+    # labeler shared with build_1dsfm and the other OOD builders.
+    out = label_outliers(M, Ps).astype(bool)
     X2 = M.reshape(m, 2, -1); vis = (X2[:, 0] != 0) | (X2[:, 1] != 0)
-    for j in range(n):
-        cams = np.where(vis[:, j])[0]
-        Xh = _triangulate(Ps, X2, cams, j)
-        if Xh is None:
-            out[cams, j] = True; continue
-        for i in cams:
-            p = Ps[i] @ Xh
-            if abs(p[2]) < 1e-12: out[i, j] = True; continue
-            err = np.hypot(p[0] / p[2] - X2[i, 0, j], p[1] / p[2] - X2[i, 1, j])
-            if err > REPROJ_INLIER_PX: out[i, j] = True
     pct = 100.0 * (out & vis).sum() / max(1, vis.sum())
     print(f"[{args.scene}] outlier_pct {pct:.1f}%", flush=True)
 
