@@ -601,6 +601,55 @@ no longer be manufactured.
 
 
 
+
+\subsection{Training on the contaminated domains: the label ceiling is causal}\label{sec:indist}
+The label-ceiling analysis predicts that supervision fails at high contamination because
+the labels themselves become untrustworthy --- not because of domain shift. We test this
+causally by making the OOD domains \emph{in-distribution}: for each dataset we split its
+scenes into train/validation/held-out test and retrain both recipes on the domain itself
+(identical protocol; supervised labels generated at reference quality, by the same
+Appendix-C procedure as MegaDepth's but against each dataset's \emph{real} GT poses ---
+the best case supervision could ever obtain). Table~\ref{tab:indist} reports five-seed
+bands on the held-out scenes.
+
+\begin{table}[t]\centering\footnotesize
+\caption{\textbf{In-distribution comparison on the (formerly OOD) domains}: mean
+translation over held-out test scenes, mean$\pm$std over five training seeds per recipe.
+Supervised labels are GT-derived (best case). Best per column in \textbf{bold}.}
+\label{tab:indist}
+\setlength{\tabcolsep}{5pt}%
+\begin{tabular}{lcc}
+\toprule
+Arm & 1DSfM-hard @$60\%$ & BlendedMVS @$3.1\%$\\
+\midrule
+\mad{}      & $\mathbf{12.1\pm 6.1}$ & 0.093$\pm$0.099\\
+weight      & 28.1$\pm$5.9 & 0.114$\pm$0.006\\
+weight+TTT  & 29.3$\pm$8.4 & $\mathbf{0.081\pm 0.046}$\\
+remove      & 19.4$\pm$7.7 & 0.228$\pm$0.080\\
+RESfM (sup., GT labels) & 23.4$\pm$7.8 & 0.260$\pm$0.149\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Three findings. \emph{(i) At $60\%$, supervision loses on its own training domain}: the
+supervised head, trained on these scenes with reference-quality labels, is beaten
+$\sim\!2\times$ at band level by \mad{} ($12.1\pm6.1$ vs.\ $23.4\pm7.8$; four of five
+\mad{} seeds beat every supervised seed; medians $9.8$ vs.\ $20.6$). ``Just train the
+classifier there'' does not work: the high-contamination failure is caused by labeling at
+contamination, not by domain shift. \emph{(ii) The BlendedMVS failure was never domain
+shift either}: supervision trained \emph{on} BlendedMVS lands at $0.20$--$0.37$ in four
+of five seeds --- indistinguishable from the MegaDepth-trained baseline evaluated OOD
+($0.35\pm0.04$) --- with a single escape seed ($0.02$), the same bimodality as its
+clean-OOD behaviour, while label-free weighting is seed-stable at $0.114\pm0.006$. A
+plausible mechanism is class imbalance: at $3\%$ contamination the classification loss
+sees almost no positive examples, suggesting the supervised recipe is bounded at
+\emph{both} ends of the contamination axis, with MegaDepth's curated $25\%$ sitting in
+the learnable middle band. \emph{(iii) The complementarity ordering replicates
+in-distribution}: robust removal (\mad{}) leads at $60\%$ and soft weighting
+($\pm$TTT) at $3\%$ --- the mechanism flip is a property of the contamination level, not
+of the train/test relationship. (A same-protocol Strecha split, one tiny test scene, is
+an uninformative three-way tie at $0.01$.)
+
 \subsection{Preliminary: training-pool diversity and the label ceiling}
 A preliminary experiment (single seed, under a coarser five-milestone decay schedule;
 cf.\ \S\ref{sec:protocol}) retrains both methods on progressively diversified pools: MegaDepth-27
