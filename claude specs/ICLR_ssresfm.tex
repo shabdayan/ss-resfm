@@ -117,28 +117,35 @@ SfM then becomes as unlimited as unlabeled imagery, and new domains require no l
 infrastructure at all.
 
 \noindent\textbf{Contributions.}
-(1)~\textbf{SS-RESfM, an entirely self-supervised outlier-handling approach} for deep SfM: an
-adaptive confident-pseudo-label head (trained on percentiles of the model's own reprojection
-error), label-free statistical removal, and robust BA, using \emph{no} ground-truth or
-COLMAP outlier labels, in contrast to RESfM's COLMAP-supervised head. It beats the
-supervised baseline on clean out-of-distribution data and at high contamination.
-(2)~A controlled study of label-free removal vs.\ soft reweighting
-($\pm$test-time fine-tuning) under an identical tracks\,+\,BA\,+\,schedule pipeline,
-isolating the mechanism alone.
-(3)~The complementarity finding: the optimal mechanism flips with contamination; no single
-mechanism dominates.
-(4)~\mad{}, which removes outliers by robust reprojection statistics (MAD), needing not
-even the head, and reweights survivors; it matches the from-scratch supervised baseline at
-extreme contamination ($\sim\!60\%$) with no learned threshold, while plain removal on
-the same self-supervised head beats the baseline outright, and both beat COLMAP, which
-registers only two-thirds of the cameras.
-(5)~\textbf{A seed- and environment-level reliability methodology} for post-BA SfM
+(1)~\textbf{The label ceiling, measured and shown causal}: outlier supervision requires a
+trusted reconstruction of the very scenes whose contamination makes reconstruction hard.
+We measure the resulting label collapse (recall $0.82\!\to\!\sim\!0.3$ above
+${\sim}15\%$ contamination) and prove it is causal, not domain shift: retrained
+\emph{on} a $60\%$-contaminated domain with best-case labels, supervision still loses
+$2\times$ to label-free removal (\S\ref{sec:indist}).
+(2)~\textbf{The complementarity finding}: under an identical tracks+BA+schedule pipeline
+isolating the mechanism alone, the optimal outlier mechanism flips with contamination ---
+removal at high contamination (beating the supervised baseline on every seed pair at
+$\sim\!60\%$), soft reweighting on clean OOD data ($2.5$--$2.9\times$, seed-reliably) ---
+with supervision retaining a curated middle band.
+(3)~\textbf{SS-RESfM}, the instrument of the study and a constructive answer: RESfM's
+outlier handling made \emph{entirely} self-supervised via confident pseudo-labels from
+the model's own reprojection-error percentiles --- no ground-truth or COLMAP labels
+anywhere --- matching the supervised baseline where labels are sound and surpassing it
+where they are not; plus \mad{}, which needs not even the head, removing by robust
+reprojection statistics (MAD) and beating COLMAP where COLMAP's own labels cannot be
+manufactured.
+(4)~\textbf{A seed- and environment-level reliability methodology} for post-BA SfM
 benchmarks: five-training-seed bands for every cell, a paired-seed evaluation control
 ($2{,}352$ evaluations showing the evaluation seed is immaterial), an
 environment-noise floor for post-BA means, and per-seed-pairing claim verification ---
 practices absent from this benchmark family, where prior work fixes a single seed, and
 which surface findings (bimodal clean-OOD failures, basin-dependent escapes) that
 mean$\pm$std alone would hide.
+(5)~\textbf{A reusable robustness benchmark}: rebuilt Appendix-C-protocol track suites
+for five OOD datasets with measured contamination ($0.5$--$61\%$), GT-derived outlier
+labels, per-domain train/test splits, and the label-quality benchmark --- released with
+code and configurations.
 
 \section{Related Work}
 \textbf{Deep equivariant SfM.} Learning-based SfM regresses cameras from point tracks with
@@ -517,7 +524,12 @@ and its decision boundary does not transfer to the outlier statistics of
 out-of-distribution internet collections (a domain-shift effect, not a labeling failure:
 MegaDepth's labels derive from its curated reference reconstructions, the
 trusted-reconstruction condition under which, per Table~\ref{tab:ceiling}, supervision
-is sound, and the strong in-distribution result is consistent with this). Second, and more
+is sound, and the strong in-distribution result is consistent with this). Even there the
+head's classification is mediocre by RESfM's \emph{own} ablation (mean outlier recall
+$72.1\%$ at precision $44.1\%$; their Table~7), and their Appendix~D attributes much of
+the final accuracy to robust BA --- consistent with our pre/post-BA analysis
+(App.~\ref{app:prepost}): a large part of the supervised system's robustness is BA
+repair, not classification. Second, and more
 fundamentally, supervision itself degrades in this regime: RESfM's labeling (Appendix~C
 of~\citep{resfm}) assumes a COLMAP reconstruction and ground-truth poses per training
 scene: readily obtained for curated data, but exactly what one lacks on the contaminated
