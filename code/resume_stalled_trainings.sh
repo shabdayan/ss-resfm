@@ -91,6 +91,18 @@ JOBS=(
  "uesfm_1dsfmid_s21|confs/multiscene_uesfm_1dsfmid_s21.conf|uesfm_1dsfmid_s21"
  "resfm_1dsfmid_s20|confs/multiscene_resfm_1dsfmid_s20.conf|resfm_1dsfmid_s20"
  "resfm_1dsfmid_s21|confs/multiscene_resfm_1dsfmid_s21.conf|resfm_1dsfmid_s21"
+ "uesfm_bmvsid_s20|confs/multiscene_uesfm_bmvsid_s20.conf|uesfm_bmvsid_s20"
+ "uesfm_strechaid_s20|confs/multiscene_uesfm_strechaid_s20.conf|uesfm_strechaid_s20"
+ "uesfm_olssonid_s20|confs/multiscene_uesfm_olssonid_s20.conf|uesfm_olssonid_s20"
+ "uesfm_bmvsid_s21|confs/multiscene_uesfm_bmvsid_s21.conf|uesfm_bmvsid_s21"
+ "uesfm_strechaid_s21|confs/multiscene_uesfm_strechaid_s21.conf|uesfm_strechaid_s21"
+ "uesfm_olssonid_s21|confs/multiscene_uesfm_olssonid_s21.conf|uesfm_olssonid_s21"
+ "resfm_bmvsid_s20|confs/multiscene_resfm_bmvsid_s20.conf|resfm_bmvsid_s20"
+ "resfm_strechaid_s20|confs/multiscene_resfm_strechaid_s20.conf|resfm_strechaid_s20"
+ "resfm_olssonid_s20|confs/multiscene_resfm_olssonid_s20.conf|resfm_olssonid_s20"
+ "resfm_bmvsid_s21|confs/multiscene_resfm_bmvsid_s21.conf|resfm_bmvsid_s21"
+ "resfm_strechaid_s21|confs/multiscene_resfm_strechaid_s21.conf|resfm_strechaid_s21"
+ "resfm_olssonid_s21|confs/multiscene_resfm_olssonid_s21.conf|resfm_olssonid_s21"
 )
 for row in "${JOBS[@]}"; do
   IFS='|' read -r exp conf resdir final ngpu pyexe <<< "$row"
