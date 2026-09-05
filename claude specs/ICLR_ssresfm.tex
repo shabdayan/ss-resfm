@@ -34,7 +34,7 @@
 %%%  [x] natbib citations; reproducibility study + per-scene + config + label-deg tables ported to appendix
 
 \title{When Outlier Supervision Fails:\\
-Label-Free Robustness in Deep Structure-from-Motion}
+Self-Supervised Robustness in Deep Structure-from-Motion}
 \author{Anonymous authors\\Paper under double-blind review}
 
 \begin{document}
@@ -50,8 +50,8 @@ recipe fails}, and show its failures are caused by the labels themselves, not by
 shift: labels cannot be manufactured where robustness is needed most, and retraining the
 state-of-the-art supervised method (RESfM) \emph{on} a $60\%$-contaminated domain with
 best-case labels still loses $2\times$ to a label-free alternative. That alternative is
-\textbf{SS-RESfM}: RESfM's outlier head trained \emph{entirely self-supervised}, on
-confident pseudo-labels formed from percentiles of the model's own reprojection error,
+\textbf{SS-RESfM}: RESfM's outlier head trained with a \emph{self-supervised loss} ---
+confident pseudo-labels formed from percentiles of the model's own reprojection error ---
 with no ground-truth or COLMAP labels anywhere in training or test. Under a strictly controlled protocol (identical tracks, robust bundle adjustment,
 and training schedule, varying only the outlier mechanism) we compare label-free
 statistical removal (\mad{}) and soft reweighting against a from-scratch RESfM baseline

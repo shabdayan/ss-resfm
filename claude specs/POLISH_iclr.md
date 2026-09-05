@@ -72,3 +72,4 @@ Status legend: [ ] open · [~] in progress / blocked on data · (→ who)
   mention it beyond a footnote).
 - [ ] BMVS class-imbalance probe (train supervised with re-weighted BCE) to upgrade
   the imbalance hypothesis from plausible to tested.
+- [ ] OpenReview fields: keywords "self-supervised learning; structure-from-motion; outlier rejection; pseudo-labels; robust 3D reconstruction; bundle adjustment; label noise"; TLDR as a search-result sentence; arXiv cross-list cs.CV + cs.LG at posting.
