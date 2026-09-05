@@ -260,7 +260,12 @@ Olsson~\citep{olsson} & -- & 0.5 & outlier-free\\
 On MegaDepth (where tracks are identical to RESfM's) the two measurements agree
 ($25.4$ vs $25.6$), validating our measurement; our 1DSfM rebuild is markedly harder than
 the tracks behind RESfM's quoted $31.9\%$, which should be kept in mind when reading the
-1DSfM columns. \emph{1DSfM-hard} comprises the five 1DSfM scenes unused by the standard
+1DSfM columns. This difference also yields a falsifiable prediction: since the winning
+mechanism is a function of contamination (\S\ref{sec:indist}), the supervised advantage
+should \emph{persist} on lower-contamination track builds --- in particular, on the
+authors' own ${\sim}32\%$ 1DSfM tracks we expect supervision to be competitive or ahead,
+with the label-free advantage emerging as contamination approaches our rebuild's $43\%$
+and dominating by $60\%$. We state this in advance of evaluating on those tracks. \emph{1DSfM-hard} comprises the five 1DSfM scenes unused by the standard
 ten-scene split (Gendarmenmarkt, Piccadilly, Roman Forum, Trafalgar, Union Square), built
 with the same pipeline and subsampled to $300$ cameras per scene following RESfM's
 convention. Networks are trained on 27 MegaDepth scenes; MegaDepth test is therefore
