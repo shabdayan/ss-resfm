@@ -87,6 +87,10 @@ JOBS=(
  "sc10k_s22|confs/multiscene_resfm_selfclean_10k_s22.conf|resfm_shallow_27scenes_selfclean_10k_s22|9999"
  "sc10k_s23|confs/multiscene_resfm_selfclean_10k_s23.conf|resfm_shallow_27scenes_selfclean_10k_s23|9999"
  "sc10k_s24|confs/multiscene_resfm_selfclean_10k_s24.conf|resfm_shallow_27scenes_selfclean_10k_s24|9999"
+ "uesfm_1dsfmid_s20|confs/multiscene_uesfm_1dsfmid_s20.conf|uesfm_1dsfmid_s20"
+ "uesfm_1dsfmid_s21|confs/multiscene_uesfm_1dsfmid_s21.conf|uesfm_1dsfmid_s21"
+ "resfm_1dsfmid_s20|confs/multiscene_resfm_1dsfmid_s20.conf|resfm_1dsfmid_s20"
+ "resfm_1dsfmid_s21|confs/multiscene_resfm_1dsfmid_s21.conf|resfm_1dsfmid_s21"
 )
 for row in "${JOBS[@]}"; do
   IFS='|' read -r exp conf resdir final ngpu pyexe <<< "$row"
