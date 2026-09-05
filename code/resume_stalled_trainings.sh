@@ -103,6 +103,14 @@ JOBS=(
  "resfm_bmvsid_s21|confs/multiscene_resfm_bmvsid_s21.conf|resfm_bmvsid_s21"
  "resfm_strechaid_s21|confs/multiscene_resfm_strechaid_s21.conf|resfm_strechaid_s21"
  "resfm_olssonid_s21|confs/multiscene_resfm_olssonid_s21.conf|resfm_olssonid_s21"
+ "uesfm_1donly_s20|confs/multiscene_uesfm_1donly_s20.conf|uesfm_1donly_s20"
+ "uesfm_hardonly_s20|confs/multiscene_uesfm_hardonly_s20.conf|uesfm_hardonly_s20"
+ "uesfm_1donly_s21|confs/multiscene_uesfm_1donly_s21.conf|uesfm_1donly_s21"
+ "uesfm_hardonly_s21|confs/multiscene_uesfm_hardonly_s21.conf|uesfm_hardonly_s21"
+ "resfm_1donly_s20|confs/multiscene_resfm_1donly_s20.conf|resfm_1donly_s20"
+ "resfm_hardonly_s20|confs/multiscene_resfm_hardonly_s20.conf|resfm_hardonly_s20"
+ "resfm_1donly_s21|confs/multiscene_resfm_1donly_s21.conf|resfm_1donly_s21"
+ "resfm_hardonly_s21|confs/multiscene_resfm_hardonly_s21.conf|resfm_hardonly_s21"
 )
 for row in "${JOBS[@]}"; do
   IFS='|' read -r exp conf resdir final ngpu pyexe <<< "$row"
