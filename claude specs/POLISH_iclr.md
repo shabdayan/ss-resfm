@@ -65,13 +65,29 @@ Status legend: [ ] open · [~] in progress / blocked on data · (→ who)
 - [ ] Submission dry-run on OpenReview a few days early (PDF compiles under their
   checker, abstract field, keywords, TLDR).
 
-## F. Promoted (3-week timeline confirms feasibility)
-- [ ] **MegaDepth track-pipeline robustness check**: source 5–8 test scenes with numeric
-  IDs from a per-scene mirror (try D2-Net/LoFTR undistorted-MegaDepth mirrors first;
-  MegaDepth-X uses landmark names and needs mapping), rebuild tracks with our
-  Appendix-C builder, evaluate EXISTING checkpoints (test-time only, no retraining),
-  report "ordering/margins stable under independent track build" as one appendix
-  paragraph. Closes the builder-confound objection. (→ me, week 1)
+## F. MegaDepth rebuild program (full version, launched Sep 7 — supersedes the
+## subset check; week 1)
+- [~] **Download**: streaming extract of all 67 scenes' images from MegaDepth_v1.tar.gz
+  (job 741726; 667GB SfM tar skipped — GT reused from existing npz, preserving exact
+  camera sets incl. Group-2 subsampling). (→ me, running)
+- [ ] **Track rebuild fleet**: `build_tracks/build_megadepth_rebuilt.py` per scene
+  (Appendix-C pipeline + canonical GT labeler) → `datasets/megadepth_rebuilt/`.
+  Record per-scene outlier_pct; compare to curated 25.4% (the headline diagnostic).
+- [ ] **Mirror trainings**: uesfm + resfm × seeds 20/21 on rebuilt-27 pool (escalate to
+  5 seeds on divergence); evals on rebuilt-36 test + unchanged OOD suite.
+- [ ] **Interpretation ladder** (write whichever materializes):
+  (a) supervised advantage shrinks/flips on raw tracks → "supervision's home win
+      depends on curated preprocessing" — headline-adjacent, extends label ceiling
+      to MegaDepth itself + quantifies the deployability argument;
+  (b) same ordering/margins → pipeline-robustness appendix paragraph (closes the
+      builder-confound objection);
+  (c) absolute numbers better than curated → report neutrally, expect builder
+      scrutiny, no claim.
+  NEVER compare rebuilt-track numbers against curated-track numbers as if one
+  benchmark — within-rebuild comparisons only.
+- [ ] **Self-containedness sentence**: once rebuilt-MD lands, the release claim
+  upgrades to "every dataset built by one disclosed pipeline from raw public data"
+  (strengthens contribution 5 / reproducibility statement).
 
 ## G. Nice-to-have (only if time remains)
 - [ ] Realistic-COLMAP-label third arm for the in-dist experiment (the "price of
