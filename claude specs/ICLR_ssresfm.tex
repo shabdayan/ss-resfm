@@ -405,7 +405,10 @@ $0.14\pm0.02$ are $2.5\times$ better; the baseline's rotation failure, $31.7\deg
 averaged over seeds, persists on every one) and by ${\sim}3\times$ on Olsson means against four of five baseline
 seeds ($3.0\pm0.3$ vs.\ $8.2$--$8.9$; one baseline seed escapes the collapse at $2.69$,
 revealing the clean-benchmark failure as basin-dependent rather than universal, its
-frequency $4/5$). The collapse is not a from-scratch artifact: the authors' released
+frequency $4/5$). Figure~\ref{fig:qualolsson} shows what the collapse looks like:
+on an essentially outlier-free scene, the supervised reconstruction degenerates to a
+compressed cluster with $16.5\deg$ mean rotation error, while the label-free arm
+reproduces the ground-truth camera arc nearly exactly. The collapse is not a from-scratch artifact: the authors' released
 checkpoint also collapses on Olsson ($9.10$; identically, $9.18$, under their pinned
 software stack), as does the authors-faithful configuration ($8.77$). Strecha is the exception: RESfM's mean is better on every seed
 ($0.006$--$1.67$ vs.\ $\sim\!2$, though one baseline seed nearly loses it) and at
@@ -530,6 +533,19 @@ question, is stable across schedules and seeds.
 \noindent\emph{Baseline learning-rate robustness, the full mechanism matrix, the
 MAD/STD/Huber ablation, per-scene selection, and qualitative results:
 Apps.~\ref{app:lrgrid}--\ref{app:qual}.}
+
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{fig_qual_olsson.pdf}
+\caption{\textbf{The clean-OOD collapse, qualitatively} (Buddah Tooth Relic Temple,
+Olsson, $0.5\%$ contamination; both networks trained on MegaDepth, seed $20$): top-view
+camera centers in the evaluation frame; whiskers join each reconstructed camera to its
+ground-truth position. The label-free \mad{} arm (left) lands on the ground-truth
+layout (translation median $0.06$, rotation $1.0\deg$); the supervised baseline
+(right) registers the same number of cameras but collapses them toward a line with
+large systematic displacements (median $2.55$, rotation $16.5\deg$) --- on a scene
+with almost no outliers to reject.}
+\label{fig:qualolsson}
+\end{figure}
 
 \subsection{Why label-free removal wins under high contamination}\label{sec:whyremoval}
 Two factors explain why the supervised advantage erodes as contamination rises.
