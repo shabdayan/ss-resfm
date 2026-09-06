@@ -64,7 +64,9 @@ the supervised baseline $2.5$--$2.9\times$ on clean out-of-distribution data ---
 unlike any supervised recipe we test, does so \emph{reliably}: the label-free arms land
 in a narrow band on every training seed, whereas the supervised baseline collapses on
 the clean benchmark in most seeds under every learning rate, budget, and recipe variant
-we try. Supervision
+we try (on Olsson --- $39$ essentially outlier-free scenes, $0.5\%$ --- every
+MegaDepth-trained supervised variant lands at a translation error of $7.4$--$9.1$,
+versus $2.9$--$3.6$ for every label-free arm). Supervision
 retains the in-distribution regime and the cleanest OOD mean (self-supervised arms within
 $\sim\!38\%$ in distribution). Every comparison is backed by five-training-seed bands, a
 paired-seed evaluation control, and an environment-noise study --- in a benchmark family
