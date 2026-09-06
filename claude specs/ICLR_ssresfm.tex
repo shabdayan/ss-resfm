@@ -659,7 +659,7 @@ RESfM (sup., GT labels) & $\mathbf{0.82\pm 0.37}$ & 0.260$\pm$0.149 & $\mathbf{4
 \end{table}
 
 \begin{figure}[t]\centering
-\includegraphics[width=0.62\linewidth]{fig_contamcurve.pdf}
+\includegraphics[width=\linewidth]{fig_contamcurve.pdf}
 \caption{\textbf{The completed in-distribution contamination curve.} Post-BA mean
 translation (log scale) when training and test share the domain, versus measured track
 contamination. The supervised recipe uses best-case labels (GT-derived; on MegaDepth,
@@ -669,7 +669,10 @@ the complementarity mechanism flip replicated in-distribution. Supervision
 wins at $0.5\%$ and $25\%$
 and narrowly at $43\%$, and loses at $3.1\%$ (dataset-specific dead zone) and $60\%$
 (the causal label ceiling): its failures are two distinct modes, not a smooth function
-of contamination. Bands: $\pm$std over five training seeds (Olsson: two).}
+of contamination. The rotation panel (right) tells the same story and makes the
+BlendedMVS dead zone starker still (supervised $20.7\pm12.2\deg$ vs.\ label-free
+$4$--$13\deg$). Bands: $\pm$std over five training seeds (Olsson: two; MegaDepth
+rotation: five-seed means, bands omitted).}
 \label{fig:contamcurve}
 \end{figure}
 
