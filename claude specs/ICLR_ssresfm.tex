@@ -663,9 +663,10 @@ RESfM (sup., GT labels) & $\mathbf{0.82\pm 0.37}$ & 0.260$\pm$0.149 & $\mathbf{4
 \caption{\textbf{The completed in-distribution contamination curve.} Post-BA mean
 translation (log scale) when training and test share the domain, versus measured track
 contamination. The supervised recipe uses best-case labels (GT-derived; on MegaDepth,
-its native COLMAP labels). The label-free curve shows the best \emph{deterministic}
-arm per point (named); TTT variants improve two points further (MegaDepth
-$0.40\pm0.11$, BlendedMVS $0.081\pm0.046$). Supervision wins at $0.5\%$ and $25\%$
+its native COLMAP labels). The label-free curve is a single arm, \mad{}, across all
+points (the head-based and TTT arms improve two points further: 1DSfM $6.68$ for
+remove is comparable, MegaDepth $0.40\pm0.11$ and BlendedMVS $0.081\pm0.046$ for
+weight+TTT). Supervision wins at $0.5\%$ and $25\%$
 and narrowly at $43\%$, and loses at $3.1\%$ (dataset-specific dead zone) and $60\%$
 (the causal label ceiling): its failures are two distinct modes, not a smooth function
 of contamination. Bands: $\pm$std over five training seeds (Olsson: two).}
