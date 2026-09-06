@@ -107,11 +107,12 @@ Delete \code{datasets/raw\_megadepth} ($\sim$0.6\,TB) when done.
 \section*{4. Paper polish still open (\code{POLISH\_iclr.md} is authoritative)}
 
 \begin{itemize}[leftmargin=1.4em,itemsep=2pt]
-\item \textbf{Page trim — the big one}: main text ends $\sim$p.13 vs.\ ICLR/ICML's
-$\sim$9--10-page limits. Proposed cut order (user never approved — decide): move two-stage
-control + 2$\times$2 diversity-architecture control to appendix ($\sim$1.2pp); compress
-Related Work + classical-baselines/lr-grid pointers ($\sim$0.5pp); move \code{tab:main}
-rotation/$N_r$ panels to appendix ($\sim$0.8pp); tighten \S\code{whyremoval} ($\sim$0.5pp).
+\item Page trim: RESOLVED for CVPR --- \code{CVPR\_ssresfm.tex} fits 8pp (the cut plan
+was executed there: two-stage + diversity controls, rot/$N_r$ panels, tab:hard, Roman
+Forum figure, schedule robustness, and the ICLR statements all moved to
+\code{CVPR\_ssresfm\_supp.tex}; related/protocol/results prose compressed). If the ICML
+route fires, port the same cuts to an ICML-class version (the ICLR tex is still full
+length --- the master; the CVPR tex is the trimmed derivative).
 \item Style swap to the official ICLR 2027 (or ICML 2027) class when targeting; re-measure.
 \item Abstract option (drafted, not applied): promote the ``label-free is the safer default
 outside the curated training domain'' deployment sentence.
