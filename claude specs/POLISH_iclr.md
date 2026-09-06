@@ -7,16 +7,16 @@ Status legend: [ ] open · [~] in progress / blocked on data · (→ who)
   ~Ep16k–19.5k) → fire held-out evals on completion, add the 43% column to the
   in-dist table, state where the supervised advantage inverts. Escalate to 5 seeds
   if the screen shows a claimable margin. (→ me, automatic)
-- [~] **Olsson@0.5% clean control** (olssonid, ~Ep7k) → same; expected supervised win
+- [x] **Olsson@0.5% clean control** DONE Sep 6: SUP 0.82±0.37 beats all SS arms; class-imbalance refuted; 5-seed escalation trainings launched (s22-24 both recipes). (olssonid, ~Ep7k) → same; expected supervised win
   completes the "curated middle band" story. (→ me, automatic)
-- [ ] **Re-run one Roman_Forum in-dist eval with `save_eval_diagnostics=True`** for the
+- [~] **Re-run one Roman_Forum in-dist eval with `save_eval_diagnostics=True`** (2 diag evals in flight, jobs 121184/121186) for the
   qualitative SS-vs-supervised figure (strongest closure of the "errors too high"
   objection). ~1 h. (→ me)
 
 ## B. Figures
 - [ ] **Qualitative Roman_Forum figure** (from A3): side-by-side BA-aligned cameras,
   SS vs supervised, in the in-dist subsection.
-- [ ] **Contamination-curve figure**: supervised-minus-SS in-distribution gap vs
+- [x] **Contamination-curve figure** DONE Sep 6 (fig:contamcurve, two panels trans+rot, per-arm lines, in sec:indist): supervised-minus-SS in-distribution gap vs
   training-domain contamination (0.5 / 1.7 / 3.1 / 25 / 43 / 60%) — one plot that
   carries the whole causal story; becomes Fig. 2 candidate.
 - [ ] Re-render Fig. 1 (complementarity) with final 5-seed numbers; check fonts/size
@@ -31,12 +31,12 @@ Status legend: [ ] open · [~] in progress / blocked on data · (→ who)
   its own bullet; re-check the contribution list reads as 5 crisp items.
 - [ ] Promote-or-keep decision: in-dist subsection placement (currently before the
   diversity subsection — consider moving directly after the main comparison).
-- [ ] Consistency sweep of the two new subsections against final table values
+- [x] Consistency sweep DONE Sep 6 (verify_iclr_tables extended w/ 40 in-dist cells, 0 mismatches) of the two new subsections against final table values
   (rerun `verify_iclr_tables.py` extended with the in-dist cells; add those cells
   to the script).
 - [ ] Kill remaining "Preliminary:" in the diversity subsection title if the
   in-dist + 2×2 results now make it non-preliminary.
-- [ ] Page budget: main text crept past 10 pages with the new subsection — re-measure;
+- [ ] Page budget: **MEASURED Sep 6: main text ends p.13 vs ICLR 9-page limit — ~3.5pp over; needs a real trim pass (user decision on cuts)**;
   candidates to compress: lr-grid pointer paragraph, classical-baselines paragraph.
 - [ ] Global pass for stale "appendix" promises, dangling refs (grep `??` after
   compile), duplicate parentheticals.
@@ -55,9 +55,9 @@ Status legend: [ ] open · [~] in progress / blocked on data · (→ who)
 ## E. Logistics
 - [ ] Swap placeholder ICLR 2026 style → official ICLR 2027 style when released;
   re-measure page budget after swap.
-- [ ] Reproducibility statement + ethics statement (ICLR requires both sections;
+- [x] Reproducibility statement + ethics statement DONE Sep 6 (ICLR requires both sections;
   currently absent).
-- [ ] Anonymity sweep: no author-identifying paths/acknowledgments; check appendix
+- [x] Anonymity sweep DONE Sep 6 (0 hits tex+PDF): no author-identifying paths/acknowledgments; check appendix
   config table and code-release sentence.
 - [ ] Code/data release prep: clean repo snapshot matching the config appendix
   (the CODEMAP doc is the internal guide; decide what ships).
