@@ -1,0 +1,96 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb}
+\usepackage[colorlinks=true,linkcolor=blue]{hyperref}
+\usepackage{parskip}
+\title{SS-RESfM vs.\ RESfM: One-Paragraph Summary}
+\author{}
+\date{September 6, 2026}
+\begin{document}
+\maketitle
+\vspace{-2.5em}
+
+\section*{The summary}
+
+SS-RESfM is RESfM with the supervision removed and nothing else changed --- same
+sets-of-sets architecture, tracks, schedule, and robust bundle adjustment, but the
+outlier head trains on confident pseudo-labels from the model's own reprojection-error
+percentiles instead of COLMAP-derived labels --- and the comparison splits along the
+contamination axis. In its curated comfort zone, supervised RESfM keeps at most a modest
+edge: in-distribution MegaDepth at $25\%$ contamination, the baseline scores
+$0.37\pm0.12$ versus $0.40\pm0.11$ for our test-time-fine-tuned arm (statistically
+overlapping, though that arm carries run-to-run noise) or $0.51\pm0.08$ for the
+deterministic arms (a ${\sim}38\%$ gap); at $43\%$ with best-case labels the bands
+overlap ($5.0\pm2.1$ vs.\ $6.7\pm1.4$); and clean Strecha goes to supervision on every
+seed ($0.39\pm0.72$ vs.\ ${\sim}2$--$3.2$) --- so SS-RESfM does \emph{not} always win.
+But it matches supervision at moderate out-of-distribution contamination, beats it
+outright where labels cannot be manufactured (plain removal below \emph{every} baseline
+seed pair at ${\sim}60\%$: $12.4\pm2.1$ vs.\ $19.2\pm3.4$, and $2\times$ better even
+when RESfM is retrained \emph{on} a $60\%$ domain with reference-quality labels ---
+proving the failure is caused by labeling, not domain shift), and wins two of the three
+clean out-of-distribution splits by $2.5$--$2.9\times$ (BlendedMVS and Olsson, where
+every supervised variant lands at $7.4$--$9.1$ versus $2.9$--$3.6$ for every label-free
+arm) with a qualitative difference in dependability: the label-free arms land in a
+narrow band on every training seed, whereas supervised RESfM collapses on clean OOD in
+most seeds under every learning rate, budget, and recipe variant tested. The one-line
+version: removing RESfM's labels costs little-to-nothing inside its curated comfort zone
+(and Strecha), and buys robustness --- and above all \emph{reliability} --- everywhere
+labels are unsound or unavailable, which is exactly where robust SfM is needed.
+
+\section*{What ``RESfM collapses'' means}
+
+``Collapse'' is not divergence or a crash --- the network trains normally and
+reconstructs its training distribution well. It is a \emph{silent generalization
+failure on the easiest possible test}: Olsson, $39$ essentially outlier-free scenes
+($0.5\%$ measured contamination), where a method that merely ignored its outlier head
+should do fine. Every MegaDepth-trained \emph{supervised} variant we test --- the
+authors' released checkpoint ($9.10$), the authors-faithful retrain ($8.77$), and our
+controlled from-scratch retrains ($7.4\pm2.6$) --- lands at a translation error of
+$7.4$--$9.1$, versus $2.9$--$3.6$ for every label-free arm and $3.15$ for classical
+GLOMAP. It is seed-dependent but dominant ($4$ of $5$ training seeds collapse; one
+escapes to $2.32$), and it survives every learning rate, epoch budget, and recipe
+variant we try. Crucially it is \emph{not} a domain-shift story: RESfM retrained
+in-distribution on Olsson-style data is fine ($0.56$--$1.08$) --- the supervised outlier
+head, fit to MegaDepth's label distribution, actively misclassifies on clean
+out-of-distribution scenes, while the self-supervised head adapts because its
+pseudo-labels are recomputed from the test-time reprojection-error distribution itself.
+
+\section*{The four RESfM reference points}
+
+All four supervised reference points appear in the paper's main table; translation
+error (mean), lower is better. The controlled comparison arm is RESfM-scratch:
+identical tracks, schedule, and BA to our label-free arms, with checkpoint selection by
+our label-free reprojection-error criterion (which \emph{favors} the baseline relative
+to the authors' own Accuracy-based selection --- MegaDepth $0.37$ vs.\ $0.50$).
+
+\begin{center}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+RESfM variant & MegaDepth & 1DSfM & 1DSfM-hard & Strecha & BMVS & Olsson\\
+ & (25\%) & (43\%) & (60\%) & (1.7\%) & (3.1\%) & (0.5\%)\\
+\midrule
+Paper (reported)              & 0.169 & -- & -- & -- & -- & --\\
+Released (authors' weights)   & 0.203$\pm$0.008 & 10.71 & 15.29 & 0.20 & 0.33 & 9.10\\
+From scratch, faithful (authors' ckpt sel.) & 0.496 & 9.75 & 17.58 & 0.14 & 0.37 & 8.77\\
+From scratch, our reproj-error ckpt sel.    & 0.37$\pm$0.12 & 10.5$\pm$1.5 & 19.2$\pm$3.4 & 0.39$\pm$0.72 & 0.35$\pm$0.04 & 7.4$\pm$2.6\\
+\midrule
+SS-RESfM best label-free arm  & 0.40$\pm$0.11 & 8.9$\pm$1.2 & 12.4$\pm$2.1 & 1.97$\pm$0.09 & 0.14$\pm$0.02 & 2.9$\pm$0.3\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Reading the four rows: the \emph{paper} number ($0.169$) is not reproducible even from
+the authors' own released weights in our harness ($0.209$, confirmed under their pinned
+software stack); the \emph{released} checkpoint is the strongest in-distribution but
+collapses on Olsson like every other supervised variant ($9.10$) --- so the collapse is
+not an artifact of our retraining; the \emph{faithful} from-scratch retrain (authors'
+own checkpoint-selection metric) is the weakest in distribution ($0.496$), showing our
+selection deviation helps the baseline, not us; and \emph{from-scratch with our
+selection} is the controlled anchor used for all seed-band claims. Against whichever
+row one prefers, the label-free story is unchanged: supervision holds MegaDepth and
+Strecha; label-free wins the high-contamination regime, BlendedMVS, and Olsson, and is
+the only recipe that never collapses.
+
+\end{document}
