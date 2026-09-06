@@ -658,7 +658,21 @@ RESfM (sup., GT labels) & $\mathbf{0.82\pm 0.37}$ & 0.260$\pm$0.149 & $\mathbf{4
 \end{tabular}
 \end{table}
 
-Four findings. \emph{(i) At $60\%$, supervision loses on its own training domain}: the
+\begin{figure}[t]\centering
+\includegraphics[width=0.62\linewidth]{fig_contamcurve.pdf}
+\caption{\textbf{The completed in-distribution contamination curve.} Post-BA mean
+translation (log scale) when training and test share the domain, versus measured track
+contamination. The supervised recipe uses best-case labels (GT-derived; on MegaDepth,
+its native COLMAP labels). The label-free curve shows the best \emph{deterministic}
+arm per point (named); TTT variants improve two points further (MegaDepth
+$0.40\pm0.11$, BlendedMVS $0.081\pm0.046$). Supervision wins at $0.5\%$ and $25\%$
+and narrowly at $43\%$, and loses at $3.1\%$ (dataset-specific dead zone) and $60\%$
+(the causal label ceiling): its failures are two distinct modes, not a smooth function
+of contamination. Bands: $\pm$std over five training seeds (Olsson: two).}
+\label{fig:contamcurve}
+\end{figure}
+
+Four findings (Fig.~\ref{fig:contamcurve}). \emph{(i) At $60\%$, supervision loses on its own training domain}: the
 supervised head, trained on these scenes with reference-quality labels, is beaten
 $\sim\!2\times$ at band level by \mad{} ($12.1\pm6.1$ vs.\ $23.4\pm7.8$; four of five
 \mad{} seeds beat every supervised seed; medians $9.8$ vs.\ $20.6$). ``Just train the
@@ -686,7 +700,7 @@ the MegaDepth-fit outlier head misclassifying on clean out-of-distribution scene
 an inability to handle clean data; the label-free arms are competent but behind here
 ($2.3$--$4.5$), so at near-zero contamination with sound labels, supervision earns its
 keep. \emph{(iv) The supervised advantage inverts between $43\%$ and $60\%$}: at $43\%$
-supervision retains an overlapping edge ($4.97\pm2.08$ vs.\ remove $6.68\pm1.44$;
+supervision retains an overlapping edge ($4.97\pm2.08$ vs.\ \mad{} $6.37\pm0.20$;
 the supervised band's spread is dominated by one strong seed at $1.38$), while at
 $60\%$ it loses $\sim\!2\times$ --- and the complementarity ordering replicates
 in-distribution: robust removal (\mad{}/remove) leads at $43$--$60\%$ and soft

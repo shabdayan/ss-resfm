@@ -22,8 +22,12 @@ edge: in-distribution MegaDepth at $25\%$ contamination, the baseline scores
 $0.37\pm0.12$ versus $0.40\pm0.11$ for our test-time-fine-tuned arm (statistically
 overlapping, though that arm carries run-to-run noise) or $0.51\pm0.08$ for the
 deterministic arms (a ${\sim}38\%$ gap); at $43\%$ with best-case labels the bands
-overlap ($5.0\pm2.1$ vs.\ $6.7\pm1.4$); and clean Strecha goes to supervision on every
-seed ($0.39\pm0.72$ vs.\ ${\sim}2$--$3.2$) --- so SS-RESfM does \emph{not} always win.
+overlap ($5.0\pm2.1$ vs.\ $6.4\pm0.2$); clean Strecha goes to supervision on every
+seed ($0.39\pm0.72$ vs.\ ${\sim}2$--$3.2$); and truly clean \emph{in-distribution}
+data goes to supervision too (retrained on the Olsson domain at $0.5\%$: $0.82\pm0.37$
+vs.\ $2.3$--$2.6$ for the best label-free arms) --- so SS-RESfM does \emph{not} always
+win: with sound labels and negligible-or-curated contamination, supervision earns its
+keep.
 But it matches supervision at moderate out-of-distribution contamination, beats it
 outright where labels cannot be manufactured (plain removal below \emph{every} baseline
 seed pair at ${\sim}60\%$: $12.4\pm2.1$ vs.\ $19.2\pm3.4$, and $2\times$ better even
@@ -51,7 +55,7 @@ $7.4$--$9.1$, versus $2.9$--$3.6$ for every label-free arm and $3.15$ for classi
 GLOMAP. It is seed-dependent but dominant ($4$ of $5$ training seeds collapse; one
 escapes to $2.32$), and it survives every learning rate, epoch budget, and recipe
 variant we try. Crucially it is \emph{not} a domain-shift story: RESfM retrained
-in-distribution on Olsson-style data is fine ($0.56$--$1.08$) --- the supervised outlier
+in-distribution on the Olsson domain is fine ($0.82\pm0.37$ across two seeds) --- the supervised outlier
 head, fit to MegaDepth's label distribution, actively misclassifies on clean
 out-of-distribution scenes, while the self-supervised head adapts because its
 pseudo-labels are recomputed from the test-time reprojection-error distribution itself.
