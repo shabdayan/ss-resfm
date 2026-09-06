@@ -35,7 +35,7 @@ Status legend: [ ] open · [~] in progress / blocked on data · (→ who)
   to the script).
 - [ ] Kill remaining "Preliminary:" in the diversity subsection title if the
   in-dist + 2×2 results now make it non-preliminary.
-- [ ] Page budget: **MEASURED Sep 6: main text ends p.13 vs ICLR 9-page limit — ~3.5pp over; needs a real trim pass (user decision on cuts)**;
+- [x] Page budget: RESOLVED via CVPR port Sep 6 — CVPR_ssresfm.tex fits 8pp two-column (venue decision: CVPR Nov 7-12 -> read reviews mid-Jan -> stay(rebut->ICCV fallback) or withdraw->ICML). ICLR tex unchanged (13pp) if ICLR route revived;
   candidates to compress: lr-grid pointer paragraph, classical-baselines paragraph.
 - [ ] Global pass for stale "appendix" promises, dangling refs (grep `??` after
   compile), duplicate parentheticals.
