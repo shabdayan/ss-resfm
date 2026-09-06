@@ -60,7 +60,8 @@ across six datasets spanning $0.5\%$--$61\%$ measured outliers. The optimal mech
 plain removal beats the supervised baseline on \emph{every} seed pair
 ($12.4\pm2.1$ vs.\ $19.2\pm3.4$) and both beat COLMAP, while at $43\%$ it beats every
 supervised seed's median ($1.4$--$1.9$ vs.\ $2.4$--$4.3$). Reweighting wins the low-contamination regime, beating
-the supervised baseline $2.5$--$2.9\times$ on clean out-of-distribution data --- and,
+the supervised baseline $2.5$--$2.9\times$ on two of the three clean out-of-distribution
+splits (BlendedMVS and Olsson; Strecha goes to supervision on every seed) --- and,
 unlike any supervised recipe we test, does so \emph{reliably}: the label-free arms land
 in a narrow band on every training seed, whereas the supervised baseline collapses on
 the clean benchmark in most seeds under every learning rate, budget, and recipe variant
