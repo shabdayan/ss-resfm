@@ -9,13 +9,12 @@ Status legend: [ ] open · [~] in progress / blocked on data · (→ who)
   if the screen shows a claimable margin. (→ me, automatic)
 - [x] **Olsson@0.5% clean control** DONE Sep 6: SUP 0.82±0.37 beats all SS arms; class-imbalance refuted; 5-seed escalation trainings launched (s22-24 both recipes). (olssonid, ~Ep7k) → same; expected supervised win
   completes the "curated middle band" story. (→ me, automatic)
-- [~] **Re-run one Roman_Forum in-dist eval with `save_eval_diagnostics=True`** (2 diag evals in flight, jobs 121184/121186) for the
+- [x] **Roman_Forum diag evals + qualitative figure** DONE Sep 6 (fig:qualrf in sec:indist) for the
   qualitative SS-vs-supervised figure (strongest closure of the "errors too high"
   objection). ~1 h. (→ me)
 
 ## B. Figures
-- [ ] **Qualitative Roman_Forum figure** (from A3): side-by-side BA-aligned cameras,
-  SS vs supervised, in the in-dist subsection.
+- [x] **Qualitative Roman_Forum figure** DONE Sep 6 (fig:qualrf).
 - [x] **Contamination-curve figure** DONE Sep 6 (fig:contamcurve, two panels trans+rot, per-arm lines, in sec:indist): supervised-minus-SS in-distribution gap vs
   training-domain contamination (0.5 / 1.7 / 3.1 / 25 / 43 / 60%) — one plot that
   carries the whole causal story; becomes Fig. 2 candidate.
