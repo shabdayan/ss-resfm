@@ -41,7 +41,7 @@ def main():
     # subset, subsetting GT accordingly, and require >=90% coverage.
     keep, paths = [], []
     for idx, n in enumerate(names):
-        base = os.path.basename(n)
+        base = os.path.basename(n.strip())  # namesList entries carry a trailing newline
         if base in pool:
             keep.append(idx); paths.append(pool[base])
     cov = len(keep) / max(1, len(names))
