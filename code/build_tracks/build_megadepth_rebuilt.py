@@ -36,15 +36,24 @@ def main():
     for p in glob.glob(os.path.join(args.raw, "MegaDepth_v1", args.scene,
                                     "dense*", "imgs", "*")):
         pool[os.path.basename(p)] = p
-    paths = []
-    for n in names:
+    # MegaDepth_v1 ships only the dense-reconstruction image subset; some npz
+    # cameras (from the SfM models) have no image there. Build over the covered
+    # subset, subsetting GT accordingly, and require >=90% coverage.
+    keep, paths = [], []
+    for idx, n in enumerate(names):
         base = os.path.basename(n)
-        if base not in pool:
-            sys.exit(f"[{args.scene}] missing image {base} ({len(pool)} extracted)")
-        paths.append(pool[base])
-    print(f"[{args.scene}] {len(paths)} cameras, all images found", flush=True)
-
-    fields = build_scene(paths, ref["Ps_gt"], ref["K_gt"], ref["namesList"])
+        if base in pool:
+            keep.append(idx); paths.append(pool[base])
+    cov = len(keep) / max(1, len(names))
+    print(f"[{args.scene}] {len(keep)}/{len(names)} cameras covered "
+          f"({100*cov:.1f}%)", flush=True)
+    if cov < 0.9:
+        sys.exit(f"[{args.scene}] coverage {100*cov:.1f}% < 90% -- skipping")
+    import numpy as _np
+    keep = _np.asarray(keep)
+    fields = build_scene(paths, ref["Ps_gt"][keep], ref["K_gt"][keep],
+                         ref["namesList"][keep])
+    fields["covered_frac"] = _np.float64(cov)
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     np.savez(out_path, **fields)
     print(f"[{args.scene}] DONE outlier_pct={float(fields['outlier_pct']):.2f}", flush=True)
