@@ -1,0 +1,169 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs,amsmath,amssymb,enumitem}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\usepackage{parskip}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\title{SS-RESfM: Resume Handbook}
+\author{State as of September 6, 2026}
+\date{}
+\begin{document}
+\maketitle
+\vspace{-2.5em}
+
+\section*{1. Where the project stands}
+
+\textbf{The paper is essentially complete.} \code{claude specs/ICLR\_ssresfm.tex} is the living
+draft (ICLR format): all experiments integrated, every table cell machine-verified
+(\code{code/verify\_iclr\_tables.py} — run it, expect 0 mismatches), appendix done, abstract and
+contributions in findings-first framing, reproducibility + ethics statements in, anonymity
+clean. Two qualitative figures (\code{fig\_qual\_olsson.pdf} = the clean-OOD collapse, the lead
+visual; \code{fig\_qual\_romanforum.pdf} = the causal 60\% ceiling) and the contamination-curve
+figure (\code{fig\_contamcurve.pdf}, trans+rot) are integrated. The experimental program —
+main 5-seed bands, two-stage, lr grid, hyperparameter sensitivity, and the complete
+in-distribution contamination curve (0.5/3.1/25/43/60\%) — is finished and logged in
+memory + \code{claude specs/POLISH\_iclr.md}.
+
+\textbf{3DV \#524 is under review} (frozen; decisions expected $\sim$November 2026).
+\code{PATHA\_supp.zip} was the submitted supplementary. Post-deadline results are ICLR/ICML-only.
+
+\textbf{Companion documents}: \code{SUMMARY\_ssresfm\_vs\_resfm.pdf} (3-page short summary + the
+4-panel figure — the advisor-briefing artifact), \code{PATHA\_3dv\_rebuttal\_prep.pdf} (rebuttal
+playbook), \code{CODEMAP\_ssresfm.pdf} (repo changes + per-model code paths),
+\code{POLISH\_iclr.md} (itemized polish tracker — the authoritative TODO list).
+
+\section*{2. The submission decision (do this first on resume)}
+
+The venue fork was left open pending Ronen's read. A drafted email to him (in the chat log;
+core: 3-page summary + 3 figures, framed via RESfM's own Table~7) was never confirmed sent —
+\textbf{send it or have that conversation first}. The tree:
+
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+\item \textbf{ICLR 2027} (deadline late Sept 2026): requires withdrawing 3DV first; paper +
+reviews are \emph{public} during review. \emph{If you resume after late September, this
+option has expired} and you are automatically on the next branch.
+\item \textbf{Let 3DV decide ($\sim$Nov)} $\rightarrow$ \emph{rejected}: submit the full
+strengthened paper to \textbf{ICML 2027} (deadline late Jan 2027; reviews private) —
+this was the recommended risk-dominant route. $\rightarrow$ \emph{accepted}: publish at 3DV;
+the post-freeze work (causal in-distribution program, contamination curve, two-stage
+controls, reliability methodology) is substantial enough to become a \emph{second} paper
+(``the label ceiling is causal'') for ICML/ICCV, citing the 3DV paper.
+\item \textbf{ICCV 2027} ($\sim$Mar 5) is the fallback after any rejection. CVPR (Nov 7--12)
+was never reachable while under 3DV/ICLR review.
+\end{itemize}
+
+Key sensitivity: the paper critiques the supervision recipe of the ESFM$\rightarrow$RESfM line
+(Ronen's own); public-during-review venues expose it to the community — and to the RESfM
+authors — before acceptance. Privacy was the argument for ICML. Also pending from Fadi:
+VGPA camera-ready PDF (verify the citation) and the authors' $\sim$32\% 1DSfM tracks — the
+paper contains a \textbf{pre-registered prediction} about those tracks (supervision
+competitive-or-ahead at $\sim$32\%); when they arrive, run both recipes and report the result
+\emph{whatever it is}. Never soften or remove the prediction sentence.
+
+\section*{3. Compute that was in flight (will be finished; results NOT yet harvested)}
+
+Nothing fires automatically after this session ends. On resume, harvest in this order:
+
+\begin{enumerate}[leftmargin=1.6em,itemsep=3pt]
+\item \textbf{Olsson in-distribution escalation} (2$\rightarrow$5 seeds). Six trainings were
+running: \code{results/multiscene/\{uesfm,resfm\}\_olssonid\_s\{22,23,24\}} (20k epochs, babysitter
+chains attached; a duplicate s22 job was killed — expect exactly one run per dir).
+When done: fire the standard in-dist eval fleets exactly like s20/s21 — for each seed,
+SS arms via \code{run\_multiscene\_eval.sh} with eval roots
+\code{results/crossdataset/uesfm\_olssonid\_s\{22,23,24\}\_ind\_\{madweight,weight,weight\_ttt,remove\}\_eval}
+and supervised \code{resfm\_olssonid\_s\{22,23,24\}\_ind\_eval}, 8 OLTEST test scenes each, queue
+\textbf{waic-risk} (standing policy: ALL jobs). Then update the Olsson column of
+\code{tab:indist} (currently 2-seed: SUP $0.82\pm0.37$; wttt $2.31\pm0.10$; mad $2.58\pm1.14$;
+remove $2.75\pm0.35$; weight $4.46\pm0.84$), remove the ``(Olsson: two seeds)'' caveats in the
+caption/text/figure captions, extend \code{verify\_iclr\_tables.py} INDIST expectations, and
+re-run it. Conclusion at 2 seeds (supervision wins clean in-dist; class-imbalance refuted)
+is expected to hold — flag prominently if 5 seeds change it.
+\item \textbf{MegaDepth rebuild program} (Polish list section F). The 667\,GB
+\code{MegaDepth\_SfM\_v1.tar.xz} download job (\code{md\_sfm\_dl}, script
+\code{code/.md\_sfm\_download.sh}, resumable/idempotent) extracts full per-scene image sets to
+\code{code/datasets/raw\_megadepth/MegaDepth\_SfM/<scene>/}. Verify
+\code{SFM SCENES: 68} in \code{.md\_sfm\_dl.out}. Then: point
+\code{code/build\_tracks/build\_megadepth\_rebuilt.py} at the new dir (edit the pool glob from
+\code{MegaDepth\_v1/.../dense*/imgs} to \code{MegaDepth\_SfM/<scene>}) and submit the 68-scene
+fleet (v1-dense archive was abandoned: median 43\% coverage). Traps already burned: strip
+\code{namesList} entries (trailing newline); use the \emph{literal} venv path
+\code{u-esfm/.venv38-resfm/bin/python} in bsub (never \code{readlink -f} — it resolves past the
+venv); clean \code{.mdrlogs/} between resubmits ( \code{-o} appends). After tracks build:
+mirror trainings (uesfm/resfm $\times$ s20,s21 on rebuilt-27) + evals;
+\textbf{within-rebuild comparisons only} (interpretation ladder in \code{POLISH\_iclr.md} F).
+Delete \code{datasets/raw\_megadepth} ($\sim$0.6\,TB) when done.
+\end{enumerate}
+
+\section*{4. Paper polish still open (\code{POLISH\_iclr.md} is authoritative)}
+
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+\item \textbf{Page trim — the big one}: main text ends $\sim$p.13 vs.\ ICLR/ICML's
+$\sim$9--10-page limits. Proposed cut order (user never approved — decide): move two-stage
+control + 2$\times$2 diversity-architecture control to appendix ($\sim$1.2pp); compress
+Related Work + classical-baselines/lr-grid pointers ($\sim$0.5pp); move \code{tab:main}
+rotation/$N_r$ panels to appendix ($\sim$0.8pp); tighten \S\code{whyremoval} ($\sim$0.5pp).
+\item Style swap to the official ICLR 2027 (or ICML 2027) class when targeting; re-measure.
+\item Abstract option (drafted, not applied): promote the ``label-free is the safer default
+outside the curated training domain'' deployment sentence.
+\item OpenReview logistics: keywords/TLDR chosen (in POLISH E); arXiv cross-list cs.CV+cs.LG.
+\item Decide fate of exploratory figures not in the paper: \code{fig\_indist\_vs\_ood.pdf},
+\code{fig\_4panel\_\{faith,scratch,released\}.pdf} (candidates for appendix; the 4-panel scratch
+version is embedded in the Short Summary).
+\item Final passes: rerun \code{verify\_iclr\_tables.py}; grep compiled PDF for \code{??} refs;
+anonymity re-check after any edits.
+\end{itemize}
+
+\section*{5. Operational facts you will otherwise re-derive painfully}
+
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+\item \textbf{Queue policy}: ALL jobs (trainings and evals) $\rightarrow$ \code{waic-risk}.
+Eval bsub pattern: \code{-gpu "num=1:j\_exclusive=yes:gmem=80G" -R "rusage[mem=50000]"};
+trainings via \code{multiple\_scenes\_learning.py --conf ... --phase TRAINING} with babysitter
+\code{trigger\_ablation\_resume.sh} (see \code{resume\_stalled\_trainings.sh} lines 110--135 for
+the canonical block). \code{bsub} under mbatchd throttling retries internally —
+\emph{check for duplicate submissions} (it double-submitted once).
+\item \textbf{Root naming}: main-band SS arms \code{uesfm\_finelr[\_s2X]\_rf\_\{arm\}\_\{ds\}\_eval}
+(MegaDepth: \code{uesfm\_finelr[\_s2X]\_\{arm\}\_megadepth\_eval}); baseline
+\code{resfm\_finelr[\_s2X]\_...}; released ckpt = \code{resfm\_repro\_env38} (MegaDepth; 0.209) and
+\code{resfm\_repro\_\{ds\}} (OOD) — \code{resfm\_repro} bare is a stale variant (0.286), do not use;
+faithful = \code{resfm\_faithful[\_s2X]\_...}; in-dist = \code{\{uesfm,resfm\}\_\{pool\}\_s\{s\}\_ind[\_arm]\_eval},
+pools \code{olssonid/bmvsid/1donly/hardonly/1dsfmid} (\code{\_indh\_} = merged-pool hard test).
+\item \textbf{Reading results}: per-scene file
+\code{<root>/<scene>\_ba/Results\_FINE\_TUNE\_stage\_1\_esfm\_outliers\_shallow.xlsx}, post-BA
+translation \code{ts\_ba\_final\_mean}/\code{\_med}, rotation \code{Rs\_ba\_final\_mean}, cameras
+\code{\#registered\_cams\_final}. Bands = mean$\pm$std (\textbf{ddof=1}) over training seeds of
+per-root scene-means. The recorded translation metric is \emph{not} reproducible as naive
+camera-center distance from the \code{forFigures} npz (alignment/normalization differs); for
+camera-map figures extract positions from the eval's own
+\code{plots/Final\_plots\_final\_cameras.html} (plotly traces \code{cam\_gt}/\code{cam\_learn}) —
+that is how \code{fig\_qual\_olsson.pdf} was made. \code{registered\_cams\_indices} in the npz is
+sometimes a 0/1 \emph{mask}, sometimes an index list — check before pairing.
+\item \textbf{Compiling}: \code{tectonic} at
+\code{\char`~/.local/share/mamba/envs/tex/bin/tectonic -X compile <file>.tex} from
+\code{claude specs/}. Figures regenerate from scratchpad scripts; the aggregated numbers behind
+the 4-panel figure are in the scripts' JSON (regenerate by re-running the aggregation against
+the roots above if lost).
+\item \textbf{Standing hygiene}: after each model's eval fleets complete, prune its
+\code{models\_all} to best+final+reselection winners (\code{prune\_checkpoints\_dryrun.py});
+lean eval outputs are default (diagnostics only via \code{eval.save\_eval\_diagnostics = True}
+appended as an \code{eval \{\}} block to a generated conf, with a \code{\_diag\_eval} root).
+\item \textbf{Memory}: the assistant's memory index (auto-loaded each session) holds the
+verdict log — \code{fiveseed-bands-and-30k-verdict}, \code{indist-contamination-curve},
+\code{megadepth-rebuild-blocker}, \code{paper-framing-doctrine} (never sell the delta; the
+findings are the paper), \code{phase0-spec-regime} (naming/metric rules). Trust it as the
+starting point; verify anything file-specific still exists.
+\end{itemize}
+
+\section*{6. Thirty-second resume checklist}
+
+\begin{enumerate}[leftmargin=1.6em,itemsep=1pt]
+\item Which venue window is open? (\S2) — talk to Ronen if not yet done; 3DV decision known?
+\item \code{bjobs}; harvest Olsson escalation $\rightarrow$ fire evals $\rightarrow$ 5-seed
+\code{tab:indist} column (\S3.1).
+\item Check MegaDepth-SfM extraction $\rightarrow$ rebuild fleet $\rightarrow$ mirror
+trainings (\S3.2).
+\item Fadi's tracks arrived? $\rightarrow$ run both recipes, report the pre-registered result.
+\item Page trim + venue style swap + final verify run (\S4) $\rightarrow$ submit.
+\end{enumerate}
+
+\end{document}
