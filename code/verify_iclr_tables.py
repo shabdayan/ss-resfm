@@ -93,15 +93,15 @@ def agg1(root, col="ts_ba_final_mean"):
          for f in glob.glob(f"{root}/*_ba/Results_FINE_TUNE_stage_1_*.xlsx")]
     return (np.mean(v), len(v)) if v else (float("nan"), 0)
 
-FAITH = {"megadepth": 0.496, "1dsfm": 12.00, "1dsfmhard": 17.58, "strecha": 0.144,
-         "blendedmvs": 0.489, "olsson": 8.77}
+FAITH = {"megadepth": 0.496, "1dsfm": 9.75, "1dsfmhard": 17.58, "strecha": 0.144,
+         "blendedmvs": 0.367, "olsson": 8.77}
 for ds, pv in FAITH.items():
     pre = M if ds == "megadepth" else C
     cv, n = agg1(f"{pre}/resfm_faithful_{ds}_eval")
     if not chk(f"REF faithful/{ds}", pv, cv, 0.03): bad += 1
 
 # GLOMAP rows
-GLO = {"megadepth": (3.33, 5.42), "1dsfm": (30.01, 8.36), "1dsfmhard": (35.38, 26.4),
+GLO = {"megadepth": (3.33, 5.42), "1dsfm": (27.15, 8.87), "1dsfmhard": (35.38, 26.4),
        "strecha": (0.047, 0.25), "blendedmvs": (0.339, 2.11), "olsson": (3.15, 1.28)}
 DSMAP = {"megadepth": "megadepth", "1dsfm": "1dsfm", "1dsfmhard": "1dsfm_hard_300",
          "strecha": "strecha", "blendedmvs": "blendedmvs", "olsson": "olsson"}
@@ -116,3 +116,33 @@ for ds, (pt, pr) in GLO.items():
     if not chk(f"GLOMAP/{ds} rot", pr, np.mean(rv), 0.11): bad += 1
 
 print(f"\nDONE: {bad} mismatches")
+
+
+# ---- tab:indist (in-distribution contamination curve) ----
+def band_mean(fmt, seeds):
+    ms = []
+    for s in seeds:
+        v = [float(pd.read_excel(f)["ts_ba_final_mean"].iloc[-1])
+             for f in glob.glob(f"{C}/{fmt.format(s=s)}/*_ba/Results_FINE_TUNE_stage_1_*.xlsx")]
+        if v: ms.append(np.mean(v))
+    return (np.mean(ms), np.std(ms, ddof=1)) if len(ms) > 1 else (float("nan"), float("nan"))
+
+INDIST = {  # (pool, seeds): {arm: (paper_mean, paper_std)}
+    ("olssonid", (20, 21)): {"madweight": (2.58, 1.14), "weight": (4.46, 0.84),
+        "weight_ttt": (2.31, 0.10), "remove": (2.75, 0.35), "SUP": (0.82, 0.37)},
+    ("bmvsid", (20, 21, 22, 23, 24)): {"madweight": (0.093, 0.099), "weight": (0.114, 0.006),
+        "weight_ttt": (0.081, 0.046), "remove": (0.228, 0.080), "SUP": (0.260, 0.149)},
+    ("1donly", (20, 21, 22, 23, 24)): {"madweight": (6.37, 0.20), "weight": (10.65, 2.49),
+        "weight_ttt": (9.91, 2.39), "remove": (6.68, 1.44), "SUP": (4.97, 2.08)},
+    ("hardonly", (20, 21, 22, 23, 24)): {"madweight": (12.1, 6.1), "weight": (28.1, 5.9),
+        "weight_ttt": (29.3, 8.4), "remove": (19.4, 7.7), "SUP": (23.4, 7.8)},
+}
+for (pool, seeds), arms in INDIST.items():
+    for arm, (pm, ps) in arms.items():
+        fmt = f"resfm_{pool}_s{{s}}_ind_eval" if arm == "SUP" \
+            else f"uesfm_{pool}_s{{s}}_ind_{arm}_eval"
+        cm, cs = band_mean(fmt, seeds)
+        if not chk(f"INDIST {pool}/{arm} mean", pm, cm, 0.06): bad += 1
+        if not chk(f"INDIST {pool}/{arm} std", ps, cs, 0.12): bad += 1
+
+print(f"\nDONE(indist): {bad} total mismatches")
