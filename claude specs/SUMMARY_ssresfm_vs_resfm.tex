@@ -4,6 +4,7 @@
 \usepackage{amsmath,amssymb}
 \usepackage[colorlinks=true,linkcolor=blue]{hyperref}
 \usepackage{parskip}
+\usepackage{graphicx}
 \title{SS-RESfM vs.\ RESfM: One-Paragraph Summary}
 \author{}
 \date{September 6, 2026}
@@ -59,6 +60,26 @@ in-distribution on the Olsson domain is fine ($0.82\pm0.37$ across two seeds) --
 head, fit to MegaDepth's label distribution, actively misclassifies on clean
 out-of-distribution scenes, while the self-supervised head adapts because its
 pseudo-labels are recomputed from the test-time reprojection-error distribution itself.
+
+\section*{The picture in one figure}
+
+\begin{center}
+\includegraphics[width=\linewidth]{fig_4panel_scratch.pdf}
+\end{center}
+\noindent\emph{Columns:} translation / rotation (post-BA means, log scale).
+\emph{Top row:} all methods trained on MegaDepth, evaluated out-of-distribution on
+each domain's held-out test scenes. \emph{Bottom row:} trained on each domain itself
+(supervised with best-case GT-derived labels), evaluated in-distribution on the same
+scenes. The red supervised line is RESfM-from-scratch (our controlled anchor) in the
+top row and the in-domain retrain in the bottom row (MegaDepth anchor point shared);
+label-free arms carry five-seed bands. In-domain retraining rescues supervision at
+$0.5\%$ and helps at $43\%$, does nothing at $3.1\%$ (the dead zone --- rotation-first
+in both rows), and worsens at $60\%$, while the label-free arms barely move between
+rows: they have no labels to gain from. Analogous figures exist with the
+authors-faithful retrain and the released checkpoint as the supervised line; the
+verdicts are unchanged. (Test-scene restriction caveats: the $8$ Olsson held-out
+scenes exclude most of the clean-OOD collapse scenes, and the $43\%$ point is a
+three-scene mean including the Ellis Island failure scene.)
 
 \section*{The four RESfM reference points}
 
