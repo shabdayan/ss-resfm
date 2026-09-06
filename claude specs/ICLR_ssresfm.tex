@@ -796,6 +796,29 @@ high contamination, reweighting at low. Robust deep SfM should treat outlier han
 adaptive and self-supervised; code, configurations, and the rebuilt OOD tracks will be
 released upon publication.
 
+\subsubsection*{Reproducibility Statement}
+All results are reproducible from the released materials: code (a documented fork of
+RESfM's public repository), every training and evaluation configuration file, the
+rebuilt track suites for the five OOD datasets and the per-domain train/val/test splits
+of \S\ref{sec:indist}, and the scripts that regenerate every table and figure from the
+saved evaluation outputs (including a verification script that recomputes each printed
+cell). Training protocol, learning rates, schedules, and checkpoint-selection rules are
+specified in \S\ref{sec:protocol}; seeds are enumerated per experiment ($20$--$24$),
+and every headline comparison reports five-training-seed bands. Sources of
+irreducible run-to-run variance (robust-BA solver nondeterminism, TTT) are
+characterized in App.~\ref{app:repro} so that deviations within those bounds can be
+recognized as environmental. Dataset provenance and licences: all datasets are public
+academic benchmarks; our track builder and download manifests are included.
+
+\subsubsection*{Ethics Statement}
+This work studies robustness of 3D reconstruction on standard public benchmarks of
+landmark photographs (MegaDepth, 1DSfM, Strecha, BlendedMVS, Olsson's dataset) and
+introduces no new data collection, no personal data processing beyond what those
+established benchmarks already contain, and no human subjects. Improved robust SfM has
+broadly beneficial applications (mapping, cultural heritage, robotics); we are not
+aware of ethical concerns specific to this method beyond those generic to 3D
+reconstruction of public imagery.
+
 \label{sec:endcontent}%
 \begin{thebibliography}{99}\small
 
