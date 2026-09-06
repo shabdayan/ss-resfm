@@ -75,7 +75,7 @@ top row and the in-domain retrain in the bottom row (MegaDepth anchor point shar
 label-free arms carry five-seed bands. In-domain retraining rescues supervision at
 $0.5\%$ and helps at $43\%$, does nothing at $3.1\%$ (the dead zone --- rotation-first
 in both rows), and worsens at $60\%$, while the label-free arms barely move between
-rows: they have no labels to gain from. Analogous figures exist with the
+rows: they have no labels to gain from. The top row also shows Strecha ($1.7\%$, full four-scene OOD eval; no bottom-row counterpart --- its same-protocol in-distribution split leaves a single uninformative test scene): supervision's clean-OOD win there is visible in both columns. Analogous figures exist with the
 authors-faithful retrain and the released checkpoint as the supervised line; the
 verdicts are unchanged. (Test-scene restriction caveats: the $8$ Olsson held-out
 scenes exclude most of the clean-OOD collapse scenes, and the $43\%$ point is a
