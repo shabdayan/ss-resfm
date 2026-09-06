@@ -681,7 +681,7 @@ supervised head, trained on these scenes with reference-quality labels, is beate
 $\sim\!2\times$ at band level by \mad{} ($12.1\pm6.1$ vs.\ $23.4\pm7.8$; four of five
 \mad{} seeds beat every supervised seed; medians $9.8$ vs.\ $20.6$). ``Just train the
 classifier there'' does not work: the high-contamination failure is caused by labeling at
-contamination, not by domain shift. The absolute errors deserve decomposition: they are
+contamination, not by domain shift. The absolute errors deserve decomposition (Fig.~\ref{fig:qualrf}): they are
 not uniformly ``large for everyone.'' On Roman\_Forum, \mad{} produces \emph{usable}
 reconstructions (median $1.6$--$3.5$, rotation $2.3$--$8.2\deg$, in four of five seeds)
 where supervision fails outright (medians $9.5$--$36$); on Union\_Square the supervised
@@ -715,6 +715,19 @@ with best-case labels wins at $0.5\%$, $25\%$ (MegaDepth), and narrowly at $43\%
 loses at $3.1\%$ and $60\%$: its failures are not a smooth function of contamination
 but two distinct modes --- a dataset-specific dead zone, and the causal label ceiling
 at high contamination that no in-domain retraining can cross.
+
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{fig_qual_romanforum.pdf}
+\caption{\textbf{Qualitative view of the $60\%$ label ceiling} (Roman Forum, seed
+$20$, both recipes trained in-domain, supervised with GT-derived labels): BA-aligned
+camera centers in top view; whiskers join each reconstructed camera to its ground-truth
+position. The label-free \mad{} arm (left) registers more cameras ($67$ vs.\ $54$ of
+$300$) that track the ground-truth layout at a usable median error ($3.8$ vs.\
+$15.4$), while the supervised reconstruction (right) collapses toward a compressed
+cluster with large systematic displacements --- supervision fails here \emph{with the
+best labels it could ever have}.}
+\label{fig:qualrf}
+\end{figure}
 
 \subsection{Preliminary: training-pool diversity and the label ceiling}
 A preliminary experiment (single seed, under a coarser five-milestone decay schedule;
