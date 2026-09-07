@@ -115,6 +115,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("dataset"); ap.add_argument("scene")
     ap.add_argument("--min_pair", type=int, default=15)
+    ap.add_argument("--tag", default="",
+                    help="suffix for the output json (replicate runs)")
     args = ap.parse_args()
     X, vis, K, Ps, m = load_scene(args.dataset, args.scene)
     print(f"[{args.dataset}/{args.scene}] {m} cams, {vis.shape[1]} tracks, "
@@ -151,7 +153,7 @@ def main():
                 print(f"  ROT  mean={rot.mean():.3f} median={np.median(rot):.3f}")
                 print(f"  TRANS mean={trans.mean():.3f} median={np.median(trans):.3f}  "
                       f"(aligned on {nreg} common cams)")
-        with open(os.path.join(outdir, f"{args.dataset}__{args.scene}.json"), "w") as f:
+        with open(os.path.join(outdir, f"{args.dataset}__{args.scene}{args.tag}.json"), "w") as f:
             json.dump(res, f)
     finally:
         shutil.rmtree(work, ignore_errors=True)
