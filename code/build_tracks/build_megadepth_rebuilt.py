@@ -33,12 +33,11 @@ def main():
     names = [str(n) for n in ref["namesList"]]
 
     pool = {}
-    for p in glob.glob(os.path.join(args.raw, "MegaDepth_v1", args.scene,
-                                    "dense*", "imgs", "*")):
+    for p in glob.glob(os.path.join(args.raw, "MegaDepth_SfM", args.scene, "*")):
         pool[os.path.basename(p)] = p
-    # MegaDepth_v1 ships only the dense-reconstruction image subset; some npz
-    # cameras (from the SfM models) have no image there. Build over the covered
-    # subset, subsetting GT accordingly, and require >=90% coverage.
+    # MegaDepth_SfM holds the full per-scene Flickr collections (the v1 dense
+    # archive covered only ~43% of the npz cameras and was abandoned). Build
+    # over the covered subset, subsetting GT accordingly, with a >=90% guard.
     keep, paths = [], []
     for idx, n in enumerate(names):
         base = os.path.basename(n.strip())  # namesList entries carry a trailing newline
