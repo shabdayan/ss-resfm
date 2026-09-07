@@ -652,24 +652,24 @@ scenes into train/validation/held-out test and retrain both recipes on the domai
 (identical protocol; supervised labels generated at reference quality, by the same
 Appendix-C procedure as MegaDepth's but against each dataset's \emph{real} GT poses ---
 the best case supervision could ever obtain). Table~\ref{tab:indist} reports five-seed
-bands on the held-out scenes (Olsson: two seeds so far).
+bands on the held-out scenes.
 
 \begin{table}[t]\centering\footnotesize
 \caption{\textbf{In-distribution comparison on the (formerly OOD) domains}, ordered by
 contamination: mean translation over held-out test scenes, mean$\pm$std over five
-training seeds per recipe (Olsson: two seeds). Supervised labels are GT-derived (best
-case). Best per column in \textbf{bold}.}
+training seeds per recipe. Supervised labels are GT-derived (best case). Best per
+column in \textbf{bold}.}
 \label{tab:indist}
 \setlength{\tabcolsep}{5pt}%
 \begin{tabular}{lcccc}
 \toprule
 Arm & Olsson @$0.5\%$ & BlendedMVS @$3.1\%$ & 1DSfM @$43\%$ & 1DSfM-hard @$60\%$\\
 \midrule
-\mad{}      & 2.58$\pm$1.14 & 0.093$\pm$0.099 & 6.37$\pm$0.20 & $\mathbf{12.1\pm 6.1}$\\
-weight      & 4.46$\pm$0.84 & 0.114$\pm$0.006 & 10.65$\pm$2.49 & 28.1$\pm$5.9\\
-weight+TTT  & 2.31$\pm$0.10 & $\mathbf{0.081\pm 0.046}$ & 9.91$\pm$2.39 & 29.3$\pm$8.4\\
-remove      & 2.75$\pm$0.35 & 0.228$\pm$0.080 & 6.68$\pm$1.44 & 19.4$\pm$7.7\\
-RESfM (sup., GT labels) & $\mathbf{0.82\pm 0.37}$ & 0.260$\pm$0.149 & $\mathbf{4.97\pm 2.08}$ & 23.4$\pm$7.8\\
+\mad{}      & 1.97$\pm$0.94 & 0.093$\pm$0.099 & 6.37$\pm$0.20 & $\mathbf{12.1\pm 6.1}$\\
+weight      & 3.05$\pm$1.39 & 0.114$\pm$0.006 & 10.65$\pm$2.49 & 28.1$\pm$5.9\\
+weight+TTT  & $\mathbf{1.60\pm 0.81}$ & $\mathbf{0.081\pm 0.046}$ & 9.91$\pm$2.39 & 29.3$\pm$8.4\\
+remove      & 2.94$\pm$0.27 & 0.228$\pm$0.080 & 6.68$\pm$1.44 & 19.4$\pm$7.7\\
+RESfM (sup., GT labels) & 2.03$\pm$1.86 & 0.260$\pm$0.149 & $\mathbf{4.97\pm 2.08}$ & 23.4$\pm$7.8\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -682,13 +682,14 @@ contamination. The supervised recipe uses best-case labels (GT-derived; on MegaD
 its native COLMAP labels). Each label-free arm is its own line: soft weighting
 ($\pm$TTT) leads at low contamination, robust removal (\mad{}, remove) at high ---
 the complementarity mechanism flip replicated in-distribution. Supervision
-wins at $0.5\%$ and $25\%$
-and narrowly at $43\%$, and loses at $3.1\%$ (dataset-specific dead zone) and $60\%$
-(the causal label ceiling): its failures are two distinct modes, not a smooth function
-of contamination. The rotation panel (right) tells the same story and makes the
-BlendedMVS dead zone starker still (supervised $20.7\pm12.2\deg$ vs.\ label-free
-$4$--$13\deg$). Bands: $\pm$std over five training seeds (Olsson: two; MegaDepth
-rotation: five-seed means, bands omitted).}
+wins at $25\%$ and narrowly
+at $43\%$, is seed-bimodal at $0.5\%$ (mean tied with the label-free arms at more than
+twice their spread), and loses at $3.1\%$ (dataset-specific dead zone) and $60\%$ (the
+causal label ceiling): its failures are two distinct modes, not a smooth function of
+contamination. The rotation panel (right) tells the same story and makes the BlendedMVS
+dead zone starker still (supervised $20.7\pm12.2\deg$ vs.\ label-free $4$--$13\deg$).
+Bands: $\pm$std over five training seeds (MegaDepth rotation: five-seed means, bands
+omitted).}
 \label{fig:contamcurve}
 \end{figure}
 
@@ -710,27 +711,32 @@ of five seeds --- indistinguishable from the MegaDepth-trained baseline evaluate
 ($0.35\pm0.04$) --- with a single escape seed ($0.02$), the same bimodality as its
 clean-OOD behaviour, while label-free weighting is seed-stable at $0.114\pm0.006$.
 Class imbalance alone cannot explain this: at $0.5\%$ (Olsson), where positives are
-rarer still, supervision trained in-domain is \emph{fine} ($0.82\pm0.37$, beating every
-label-free arm) --- so the BlendedMVS failure is a dataset-specific dead zone (its
-rotation pathology is the leading suspect), not a general low-contamination bound.
-\emph{(iii) The Olsson column isolates the clean-benchmark collapse as an OOD
-phenomenon}: the same supervised recipe that lands at $7.4$--$9.1$ on Olsson when
-trained on MegaDepth reaches $0.82\pm0.37$ when trained in-domain --- the collapse is
-the MegaDepth-fit outlier head misclassifying on clean out-of-distribution scenes, not
-an inability to handle clean data; the label-free arms are competent but behind here
-($2.3$--$4.5$), so at near-zero contamination with sound labels, supervision earns its
-keep. \emph{(iv) The supervised advantage inverts between $43\%$ and $60\%$}: at $43\%$
+rarer still, supervision trained in-domain reaches $0.41$--$1.08$ in three of five
+seeds --- extreme positive scarcity does not preclude learning --- whereas BlendedMVS
+never reaches that level on any seed; the BlendedMVS failure is a dataset-specific
+dead zone (its rotation pathology is the leading suspect), not a general
+low-contamination bound. \emph{(iii) In-domain training attenuates but does not cure
+the clean-benchmark unreliability}: the recipe that lands at $7.4$--$9.1$ on Olsson
+MegaDepth-trained improves to $2.03\pm1.86$ trained in-domain --- but bimodally,
+excellent in three seeds ($0.41$--$1.08$) and degraded in two ($3.9$--$4.2$, rotation
+spread $12\pm12\deg$). The OOD collapse is thus mostly the MegaDepth-fit head
+misclassifying on clean scenes (in-domain labels remove the bulk of it), yet the
+seed-reliability asymmetry survives even here: weight+TTT ($1.60\pm0.81$) leads the
+column, \mad{} ($1.97\pm0.94$) matches the supervised mean at half the spread, and no
+label-free arm has a failure seed. Supervision's clean-data advantage is a
+three-in-five-seeds advantage, not a dependable one. \emph{(iv) The supervised advantage inverts between $43\%$ and $60\%$}: at $43\%$
 supervision retains an overlapping edge ($4.97\pm2.08$ vs.\ \mad{} $6.37\pm0.20$;
 the supervised band's spread is dominated by one strong seed at $1.38$), while at
 $60\%$ it loses $\sim\!2\times$ --- and the complementarity ordering replicates
 in-distribution: robust removal (\mad{}/remove) leads at $43$--$60\%$ and soft
 weighting ($\pm$TTT) at $3\%$ --- the mechanism flip is a property of the contamination
 level, not of the train/test relationship. (A same-protocol Strecha split, one tiny
-test scene, is an uninformative three-way tie at $0.01$.) Read as a curve, supervision
-with best-case labels wins at $0.5\%$, $25\%$ (MegaDepth), and narrowly at $43\%$, and
-loses at $3.1\%$ and $60\%$: its failures are not a smooth function of contamination
-but two distinct modes --- a dataset-specific dead zone, and the causal label ceiling
-at high contamination that no in-domain retraining can cross.
+test scene, is an uninformative three-way tie at $0.01$.) Read as a curve, supervision with best-case labels wins in distribution at $25\%$
+and narrowly at $43\%$, is seed-bimodal at $0.5\%$ (tied in mean, far wider in
+spread), and loses at $3.1\%$ and $60\%$: its failures are not a smooth function of
+contamination but two distinct modes --- a dataset-specific dead zone, and the causal
+label ceiling at high contamination that no in-domain retraining can cross --- with
+seed-unreliability shadowing it along the whole axis.
 
 \begin{figure}[t]\centering
 \includegraphics[width=\linewidth]{fig_qual_romanforum.pdf}

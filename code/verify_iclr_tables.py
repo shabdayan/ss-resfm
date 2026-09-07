@@ -128,8 +128,8 @@ def band_mean(fmt, seeds):
     return (np.mean(ms), np.std(ms, ddof=1)) if len(ms) > 1 else (float("nan"), float("nan"))
 
 INDIST = {  # (pool, seeds): {arm: (paper_mean, paper_std)}
-    ("olssonid", (20, 21)): {"madweight": (2.58, 1.14), "weight": (4.46, 0.84),
-        "weight_ttt": (2.31, 0.10), "remove": (2.75, 0.35), "SUP": (0.82, 0.37)},
+    ("olssonid", (20, 21, 22, 23, 24)): {"madweight": (1.97, 0.94), "weight": (3.05, 1.39),
+        "weight_ttt": (1.60, 0.81), "remove": (2.94, 0.27), "SUP": (2.03, 1.86)},
     ("bmvsid", (20, 21, 22, 23, 24)): {"madweight": (0.093, 0.099), "weight": (0.114, 0.006),
         "weight_ttt": (0.081, 0.046), "remove": (0.228, 0.080), "SUP": (0.260, 0.149)},
     ("1donly", (20, 21, 22, 23, 24)): {"madweight": (6.37, 0.20), "weight": (10.65, 2.49),

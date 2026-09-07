@@ -24,11 +24,12 @@ $0.37\pm0.12$ versus $0.40\pm0.11$ for our test-time-fine-tuned arm (statistical
 overlapping, though that arm carries run-to-run noise) or $0.51\pm0.08$ for the
 deterministic arms (a ${\sim}38\%$ gap); at $43\%$ with best-case labels the bands
 overlap ($5.0\pm2.1$ vs.\ $6.4\pm0.2$); clean Strecha goes to supervision on every
-seed ($0.39\pm0.72$ vs.\ ${\sim}2$--$3.2$); and truly clean \emph{in-distribution}
-data goes to supervision too (retrained on the Olsson domain at $0.5\%$: $0.82\pm0.37$
-vs.\ $2.3$--$2.6$ for the best label-free arms) --- so SS-RESfM does \emph{not} always
-win: with sound labels and negligible-or-curated contamination, supervision earns its
-keep.
+seed ($0.39\pm0.72$ vs.\ ${\sim}2$--$3.2$); and on truly clean \emph{in-distribution} data supervision is a seed lottery
+(retrained on the Olsson domain at $0.5\%$, five seeds: $2.03\pm1.86$ --- excellent,
+$0.41$--$1.08$, in three seeds, degraded to ${\sim}4$ in two --- while weight+TTT is
+stable at $1.60\pm0.81$) --- so SS-RESfM does \emph{not} always win: with sound labels
+and curated contamination supervision earns its keep, but even in-domain its advantage
+is a three-in-five-seeds advantage.
 But it matches supervision at moderate out-of-distribution contamination, beats it
 outright where labels cannot be manufactured (plain removal below \emph{every} baseline
 seed pair at ${\sim}60\%$: $12.4\pm2.1$ vs.\ $19.2\pm3.4$, and $2\times$ better even
@@ -56,7 +57,9 @@ $7.4$--$9.1$, versus $2.9$--$3.6$ for every label-free arm and $3.15$ for classi
 GLOMAP. It is seed-dependent but dominant ($4$ of $5$ training seeds collapse; one
 escapes to $2.32$), and it survives every learning rate, epoch budget, and recipe
 variant we try. Crucially it is \emph{not} a domain-shift story: RESfM retrained
-in-distribution on the Olsson domain is fine ($0.82\pm0.37$ across two seeds) --- the supervised outlier
+in-distribution on the Olsson domain improves to $2.03\pm1.86$ over five seeds
+(bimodal: $0.41$--$1.08$ in three, ${\sim}4$ in two) --- in-domain labels remove the
+bulk of the collapse, so the supervised outlier
 head, fit to MegaDepth's label distribution, actively misclassifies on clean
 out-of-distribution scenes, while the self-supervised head adapts because its
 pseudo-labels are recomputed from the test-time reprojection-error distribution itself.
@@ -72,10 +75,11 @@ each domain's held-out test scenes. \emph{Bottom row:} trained on each domain it
 (supervised with best-case GT-derived labels), evaluated in-distribution on the same
 scenes. The red supervised line is RESfM-from-scratch (our controlled anchor) in the
 top row and the in-domain retrain in the bottom row (MegaDepth anchor point shared);
-label-free arms carry five-seed bands. In-domain retraining rescues supervision at
-$0.5\%$ and helps at $43\%$, does nothing at $3.1\%$ (the dead zone --- rotation-first
-in both rows), and worsens at $60\%$, while the label-free arms barely move between
-rows: they have no labels to gain from. The top row also shows Strecha ($1.7\%$, full four-scene OOD eval; no bottom-row counterpart --- its same-protocol in-distribution split leaves a single uninformative test scene): supervision's clean-OOD win there is visible in both columns. Analogous figures exist with the
+label-free arms carry five-seed bands. In-domain retraining helps supervision at
+$0.5\%$ (from full collapse to a seed lottery: excellent in three of five seeds,
+degraded in two) and at $43\%$, does nothing at $3.1\%$ (the dead zone ---
+rotation-first in both rows), and worsens at $60\%$, while the label-free arms barely
+move between rows: they have no labels to gain from. The top row also shows Strecha ($1.7\%$, full four-scene OOD eval; no bottom-row counterpart --- its same-protocol in-distribution split leaves a single uninformative test scene): supervision's clean-OOD win there is visible in both columns. Analogous figures exist with the
 authors-faithful retrain and the released checkpoint as the supervised line; the
 verdicts are unchanged. (Test-scene restriction caveats: the $8$ Olsson held-out
 scenes exclude most of the clean-OOD collapse scenes, and the $43\%$ point is a
