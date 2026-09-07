@@ -505,6 +505,28 @@ this benchmark, a single-seed comparison can reverse the headline verdict on fou
 six datasets, and any cross-recipe claim must therefore be established at the level of
 seed bands (or, for the strongest claims, all seed pairings), as done throughout.
 
+\paragraph{Couldn't one just pick a good seed?} A natural rejoinder is that a
+single-seed comparison is fine if every method reports a well-chosen seed. Four facts
+close this off. (1)~It is not the protocol in use: RESfM fixes one shared seed ($20$)
+for itself and for the baselines it retrains, with no selection step --- a single
+lottery draw, and under the interaction above, a lottery whose variance differs by
+method. (2)~Choosing a good seed requires knowing which seed is good, and for the OOD
+regimes where the failures live, nothing available at training time identifies it:
+label-free proxy selectors fail to find the escape seed (the per-scene selection appendix), and
+the authors' own Accuracy-based checkpoint selection retains the Olsson collapse
+($8.8$). Selecting the seed that avoids a clean-benchmark failure requires evaluating
+on the clean benchmark itself --- test-set selection. (3)~The paper's strongest claims
+are constructed to survive even adversarially favorable seed choices: at $60\%$, plain
+remove's \emph{worst} seed beats the supervised baseline's \emph{best} ($15.8$ vs.\
+$16.2$), so no seed policy on either side reverses it; the one claim a lucky seed
+softens (the Olsson margin, where the escape seed ties the label-free band) is stated
+as a reliability claim --- collapse in $4/5$ seeds --- for precisely this reason.
+(4)~Empirically, the fixed seed was not a lucky one anyway: at seed $20$ the baseline
+is mid-band on MegaDepth and a collapse seed on Olsson, and the released checkpoint
+($0.209$) is itself a favorable draw that the authors' own training code does not
+reproduce ($0.34$--$0.39$ on our tracks) --- consistent with published single-seed
+numbers being draws from a wide distribution rather than representative values.
+
 \subsection{Implications for reading the paper's numbers}\label{sec:implications}
 (1)~The published number and ours are draws from a distribution over environments; no
 software matching can force a particular draw. (2)~Differences of $\lesssim\!0.05$ in
