@@ -81,6 +81,23 @@ verdicts are unchanged. (Test-scene restriction caveats: the $8$ Olsson held-out
 scenes exclude most of the clean-OOD collapse scenes, and the $43\%$ point is a
 three-scene mean including the Ellis Island failure scene.)
 
+\section*{Why five seeds (seed-additivity fails)}
+
+If the training seed shifted all models equally, relative differences would be
+seed-invariant and one seed would suffice --- the implicit assumption of prior work in
+this benchmark family, which fixes a single seed. Tested directly on the saved
+per-scene results ($98$ scene-cells, five seeds), the assumption fails: the sign of the
+supervised-vs-MAD difference flips across seeds in $67\%$ of scenes, the across-seed
+spread of the difference matches or exceeds the margin itself, and the
+\emph{dataset-level} verdict flips across seeds on four of six datasets (MegaDepth,
+1DSfM, 1DSfM-hard, and Olsson --- where the one escape seed briefly hands supervision
+the win); only Strecha and BlendedMVS are seed-invariant, and those are exactly the two
+cells stated as every-seed claims. A single-seed study can therefore reverse the
+headline conclusion on most datasets --- which is why every comparison in this project
+carries five-training-seed bands, and the strongest claims are verified over all seed
+pairings. (Evaluation seeds, by contrast, are a shared negligible offset, $\pm0.008$
+--- replicating over them is unnecessary, and we don't.)
+
 \section*{The four RESfM reference points}
 
 All four supervised reference points appear in the paper's main table; translation
