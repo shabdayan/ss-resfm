@@ -1182,6 +1182,36 @@ the single declared pipeline, treats TTT \emph{means} as carrying $\sim\!\pm0.07
 run-to-run variance, and rests its environment- and run-independent claims on the
 deterministic no-TTT cells (which reproduce exactly on repeat).
 
+\subsection{Are seed replicates necessary? Testing seed-additivity}\label{sec:interaction}
+A natural economy argument runs: if the training seed shifted all models by a shared
+offset (no seed$\times$model interaction), relative differences would be seed-invariant
+and a single seed would rank models correctly. We test this directly on the saved
+per-scene results: for the pairs (supervised $-$ \mad{}) and (weight $-$ \mad{}), we
+form the per-scene, per-seed difference over the five training seeds across all six
+datasets ($98$ scene-cells) and ask whether its sign and magnitude are stable.
+
+They are not. At \emph{scene} level, the sign of the supervised-vs-\mad{} difference
+flips across seeds in $67\%$ of scenes ($66/98$; per-dataset $50$--$80\%$), and the
+median across-seed standard deviation of the difference matches or exceeds the median
+margin itself (MegaDepth $0.20$ vs.\ $0.10$; 1DSfM $4.5$ vs.\ $3.4$) --- one to two
+orders of magnitude above the evaluation-seed and environment-noise floors of
+\S\ref{sec:factors}, so this is genuine training-seed interaction, not measurement
+noise. At \emph{dataset} level, the supervised-vs-\mad{} verdict itself flips across
+seeds on four of six datasets: MegaDepth ($-0.34$ to $+0.10$), 1DSfM ($-2.9$ to
+$+3.6$), 1DSfM-hard ($-3.1$ to $+4.0$), and Olsson ($+5.9$ on four seeds, $-0.5$ on
+the escape seed); only Strecha (supervised wins every seed) and BlendedMVS (label-free
+wins every seed) are seed-invariant --- and those are exactly the two cells the paper
+states as every-seed claims. The within-family pair (weight $-$ \mad{}) flips only
+where the two arms are near-tied ($|$margin$| \le 0.3$ on MegaDepth, BlendedMVS,
+Olsson --- flips around zero, i.e.\ genuine ties), with one true instability at
+$60\%$ contamination, where soft weighting's dataset-level margin swings from $-2.3$
+to $+9.7$.
+
+The conclusion is the methodological premise of this paper: seed-additivity fails in
+this benchmark, a single-seed comparison can reverse the headline verdict on four of
+six datasets, and any cross-recipe claim must therefore be established at the level of
+seed bands (or, for the strongest claims, all seed pairings), as done throughout.
+
 \subsection{Implications for reading the paper's numbers}\label{sec:implications}
 (1)~The published number and ours are draws from a distribution over environments; no
 software matching can force a particular draw. (2)~Differences of $\lesssim\!0.05$ in
