@@ -396,7 +396,7 @@ RESfM-scratch (supervised)  & $\mathbf{0.37\pm 0.12}$/$\mathbf{0.07}$ & 10.5$\pm
 RESfM (released)$^{\S}$    & 0.203$\pm$0.008 & 10.71$\pm$0.27 & 15.29 & 0.20$\pm$0.00 & 0.33$\pm$0.00 & 9.10\\
 RESfM (paper)               & 0.169 & -- & -- & -- & -- & --\\
 RESfM-faithful (authors' ckpt selection) & 0.496 & 9.75 & 17.58 & 0.144 & 0.367 & 8.77\\
-ESFM$^{\ast}$ (clean tracks) & 0.462 & 13.84 & 15.20 & 1.16 & 0.327 & --\\
+ESFM$^{\ast}$ (clean tracks) & 0.58$\pm$0.19 & 13.24$\pm$0.52 & 18.12$\pm$4.35 & 1.14$\pm$0.45 & 3.79$\pm$3.51 & --\\
 ESFM (same tracks, no outlier mech.) & 0.76 & 17.96 & 22.30 & 1.96 & 0.23 & 8.26\\
 GASFM (released ckpt, our robust BA) & -- & 25.84 & 36.49 & 1.14 & 11.13 & 4.45\\
 GLOMAP (classical, global)  & 3.33 & 27.21 & 35.42 & $\mathbf{0.047}$ & 0.339 & 3.17\\
@@ -510,7 +510,15 @@ alternative robust statistics) is at $16.9$ or worse at seed~20; and COLMAP lose
 ($20.9$) even though its error is computed \emph{only over the $64\%$ of cameras it
 registers}. Errors are large for every method --- these scenes are hard --- but the
 trend matches the label-ceiling prediction: the supervised advantage vanishes exactly
-where supervision can no longer be manufactured.
+where supervision can no longer be manufactured. Strikingly, plain remove on the \emph{contaminated} tracks also beats
+ESFM$^{\ast}$ on \emph{oracle-cleaned} tracks ($12.4\pm2.1$ vs.\ $18.12\pm4.35$;
+$23$ of $25$ seed pairs): at $60\%$ contamination, even ground-truth labels used for
+hard removal destroy more than they fix --- deleting $60\%$ of observations starves
+tracks below the multi-view minimum and thins the viewing graph, whereas adaptive
+removal with soft-weighted survivors preserves the constraint structure. Having
+perfect labels would not rescue the removal-by-oracle recipe; the label ceiling is
+thus not the only obstacle at the extreme --- \emph{how} labels are used matters as
+much as having them.
 
 \subsection{Training on the contaminated domains: the label ceiling is causal}\label{sec:indist}
 The label-ceiling analysis predicts that supervision fails at high contamination because

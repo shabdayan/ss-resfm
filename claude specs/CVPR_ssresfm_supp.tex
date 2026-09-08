@@ -537,6 +537,14 @@ with per-scene registration swinging by up to $67$ cameras) --- RANSAC-driven
 incremental reconstruction inherits real run-to-run variance. The volatility hierarchy
 is thus: classical global (none) $<$ classical incremental (moderate) $<$ learned
 recipes (dominant, and concentrated in the supervised arm).
+
+\paragraph{Even oracle-clean tracks do not confer reliability.} ESFM$^{\ast}$ ---
+the architecture trained on ground-truth-cleaned tracks, with no outlier mechanism in
+the loop at all --- is itself seed-bimodal on BlendedMVS: five training seeds give
+$[0.00, 0.33, 4.93, 5.64, 8.08]$ ($3.79\pm3.51$). The clean-OOD reliability failure
+therefore lives in the geometric trunk's training dynamics, not in outlier handling or
+label quality, and no amount of label perfection removes it --- only the adaptive
+label-free arms happen to escape it in our grid.
 \subsection{Implications for reading the paper's numbers}\label{sec:implications}
 (1)~The published number and ours are draws from a distribution over environments; no
 software matching can force a particular draw. (2)~Differences of $\lesssim\!0.05$ in
