@@ -477,6 +477,7 @@ RESfM (released)$^{\S}$    & 0.203$\pm$0.008 & 10.71$\pm$0.27 & 15.29 & 0.20$\pm
 RESfM (paper)               & 0.169 & -- & -- & -- & -- & --\\
 RESfM-faithful (authors' ckpt selection) & 0.496 & 9.75 & 17.58 & 0.144 & 0.367 & 8.77\\
 ESFM$^{\ast}$ (clean tracks) & 0.462 & 13.84 & 15.20 & 1.16 & 0.327 & --\\
+ESFM (same tracks, no outlier mech.) & 0.76 & 17.96 & -- & 1.96 & 0.23 & 8.26\\
 GLOMAP (classical, global)  & 3.33 & 27.15 & 35.38 & $\mathbf{0.047}$ & 0.339 & 3.15\\
 COLMAP (classical, increm.) & -- & -- & 20.90 & -- & -- & --\\
 \midrule
@@ -1408,6 +1409,47 @@ Bundle adjustment & pyceres/pycolmap robust BA, as RESfM\\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\section{Comparison with ESFM in both of its regimes}\label{app:esfmboth}
+ESFM is the no-outlier-mechanism ancestor of this model family and operates in two
+regimes: multi-scene training and its original per-scene optimization. We compare in
+both.
+
+\paragraph{Multi-scene (same contaminated tracks).} Vanilla ESFM trained under the
+unified protocol on our tracks (single run; reference row in the main table) reaches
+$0.76$ on MegaDepth, $17.96$ on 1DSfM (median of scene means $4.9$), $1.96$ on Strecha,
+$0.23$ on BlendedMVS, and $8.26$ on Olsson. Two readings: without any outlier
+mechanism, contaminated training data degrades every contaminated benchmark relative
+to all mechanism-equipped arms --- the premise of RESfM and of this paper --- yet on
+clean BlendedMVS it is competitive with the best arms, and its Olsson failure
+($8.26$) matches the supervised collapse level, suggesting the clean-OOD failure mode
+predates the supervised head.
+
+\paragraph{Single-scene (ESFM's original per-scene optimization, Olsson).} On $36$
+calibrated Olsson scenes ($3$ runs each, matching ESFM's protocol), post-BA
+median-over-scenes rotation/translation:
+\begin{center}\footnotesize
+\begin{tabular}{lcc}
+\toprule
+Method (per-scene optimization) & Rot ($\deg$) & Trans\\
+\midrule
+ESFM (official code)            & 0.19 & 0.057\\
+ESFM (RESfM codebase)           & 0.22 & 0.088\\
+ESFM $+$ sequential init ($10$ scenes) & 0.10 & 0.032\\
+ESFM $+$ MAD statistic          & 0.68 & 0.123\\
+self-supervised arm (base)      & 8.03 & 0.748\\
+self-supervised arm (30/70 percentiles) & 2.81 & 0.434\\
+self-supervised arm $+$ TTT     & 1.22 & 0.324\\
+\bottomrule
+\end{tabular}
+\end{center}
+Vanilla ESFM wins this regime outright, and every outlier mechanism --- statistical or
+learned --- costs accuracy. This is not a failure of the mechanisms but the
+low-contamination end of the complementarity finding replicated in a second regime: at
+$0.5\%$ contamination with per-scene optimization there is nothing to reject, and any
+removal or reweighting machinery only discards signal. The practical reading matches
+the main paper: mechanism choice must adapt to contamination, and ``none'' is the
+correct mechanism at the clean extreme of the axis.
 
 \section{Per-scene label degradation}\label{app:labeldeg}
 Table~\ref{tab:supp_labelceiling} gives the per-scene data behind the main paper's
