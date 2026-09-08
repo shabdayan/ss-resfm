@@ -701,8 +701,10 @@ ESFM is the no-outlier-mechanism ancestor of this model family and operates in t
 regimes: multi-scene training and its original per-scene optimization. We compare in
 both.
 
-\paragraph{Multi-scene (same contaminated tracks).} Vanilla ESFM trained under the
-unified protocol on our tracks (single run; reference row in the main table) reaches
+\paragraph{Multi-scene (same contaminated tracks).} Vanilla ESFM --- the ESFM
+architecture inside the RESfM codebase, so trainer, tracks, and BA are identical to
+every other arm --- trained under the unified protocol (reference row in the main
+table; five-seed escalation in progress) reaches
 $0.76$ on MegaDepth, $17.96$ on 1DSfM (median of scene means $4.9$), $1.96$ on Strecha,
 $0.23$ on BlendedMVS, and $8.26$ on Olsson. Two readings: without any outlier
 mechanism, contaminated training data degrades every contaminated benchmark relative
@@ -711,9 +713,12 @@ clean BlendedMVS it is competitive with the best arms, and its Olsson failure
 ($8.26$) matches the supervised collapse level, suggesting the clean-OOD failure mode
 predates the supervised head.
 
-\paragraph{Single-scene (ESFM's original per-scene optimization, Olsson).} On $36$
-calibrated Olsson scenes ($3$ runs each, matching ESFM's protocol), post-BA
-median-over-scenes rotation/translation:
+\paragraph{Single-scene (ESFM's original per-scene optimization, Olsson).} Here the
+primary ESFM row runs in the \emph{authors' official ESFM codebase}; the RESfM-codebase
+reimplementation is included as a cross-check and agrees to within noise ($0.19$ vs.\
+$0.22\deg$), ruling out implementation gaps between the two regimes. On $36$ calibrated
+Olsson scenes ($3$ runs each, matching ESFM's protocol), post-BA median-over-scenes
+rotation/translation:
 \begin{center}\footnotesize
 \begin{tabular}{lcc}
 \toprule
