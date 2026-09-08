@@ -80,7 +80,7 @@ weight       & 3.28 & 8.24 & 28.0 & 7.61 & 9.17 & 13.2\\
 weight+TTT   & 2.88 & 10.09 & 30.6 & 7.95 & 8.30 & 11.6\\
 remove       & 4.04 & $\mathbf{6.94}$ & $\mathbf{12.3}$ & 14.39 & 16.04 & 13.9\\
 remove+TTT   & 4.22 & 6.90 & 16.4 & 13.23 & 13.19 & 14.5\\
-GLOMAP (classical)          & 5.42 & 8.87 & 26.4 & 0.25 & $\mathbf{2.11}$ & $\mathbf{1.28}$\\
+GLOMAP (classical)          & 5.30 & 8.78 & 26.4 & 0.25 & $\mathbf{2.15}$ & $\mathbf{1.29}$\\
 RESfM-scratch (supervised)  & $\mathbf{1.89}$ & 9.62 & 27.3 & $\mathbf{1.56}$ & 31.66 & 12.6\\
 \midrule
 \multicolumn{7}{l}{\emph{Registered cameras $N_r/N_c$ (five-seed means; classical row single run)}}\\[1pt]
@@ -527,6 +527,16 @@ is mid-band on MegaDepth and a collapse seed on Olsson, and the released checkpo
 reproduce ($0.34$--$0.39$ on our tracks) --- consistent with published single-seed
 numbers being draws from a wide distribution rather than representative values.
 
+
+\paragraph{Classical baselines and run-to-run variance.} The same replicate protocol
+applied to the classical rows sharpens the tiering: GLOMAP is deterministic in practice
+(five independent runs per dataset; run-to-run std $\le 0.06$ translation everywhere,
+e.g.\ MegaDepth $3.33\pm0.03$, 1DSfM $27.21\pm0.06$), so its single-run rows are
+representative; incremental COLMAP is not ($20.4\pm1.1$ on 1DSfM-hard over five runs,
+with per-scene registration swinging by up to $67$ cameras) --- RANSAC-driven
+incremental reconstruction inherits real run-to-run variance. The volatility hierarchy
+is thus: classical global (none) $<$ classical incremental (moderate) $<$ learned
+recipes (dominant, and concentrated in the supervised arm).
 \subsection{Implications for reading the paper's numbers}\label{sec:implications}
 (1)~The published number and ours are draws from a distribution over environments; no
 software matching can force a particular draw. (2)~Differences of $\lesssim\!0.05$ in

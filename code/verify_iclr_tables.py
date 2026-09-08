@@ -101,8 +101,8 @@ for ds, pv in FAITH.items():
     if not chk(f"REF faithful/{ds}", pv, cv, 0.03): bad += 1
 
 # GLOMAP rows
-GLO = {"megadepth": (3.33, 5.42), "1dsfm": (27.15, 8.87), "1dsfmhard": (35.38, 26.4),
-       "strecha": (0.047, 0.25), "blendedmvs": (0.339, 2.11), "olsson": (3.15, 1.28)}
+GLO = {"megadepth": (3.33, 5.30), "1dsfm": (27.21, 8.78), "1dsfmhard": (35.42, 26.4),
+       "strecha": (0.047, 0.25), "blendedmvs": (0.339, 2.15), "olsson": (3.17, 1.29)}
 DSMAP = {"megadepth": "megadepth", "1dsfm": "1dsfm", "1dsfmhard": "1dsfm_hard_300",
          "strecha": "strecha", "blendedmvs": "blendedmvs", "olsson": "olsson"}
 for ds, (pt, pr) in GLO.items():
