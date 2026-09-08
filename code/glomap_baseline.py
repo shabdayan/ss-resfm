@@ -93,7 +93,8 @@ def align_and_error(rec, Ps_gt, K, m):
         rot_err.append(np.mean(e) if e else 0.0)
     return len(common), np.array(rot_err), np.array(trans_err), mirrored
 
-GLOMAP_ENV = os.path.expanduser("~/micromamba/root/envs/glomap")
+GLOMAP_ENV = os.environ.get(
+    "GLOMAP_ENV", os.path.expanduser("~/micromamba/root/envs/glomap"))
 
 
 def run_glomap(db_path, out_dir):
