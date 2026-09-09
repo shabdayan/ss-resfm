@@ -41,6 +41,29 @@ Headline findings (details and exact numbers in the paper drafts under `claude s
    5-seed bands for every baseline in RESfM's comparison set (ESFM, ESFM*, GASFM,
    GLOMAP, COLMAP).
 
+## Headline numbers (as of Sep 9, 2026)
+
+Post-BA mean translation error, five-training-seed bands (lower is better; best per
+column **bold**). Full tables, medians, rotation, and per-scene results in the paper
+drafts.
+
+| Method | MegaDepth 25% | 1DSfM 43% | 1DSfM-hard 60% | Strecha 1.7% | BMVS 3.1% | Olsson 0.5% |
+|---|---|---|---|---|---|---|
+| **SS-RESfM (best arm)** | 0.40±0.11 | **8.9±1.2** | **12.4±2.1** | 1.97±0.09 | **0.14±0.02** | **2.9±0.3** |
+| RESfM (scratch, supervised) | **0.37±0.12** | 10.5±1.5 | 19.2±3.4 | **0.39±0.72** | 0.35±0.04 | 7.4±2.6 |
+| RESfM (released ckpt) | 0.203 | 10.71 | 15.29 | 0.20 | 0.33 | 9.10 |
+| ESFM (same tracks, no mech.) | 0.71±0.11 | 18.42±0.75 | 21.76±0.80 | 2.03±0.14 | 6.45±3.75 | 5.91±3.32 |
+| ESFM\* (oracle-clean tracks) | 0.60±0.18 | 13.24±0.52 | 18.12±4.35 | 1.14±0.45 | 3.79±3.51 | — |
+| GASFM (released, our BA) | 2.25 | 25.84 | 36.49 | 1.14 | 11.13 | 4.45 |
+| GLOMAP (classical) | 3.33 | 27.21 | 35.42 | **0.047** | 0.339 | 3.17 |
+| COLMAP (incremental) | — | — | 20.4±1.1 | — | — | — |
+
+In-distribution causal check (train on the domain itself, best-case GT labels):
+at 60%, label-free MAD 12.1±6.1 vs. supervised 23.4±7.8 vs. no-mechanism 23.1±5.9 —
+supervision with perfect labels adds nothing over no mechanism at either extreme of
+the contamination axis (60% and 0.5%), earning its keep only in the curated 25–43%
+middle band.
+
 ## Repository map
 
 | Path | Contents |
