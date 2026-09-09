@@ -114,6 +114,39 @@ MD-27: 8.58) nor diversity alone (shallow on 52 scenes: 9.30) rescues the collap
 only their combination does (deep-52: 2.26; +LayerNorm 2.83) — while every label-free
 arm reaches the same level from the cheapest cell (shallow, MD-27 only).
 
+### Deep (2×3) variants — seed 20, MegaDepth-27 training
+
+| Arm | MegaDepth | Olsson | Strecha | BMVS | 1DSfM | 1DSfM-hard |
+|---|---|---|---|---|---|---|
+| deep SS madweight | 0.64 | — | **0.23** | 0.13 | 12.49 | — |
+| deep SS weight | 0.56 | — | 1.05 | **0.03** | 17.82 | — |
+| deep SS weight+TTT | 0.45 | — | 0.81 | 0.15 | 15.16 | — |
+| deep SS remove | 0.41 | — | 3.33 | 0.05 | **6.77** | — |
+| deep SS remove+TTT | 0.52 | — | 2.62 | 0.14 | 9.22 | — |
+| deep SS hybrid | **0.40** | — | 2.61 | 0.12 | 15.31 | — |
+| deep supervised (RESfM-deep) | 0.56 | 8.58 | **0.005** | 0.048 | 14.87 | — |
+| deep supervised + LayerNorm | 0.37 | 2.83 | 1.65 | — | 14.45 | — |
+
+### Training-pool (multids) variants — seed 20
+
+Pools: MD-27 → **39** (+ETH3D, ~8% contaminated) → **52** (+VGG/T&T, ~16% mid-band).
+
+| Recipe × pool | MegaDepth | Olsson | Strecha | BMVS | 1DSfM | 1DSfM-hard |
+|---|---|---|---|---|---|---|
+| SUP shallow, 39 | 0.32 | — | 0.77 | 0.38 | 11.48 | 18.43 |
+| SUP shallow, 52 | 0.44 | 9.31 | 2.83 | 2.84† | 8.84 | **13.96** |
+| SUP deep, 52 | **0.26** | **2.26** | — | — | — | — |
+| SS mad shallow, 39 | — | — | 2.99 | 0.30† | 11.42 | 19.03 |
+| SS mad shallow, 52 | — | — | 2.88 | 0.22† | **6.43** | 20.57 |
+| SS mad deep, 52 | 0.47 | — | 0.72 | 0.30 | 11.52 | — |
+| SS weight deep, 52 | 0.48 | — | **0.28** | 0.15 | 15.96 | — |
+
+*Both tables are seed-20 single runs (our seed-additivity analysis applies — directions,
+not conclusions); "—" = never evaluated. † = 9-scene extended BMVS set, not comparable
+to the 4-scene cells elsewhere. Notable single-seed signals: the contaminated mid-band
+pool helps SS-mad on 1DSfM too (11.0 → 6.43), and depth+diversity lets the SS soft arm
+close Strecha (0.28) — both awaiting banding before any claim.*
+
 ## Cross-generalization: train on each domain, test on the rest
 
 Each recipe trained *in-distribution* on one domain (supervised with GT-derived labels)
