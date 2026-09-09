@@ -34,8 +34,10 @@ Headline findings (details and exact numbers in the paper drafts under `claude s
    Our seed-additivity analysis shows single-seed comparisons can reverse the verdict
    on four of six datasets.
 4. **The oracle-cleaning ceiling** — at 60% contamination, label-free removal on
-   contaminated tracks beats the same architecture on *oracle-cleaned* tracks:
-   how labels are used matters as much as having them.
+   contaminated tracks beats the same architecture on *oracle-cleaned* tracks
+   (12.4±2.1 vs. ESFM\* 18.12±4.35; 23 of 25 seed pairs): deleting 60% of
+   observations — even correctly — starves the constraint structure. How labels are
+   used matters as much as having them.
 5. **A reusable robustness benchmark** — rebuilt track suites for five OOD datasets
    (0.5–61% measured contamination) with GT-derived labels and per-domain splits, plus
    5-seed bands for every baseline in RESfM's comparison set (ESFM, ESFM*, GASFM,
