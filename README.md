@@ -64,6 +64,7 @@ by rising contamination: Olsson → Strecha → BMVS → 1DSfM → 1DSfM-hard.
 | — SS weight+TTT | 0.40±0.11 | 8.0±0.3 | 2.00±0.05 | 0.14±0.02 | 15.7±2.1 | 22.2±3.2 |
 | — SS remove | 0.51±0.08 | 3.4±0.6 | 3.20±0.11 | 0.24±0.06 | 9.1±2.2 | 12.4±2.1 |
 | — SS remove+TTT | 0.56±0.07 | 3.6±0.4 | 3.01±0.07 | 0.22±0.10 | 8.9±1.2 | 15.2±1.0 |
+| — SS hybrid (3-band) | 0.45±0.08 | 2.90±0.23 | 3.25±0.45 | 0.14±0.02 | 16.23±2.20 | 22.98±4.02 |
 | RESfM (scratch, our ckpt selection)² | **0.37±0.12** | 7.4±2.6 | **0.39±0.72** | 0.35±0.04 | 10.5±1.5 | 19.2±3.4 |
 | RESfM (scratch, authors' selection)² | 0.496 | 8.77 | 0.144 | 0.367 | 9.75 | 17.58 |
 | RESfM (released ckpt) | 0.203 | 9.10 | 0.20 | 0.33 | 10.71 | 15.29 |
@@ -93,6 +94,29 @@ at 60%, label-free MAD 12.1±6.1 vs. supervised 23.4±7.8 vs. no-mechanism 23.1�
 supervision with perfect labels adds nothing over no mechanism at either extreme of
 the contamination axis (60% and 0.5%), earning its keep only in the curated 25–43%
 middle band.
+
+## Architecture & training-pool variants (single seed — preliminary)
+
+*Seed-20 only; our own seed-additivity analysis shows single-seed verdicts can flip, so
+read these as directions, not conclusions. Full grids in the paper appendices.*
+
+**Deep (2×3) self-supervised arms vs. shallow** (selected cells, translation mean):
+deep helps in distribution (MegaDepth remove 0.41, hybrid 0.40 vs. shallow ~0.51) and
+shows striking single-seed wins on Strecha (deep madweight 0.23 vs. shallow 2.65) and
+1DSfM (deep remove 6.77 vs. shallow 9.1) — unbanded, so unclaimed.
+
+**Training-pool diversity (supervised)**: growing the pool MegaDepth-27 → +ETH3D (39) →
++VGG/T&T (52) degrades clean-OOD Strecha monotonically (0.006 → 0.77 → 2.83) while
+in-distribution stays flat — diversity's label cost lands exactly on clean OOD.
+
+**The Olsson-collapse 2×2** (clean-OOD, supervised): neither depth alone (deep on
+MD-27: 8.58) nor diversity alone (shallow on 52 scenes: 9.30) rescues the collapse;
+only their combination does (deep-52: 2.26; +LayerNorm 2.83) — while every label-free
+arm reaches the same level from the cheapest cell (shallow, MD-27 only).
+
+**Cross-generalization table (in progress)**: each in-distribution-trained recipe
+(madweight + supervised, all six pools × 5 seeds) evaluated on the *other* datasets —
+~5,400 evaluations running; the table lands here when complete.
 
 ## Repository map
 
