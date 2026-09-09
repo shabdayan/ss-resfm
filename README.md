@@ -130,7 +130,18 @@ arm reaches the same level from the cheapest cell (shallow, MD-27 only).
 
 ### Training-pool (multids) variants — seed 20
 
-Pools: MD-27 → **39** (+ETH3D, ~8% contaminated) → **52** (+VGG/T&T, ~16% mid-band).
+Three training pools of increasing size and diversity, each built by adding datasets
+to the previous one:
+
+- **27 scenes** — MegaDepth only (the pool used everywhere else in this README);
+- **39 scenes** — the 27 above **+ 12 ETH3D scenes** (a relatively clean addition,
+  ~8% measured contamination);
+- **52 scenes** — the 39 above **+ VGG and Tanks&Temples scenes** (a contaminated
+  mid-band addition, ~16%).
+
+Supervised labels for the added scenes are GT-derived (COLMAP labels don't exist for
+them). Row naming: recipe · architecture · pool size — e.g. "SUP shallow, 39" =
+supervised, 1×3 architecture, trained on the 39-scene pool.
 
 | Recipe × pool | MegaDepth | Olsson | Strecha | BMVS | 1DSfM | 1DSfM-hard |
 |---|---|---|---|---|---|---|
