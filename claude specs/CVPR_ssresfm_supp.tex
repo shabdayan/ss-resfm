@@ -722,14 +722,19 @@ both.
 \paragraph{Multi-scene (same contaminated tracks).} Vanilla ESFM --- the ESFM
 architecture inside the RESfM codebase, so trainer, tracks, and BA are identical to
 every other arm --- trained under the unified protocol (reference row in the main
-table; five-seed escalation in progress) reaches
-$0.76$ on MegaDepth, $17.96$ on 1DSfM (median of scene means $4.9$), $1.96$ on Strecha,
-$0.23$ on BlendedMVS, and $8.26$ on Olsson. Two readings: without any outlier
-mechanism, contaminated training data degrades every contaminated benchmark relative
-to all mechanism-equipped arms --- the premise of RESfM and of this paper --- yet on
-clean BlendedMVS it is competitive with the best arms, and its Olsson failure
-($8.26$) matches the supervised collapse level, suggesting the clean-OOD failure mode
-predates the supervised head.
+table; five-seed bands) reaches
+$0.71\pm0.11$ on MegaDepth, $18.42\pm0.75$ on 1DSfM, $21.76\pm0.80$ at $60\%$,
+$2.03\pm0.14$ on Strecha, $6.45\pm3.75$ on BlendedMVS, and $5.91\pm3.32$ on Olsson.
+Three readings. First, without any outlier mechanism, contaminated training data
+degrades every contaminated benchmark relative to all mechanism-equipped arms --- the
+premise of RESfM and of this paper. Second, its apparent BlendedMVS competitiveness at
+seed $20$ ($0.23$) dissolves at five seeds ($6.45\pm3.75$, bimodal) --- one more
+single-seed verdict reversed by banding (cf.\ the seed-additivity analysis) --- and
+its Olsson behaviour is likewise bimodal (collapse in three of five seeds), so the
+clean-OOD failure mode predates the supervised head and lives in the trunk. Third, on
+Strecha the band ($2.03\pm0.14$) statistically ties the best label-free soft arms
+($1.97$--$2.00$), confirming at band level that at the clean extreme the correct
+mechanism approaches none.
 
 \paragraph{Single-scene (ESFM's original per-scene optimization, Olsson).} Here the
 primary ESFM row runs in the \emph{authors' official ESFM codebase}; the RESfM-codebase
