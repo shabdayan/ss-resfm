@@ -108,6 +108,7 @@ def main():
 
     old_pct = float(np.asarray(reb.get("outlier_pct", -1)))
     outliers, pct = label_outliers(M, reb["Ps_gt"])
+    pct = float(np.asarray(pct).mean()) if np.asarray(pct).size > 1 else float(pct)
     reb["M"] = M
     reb["outliers2"] = outliers
     reb["outlier_pct"] = np.float64(pct)
