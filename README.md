@@ -4,10 +4,6 @@
 > remove the outlier supervision from RESfM, and why that question matters more than it
 > sounds.
 
-**Status**: research code under active development. The accompanying papers are in
-submission (3DV 2027 under review; CVPR 2027 version in preparation) — **please keep
-this repository private until decisions are out** (double-blind).
-
 ## What this is
 
 RESfM rejects outlier correspondences with a classifier supervised by COLMAP-derived
