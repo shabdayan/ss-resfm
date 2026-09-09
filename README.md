@@ -13,6 +13,14 @@ self-supervised loss (confident pseudo-labels from percentiles of the model's ow
 reprojection error) inside an otherwise byte-identical pipeline, and uses the pair as an
 instrument to study *when outlier supervision fails*.
 
+![SS-RESfM pipeline: a shared tracks -> equivariant network -> outlier mechanism -> robust BA pipeline in which only the outlier-mechanism block changes between arms](assets/fig_method.png)
+
+*The pipeline. All arms share tracks, the sets-of-sets equivariant network, and robust
+BA; only the outlier-mechanism block differs (bottom: the four mechanisms as
+weight-vs-signal transfer functions). The head trains self-supervised — confident
+pseudo-labels from percentiles of the model's own reprojection error — with no
+ground-truth or COLMAP labels anywhere.*
+
 Headline findings (details and exact numbers in the paper drafts under `claude specs/`):
 
 1. **The label ceiling is causal** — COLMAP-regenerated labels collapse (recall
