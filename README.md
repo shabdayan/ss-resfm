@@ -39,7 +39,7 @@ Headline findings (details and exact numbers in the paper drafts under `claude s
    5-seed bands for every baseline in RESfM's comparison set (ESFM, ESFM*, GASFM,
    GLOMAP, COLMAP).
 
-## Headline numbers (as of Sep 9, 2026)
+## Headline numbers
 
 Post-BA mean translation error, five-training-seed bands (lower is better; best per
 column **bold**). Full tables, medians, rotation, and per-scene results in the paper
