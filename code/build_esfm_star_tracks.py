@@ -8,10 +8,14 @@ Output: datasets/<name>_star/<scene>.npz  (M zeroed at outlier obs, tracks with
 """
 import numpy as np, glob, os, sys
 
-SRC = ["megadepth", "1dsfm", "1dsfm_hard_300", "strecha", "blendedmvs"]
+SRC = ["megadepth", "1dsfm", "1dsfm_hard_300", "strecha", "blendedmvs", ("olsson_id", "olsson_star")]
 
 for name in SRC:
-    outdir = f"datasets/{name}_star"
+    if isinstance(name, tuple):
+        name, outname = name
+    else:
+        outname = f"{name}_star"
+    outdir = f"datasets/{outname}"
     os.makedirs(outdir, exist_ok=True)
     for f in sorted(glob.glob(f"datasets/{name}/*.npz")):
         scene = os.path.basename(f)
