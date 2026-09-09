@@ -127,7 +127,6 @@ arm reaches the same level from the cheapest cell (shallow, MD-27 only).
 | deep SS remove+TTT | 0.52 | — | 2.62 | 0.14 | 9.22 | — |
 | deep SS hybrid | **0.40** | — | 2.61 | 0.12 | 15.31 | — |
 | deep supervised (RESfM-deep) | 0.56 | 8.58 | **0.005** | 0.048 | 14.87 | — |
-| deep supervised + LayerNorm | 0.37 | 2.83 | 1.65 | — | 14.45 | — |
 
 ### Training-pool (multids) variants — seed 20
 
@@ -138,6 +137,7 @@ Pools: MD-27 → **39** (+ETH3D, ~8% contaminated) → **52** (+VGG/T&T, ~16% mi
 | SUP shallow, 39 | 0.32 | — | 0.77 | 0.38 | 11.48 | 18.43 |
 | SUP shallow, 52 | 0.44 | 9.31 | 2.83 | 2.84† | 8.84 | **13.96** |
 | SUP deep, 52 | **0.26** | **2.26** | — | — | — | — |
+| SUP deep+LayerNorm, 52 | 0.37 | 2.83 | 1.65 | — | 14.45 | — |
 | SS mad shallow, 39 | — | — | 2.99 | 0.30† | 11.42 | 19.03 |
 | SS mad shallow, 52 | — | — | 2.88 | 0.22† | **6.43** | 20.57 |
 | SS mad deep, 52 | 0.47 | — | 0.72 | 0.30 | 11.52 | — |
