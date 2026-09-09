@@ -107,8 +107,9 @@ def main():
         sys.exit(f"[{args.scene}] too many unmapped cameras -- aborting")
 
     old_pct = float(np.asarray(reb.get("outlier_pct", -1)))
-    outliers, pct = label_outliers(M, reb["Ps_gt"])
-    pct = float(np.asarray(pct).mean()) if np.asarray(pct).size > 1 else float(pct)
+    outliers, observed = label_outliers(M, reb["Ps_gt"])
+    # convention identical to build_scene: percent of observed keypoints
+    pct = 100.0 * outliers.sum() / max(observed.sum(), 1)
     reb["M"] = M
     reb["outliers2"] = outliers
     reb["outlier_pct"] = np.float64(pct)
