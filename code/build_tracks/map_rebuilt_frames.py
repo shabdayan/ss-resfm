@@ -18,6 +18,7 @@ Usage: python map_rebuilt_frames.py <scene>
 """
 import argparse, glob, os, sys
 import numpy as np
+from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CODE = os.path.dirname(HERE)
@@ -41,7 +42,9 @@ def load_colmap_cams(scene):
                 continue
             p = line.split()
             if len(p) >= 8 and p[1] == "SIMPLE_RADIAL":
-                cams[p[0]] = (float(p[4]), float(p[5]), float(p[6]), float(p[7]))
+                # (f, cx, cy, k, model_width, model_height)
+                cams[p[0]] = (float(p[4]), float(p[5]), float(p[6]), float(p[7]),
+                              int(p[2]), int(p[3]))
         skip_next = False
         for line in open(img_path):
             if line.startswith("#") or not line.strip():
@@ -84,6 +87,8 @@ def main():
     K_ud = reb["K_gt"]
     names = [os.path.basename(str(n).strip()) for n in reb["namesList"]]
     raw_cams = load_colmap_cams(args.scene)
+    img_pool = {os.path.basename(p): p for p in glob.glob(os.path.join(
+        CODE, "datasets", "raw_megadepth", "MegaDepth_SfM", args.scene, "*"))}
     m = M.shape[0] // 2
     unmapped = 0
     for i in range(m):
@@ -91,9 +96,18 @@ def main():
             unmapped += 1
             M[2 * i] = 0; M[2 * i + 1] = 0        # drop this camera's observations
             continue
-        f, cx, cy, k = raw_cams[names[i]]
+        f, cx, cy, k, mw, mh = raw_cams[names[i]]
         xs, ys = M[2 * i], M[2 * i + 1]
         vis = (xs != 0) | (ys != 0)
+        # Rebuild coordinates are in DISK-image pixels; the COLMAP model may have
+        # registered a different-resolution variant. Rescale disk -> model frame.
+        dp = img_pool.get(names[i])
+        if dp is not None:
+            dw, dh = Image.open(dp).size
+            if (dw, dh) != (mw, mh):
+                xs = xs.copy(); ys = ys.copy()
+                xs[vis] = xs[vis] * (mw / dw)
+                ys[vis] = ys[vis] * (mh / dh)
         xd = (xs[vis] - cx) / f
         yd = (ys[vis] - cy) / f
         xu, yu = undistort_simple_radial(xd, yd, k)
