@@ -147,23 +147,6 @@ to the 4-scene cells elsewhere. Notable single-seed signals: the contaminated mi
 pool helps SS-mad on 1DSfM too (11.0 → 6.43), and depth+diversity lets the SS soft arm
 close Strecha (0.28) — both awaiting banding before any claim.*
 
-## Cross-generalization: train on each domain, test on the rest
-
-Each recipe trained *in-distribution* on one domain (supervised with GT-derived labels)
-and evaluated everywhere. Diagonal *(in-dist)* cells are the held-out-test results of
-the causal study; off-diagonal cells are running (~5,400 evaluations) and fill in as
-they land. Cells where a pool's training scenes overlap the target dataset are excluded
-as **leak**.
-
-| Trained on ↓ / tested on → | MegaDepth | Olsson | Strecha | BMVS | 1DSfM | 1DSfM-hard |
-|---|---|---|---|---|---|---|
-| Olsson — SS mad / SUP | pending | *1.97±0.94 / 2.03±1.86 (in-dist)* | pending | pending | pending | pending |
-| Strecha — SS mad / SUP | pending | pending | *0.01 / 0.01 (in-dist, 1 scene, 2 seeds)* | pending | pending | pending |
-| BMVS — SS mad / SUP | pending | pending | pending | *0.09±0.10 / 0.26±0.15 (in-dist)* | pending | pending |
-| 1DSfM-easy (1donly) — SS mad / SUP | pending | pending | pending | pending | *6.37±0.20 / 4.97±2.08 (in-dist)* | pending |
-| 1DSfM-hard (hardonly) — SS mad / SUP | pending | pending | pending | pending | pending | *12.1±6.1 / 23.4±7.8 (in-dist)* |
-| 1DSfM-merged (1dsfmid) — SS mad / SUP | pending | pending | pending | pending | *6.71±0.13 / 5.05±1.57 (in-dist)* · leak | *22.84±8.85 SUP (indh)* · leak |
-
 ## Repository map
 
 | Path | Contents |
