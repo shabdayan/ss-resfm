@@ -624,14 +624,10 @@ shadowing the whole axis.
 \section{Limitations}
 (1)~No single deployable configuration wins all datasets; selecting the best mechanism per
 dataset (Table~\ref{tab:main}) requires knowing the contamination level. We present a study
-of the phenomenon, not a turnkey adaptive method; an unsupervised selector is future work. Relatedly, the basin-dependent character of the clean-OOD failures
-(\S\ref{sec:indist}; the reliability appendix) suggests a natural remedy we do not
-pursue here: initializing or anchoring the joint reconstruction with \emph{label-free
-global pose averaging} (cf.\ the concurrent view-graph work of~\citealt{vgpa}), which
-would compose two self-supervised robustness mechanisms at complementary stages of the
-pipeline --- graph-level pose consistency selecting the basin, track-level adaptivity
-handling observations --- toward a fully self-supervised robust SfM pipeline. We leave
-this composition to future work.
+of the phenomenon, not a turnkey adaptive method; an unsupervised selector is future work. The basin-dependent clean-OOD failures also suggest a remedy we leave to future
+work: anchoring the reconstruction with \emph{label-free global pose averaging}
+(cf.~\citealt{vgpa}) --- composing graph-level pose consistency (basin selection) with
+track-level adaptivity toward a fully self-supervised robust pipeline.
 (2)~Supervised RESfM retains in-distribution MegaDepth (the self-supervised arms come
 within $\sim\!38\%$ at the band level, no closer) and the clean Strecha mean, and RESfM-released
 remains stronger on MegaDepth, so we claim no SOTA. (3)~\mad{} matches rather than beats supervision at moderate/extreme contamination;
