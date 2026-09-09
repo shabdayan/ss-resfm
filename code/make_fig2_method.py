@@ -74,7 +74,7 @@ def rm_extra(ax):
     ax.axvline(0.8, color=GRID, ls=":", lw=1.0, zorder=1)
     ax.text(0.58, 0.07, r"$\tau{=}0.6$", ha="right", fontsize=7.5, color=MUTED)
     ax.text(0.82, 0.45, "0.8\n(clean)", ha="left", fontsize=7, color=MUTED, va="center")
-panel(0, C_REMOVE, "remove  (RESfM analogue)", r"drop if $s>\tau$   ($\tau{=}0.6$; 0.8 clean sets)",
+panel(0, C_REMOVE, "remove  (RESfM / SS, ours)", r"drop if $s>\tau$   ($\tau{=}0.6$; 0.8 clean sets)",
       lambda s: np.where(s < 0.6, 1.0, 0.0), tau=0.6, extra=rm_extra)
 # weight: soft 1-s
 panel(1, C_WEIGHT, "weight  (SS-RESfM, ours)", "soft: $w = 1-s$, keep all",
