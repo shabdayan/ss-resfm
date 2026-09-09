@@ -58,7 +58,7 @@ documents the training/eval workflow.
 ## Lineage & acknowledgements
 
 This project builds directly on the official implementations of
-[RESfM](https://github.com/) (Khatib, Kasten, Moran, Galun, Basri) and
-[ESFM](https://github.com/) (Moran et al.) — see their repositories for licenses.
+[RESfM](https://github.com/FadiKhatib/resfm) (Khatib, Kasten, Moran, Galun, Basri) and
+[ESFM](https://github.com/drormoran/Equivariant-SFM) (Moran et al.) — see their repositories for licenses.
 Benchmarks: MegaDepth, 1DSfM, Strecha, BlendedMVS, and Olsson's dataset. Developed at
 the Weizmann Institute of Science.
