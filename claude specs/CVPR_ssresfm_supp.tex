@@ -536,7 +536,14 @@ representative; incremental COLMAP is not ($20.4\pm1.1$ on 1DSfM-hard over five 
 with per-scene registration swinging by up to $67$ cameras) --- RANSAC-driven
 incremental reconstruction inherits real run-to-run variance. The volatility hierarchy
 is thus: classical global (none) $<$ classical incremental (moderate) $<$ learned
-recipes (dominant, and concentrated in the supervised arm).
+recipes (dominant, and concentrated in the supervised arm). A full COLMAP grid (five runs per scene on every dataset) adds nuance: its
+run-to-run variance is itself contamination-dependent --- bit-stable on the clean sets
+(Olsson $0.20\pm0.00$, Strecha $0.03$, BlendedMVS $0.01$, where it is the strongest
+method in the table) and genuinely variable only at $60\%$ ($20.4\pm1.1$). Incremental
+reconstruction is excellent and reliable exactly where outliers are absent, and fails
+where they dominate --- the classical mirror of the complementarity finding. (COLMAP
+errors are computed over its registered cameras only, a favorable convention; its
+two largest 1DSfM scenes are excluded pending completion.)
 
 \paragraph{Even oracle-clean tracks do not confer reliability.} ESFM$^{\ast}$ ---
 the architecture trained on ground-truth-cleaned tracks, with no outlier mechanism in

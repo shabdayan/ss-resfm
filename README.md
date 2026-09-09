@@ -72,7 +72,7 @@ by rising contamination: Olsson → Strecha → BMVS → 1DSfM → 1DSfM-hard.
 | ESFM\* (oracle-clean tracks) | 0.60±0.18 | — | 1.14±0.45 | 3.79±3.51 | 13.24±0.52 | 18.12±4.35 |
 | GASFM (released, our BA) | 2.25 | 4.45 | 1.14 | 11.13 | 25.84 | 36.49 |
 | GLOMAP (classical) | 3.33 | 3.17 | **0.047** | 0.339 | 27.21 | 35.42 |
-| COLMAP (incremental) | — | — | — | — | — | 20.4±1.1 |
+| COLMAP (incremental) | 0.62±0.03 | 0.20±0.00 | 0.03±0.00 | 0.01±0.00 | — | 20.4±1.1 |
 
 ² *The two from-scratch RESfM rows differ only in checkpoint selection. "Our ckpt
 selection" picks the epoch by the same label-free reprojection-error validation
