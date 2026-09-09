@@ -45,21 +45,24 @@ Post-BA mean translation error, five-training-seed bands (lower is better; best 
 column **bold**). Full tables, medians, rotation, and per-scene results in the paper
 drafts.
 
-| Method | Olsson 0.5% | Strecha 1.7% | BMVS 3.1% | MegaDepth 25% | 1DSfM 43% | 1DSfM-hard 60% |
+**In-distribution**: MegaDepth (the training domain). **Out-of-distribution**, ordered
+by rising contamination: Olsson → Strecha → BMVS → 1DSfM → 1DSfM-hard.
+
+| Method | MegaDepth 25% *(in-dist)* | Olsson 0.5% *(OOD)* | Strecha 1.7% *(OOD)* | BMVS 3.1% *(OOD)* | 1DSfM 43% *(OOD)* | 1DSfM-hard 60% *(OOD)* |
 |---|---|---|---|---|---|---|
-| **SS-RESfM (best arm)**¹ | **2.9±0.3** (weight) | 1.97±0.09 (weight) | **0.14±0.02** (soft) | 0.40±0.11 (wttt) | **8.9±1.2** (rm+TTT) | **12.4±2.1** (remove) |
-| — SS madweight | 3.0±0.3 | 2.65±0.25 | 0.14±0.02 | 0.51±0.08 | 11.0±1.7 | 18.9±4.1 |
-| — SS weight | 2.9±0.3 | 1.97±0.09 | 0.14±0.03 | 0.51±0.09 | 14.4±3.0 | 22.9±2.8 |
-| — SS weight+TTT | 8.0±0.3 | 2.00±0.05 | 0.14±0.02 | 0.40±0.11 | 15.7±2.1 | 22.2±3.2 |
-| — SS remove | 3.4±0.6 | 3.20±0.11 | 0.24±0.06 | 0.51±0.08 | 9.1±2.2 | 12.4±2.1 |
-| — SS remove+TTT | 3.6±0.4 | 3.01±0.07 | 0.22±0.10 | 0.56±0.07 | 8.9±1.2 | 15.2±1.0 |
-| RESfM (scratch, our ckpt selection)² | 7.4±2.6 | **0.39±0.72** | 0.35±0.04 | **0.37±0.12** | 10.5±1.5 | 19.2±3.4 |
-| RESfM (scratch, authors' selection)² | 8.77 | 0.144 | 0.367 | 0.496 | 9.75 | 17.58 |
-| RESfM (released ckpt) | 9.10 | 0.20 | 0.33 | 0.203 | 10.71 | 15.29 |
-| ESFM (same tracks, no mech.) | 5.91±3.32 | 2.03±0.14 | 6.45±3.75 | 0.71±0.11 | 18.42±0.75 | 21.76±0.80 |
-| ESFM\* (oracle-clean tracks) | — | 1.14±0.45 | 3.79±3.51 | 0.60±0.18 | 13.24±0.52 | 18.12±4.35 |
-| GASFM (released, our BA) | 4.45 | 1.14 | 11.13 | 2.25 | 25.84 | 36.49 |
-| GLOMAP (classical) | 3.17 | **0.047** | 0.339 | 3.33 | 27.21 | 35.42 |
+| **SS-RESfM (best arm)**¹ | 0.40±0.11 (wttt) | **2.9±0.3** (weight) | 1.97±0.09 (weight) | **0.14±0.02** (soft) | **8.9±1.2** (rm+TTT) | **12.4±2.1** (remove) |
+| — SS madweight | 0.51±0.08 | 3.0±0.3 | 2.65±0.25 | 0.14±0.02 | 11.0±1.7 | 18.9±4.1 |
+| — SS weight | 0.51±0.09 | 2.9±0.3 | 1.97±0.09 | 0.14±0.03 | 14.4±3.0 | 22.9±2.8 |
+| — SS weight+TTT | 0.40±0.11 | 8.0±0.3 | 2.00±0.05 | 0.14±0.02 | 15.7±2.1 | 22.2±3.2 |
+| — SS remove | 0.51±0.08 | 3.4±0.6 | 3.20±0.11 | 0.24±0.06 | 9.1±2.2 | 12.4±2.1 |
+| — SS remove+TTT | 0.56±0.07 | 3.6±0.4 | 3.01±0.07 | 0.22±0.10 | 8.9±1.2 | 15.2±1.0 |
+| RESfM (scratch, our ckpt selection)² | **0.37±0.12** | 7.4±2.6 | **0.39±0.72** | 0.35±0.04 | 10.5±1.5 | 19.2±3.4 |
+| RESfM (scratch, authors' selection)² | 0.496 | 8.77 | 0.144 | 0.367 | 9.75 | 17.58 |
+| RESfM (released ckpt) | 0.203 | 9.10 | 0.20 | 0.33 | 10.71 | 15.29 |
+| ESFM (same tracks, no mech.) | 0.71±0.11 | 5.91±3.32 | 2.03±0.14 | 6.45±3.75 | 18.42±0.75 | 21.76±0.80 |
+| ESFM\* (oracle-clean tracks) | 0.60±0.18 | — | 1.14±0.45 | 3.79±3.51 | 13.24±0.52 | 18.12±4.35 |
+| GASFM (released, our BA) | 2.25 | 4.45 | 1.14 | 11.13 | 25.84 | 36.49 |
+| GLOMAP (classical) | 3.33 | 3.17 | **0.047** | 0.339 | 27.21 | 35.42 |
 | COLMAP (incremental) | — | — | — | — | — | 20.4±1.1 |
 
 ² *The two from-scratch RESfM rows differ only in checkpoint selection. "Our ckpt
