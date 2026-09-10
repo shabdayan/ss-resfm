@@ -123,6 +123,23 @@ tight band, every seed bad) and bimodal (BlendedMVS, and the wide bands on 1DSfM
 The one exception, Strecha, is the smallest benchmark and the same dataset where
 supervision wins from every training pool.
 
+### Reconstruction comparison
+
+The two ends of the contamination axis, visually — BA-aligned camera centers
+(colored) against ground truth (gray); connectors mark each camera's displacement:
+
+![Buddah Tooth Relic Temple (Olsson, 0.5% contamination), both models trained on MegaDepth: SS-RESfM cameras sit on the GT trajectory (median 0.06) while the supervised RESfM reconstruction collapses (median 2.55, rot 16.5 deg)](assets/fig_qual_olsson.png)
+
+*The clean-OOD collapse (Olsson, 0.5% contamination, both trained on MegaDepth): label-free
+SS-RESfM tracks the GT camera path (translation median 0.06); supervised RESfM registers the
+same cameras but places them far off (median 2.55, rotation 16.5°).*
+
+![Roman Forum (60% contamination), both trained in-domain: SS-RESfM registers 67/300 cameras near GT (median 3.8) while supervised RESfM with best-case labels registers 54/300 collapsed into a clump (median 15.4)](assets/fig_qual_romanforum.png)
+
+*The label ceiling (Roman Forum, 60% contamination, both trained in-domain with the
+supervised arm given best-case GT labels): SS-RESfM recovers the camera distribution
+(median 3.8); the supervised reconstruction collapses into a clump (median 15.4).*
+
 ## Architecture & training-pool variants (single seed — preliminary)
 
 *Seed-20 only; our own seed-additivity analysis shows single-seed verdicts can flip, so
