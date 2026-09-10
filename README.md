@@ -140,6 +140,21 @@ same cameras but places them far off (median 2.55, rotation 16.5°).*
 supervised arm given best-case GT labels): SS-RESfM recovers the camera distribution
 (median 3.8); the supervised reconstruction collapses into a clump (median 15.4).*
 
+The two figures probe opposite ends of the contamination axis and differ in three
+experimental dimensions:
+
+| | Olsson figure (0.5%) | Roman Forum figure (60%) |
+|---|---|---|
+| **What's tested** | Generalization to a clean benchmark (outlier handling barely needed) | The outlier mechanism itself, where labels can no longer be manufactured |
+| **Training regime** | Both trained out of domain (MegaDepth) — a generalization failure | Both trained in-domain, supervised arm given best-case GT labels — the failure is causal, not domain shift |
+| **Supervised failure mode** | Registers nearly all cameras (148/161) but places them far off (rot 16.5°) | Under-registers (54/300) and collapses into a clump (median 15.4) |
+
+Common to both: same architecture, same tracks, same robust BA — within each figure the
+only difference is the training signal. The label-free arm recovers the camera geometry
+in both regimes; the supervised one fails differently at each end. One figure would show
+*a* failure — together they show the failure is two-sided, and the label-free recipe is
+the only one covering both ends.
+
 ## Architecture & training-pool variants (single seed — preliminary)
 
 *Seed-20 only; our own seed-additivity analysis shows single-seed verdicts can flip, so
