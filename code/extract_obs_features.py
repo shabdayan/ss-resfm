@@ -20,7 +20,19 @@ import cv2
 CODE = os.path.dirname(os.path.abspath(__file__))
 
 
-def resolve_images(scene, names, raw):
+def resolve_images(scene, names, raw, dataset):
+    if dataset.startswith("1dsfm"):
+        # namesList entries are global camera indices ("%06d") into the scene's
+        # list.txt (one line per image, first token = relative image path).
+        scene_dir = os.path.join(raw, scene)
+        with open(os.path.join(scene_dir, "list.txt")) as f:
+            lines = [ln.split()[0] for ln in f if ln.strip()]
+        out = []
+        for n in names:
+            c = int(n.strip())
+            p = os.path.join(scene_dir, lines[c]) if c < len(lines) else None
+            out.append(p if p and os.path.exists(p) else None)
+        return out
     pool = {}
     for p in glob.glob(os.path.join(raw, "MegaDepth_SfM", scene, "*")):
         pool[os.path.basename(p)] = p
@@ -30,9 +42,10 @@ def resolve_images(scene, names, raw):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("scene")
-    ap.add_argument("--dataset", default="megadepth")
+    ap.add_argument("--dataset", default="megadepth",
+                    choices=["megadepth", "1dsfm", "1dsfm_hard_300"])
     ap.add_argument("--source", default="sift", choices=["sift"])
-    ap.add_argument("--raw", default=os.path.join(CODE, "datasets", "raw_megadepth"))
+    ap.add_argument("--raw", default=None)
     ap.add_argument("--kp_size", type=float, default=16.0)
     args = ap.parse_args()
 
@@ -41,11 +54,15 @@ def main():
     if os.path.exists(out):
         print(f"[{args.scene}] already extracted"); return
 
+    if args.raw is None:
+        args.raw = os.path.join(CODE, "..", "datasets", "raw", "1dsfm") \
+            if args.dataset.startswith("1dsfm") \
+            else os.path.join(CODE, "datasets", "raw_megadepth")
     d = np.load(os.path.join(CODE, "datasets", args.dataset, f"{args.scene}.npz"),
                 allow_pickle=True)
     M = d["M"]; K = d["K_gt"]; names = [str(n) for n in d["namesList"]]
     m = M.shape[0] // 2
-    paths = resolve_images(args.scene, names, args.raw)
+    paths = resolve_images(args.scene, names, args.raw, args.dataset)
 
     sift = cv2.SIFT_create()
     obs_cam, obs_pt, feats = [], [], []
