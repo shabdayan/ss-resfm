@@ -146,3 +146,40 @@ for (pool, seeds), arms in INDIST.items():
         if not chk(f"INDIST {pool}/{arm} std", ps, cs, 0.12): bad += 1
 
 print(f"\nDONE(indist): {bad} total mismatches")
+
+
+# ---- tab:main baseline band rows (ESFM*, vanilla ESFM) ----
+def band_roots(cands_per_seed):
+    ms = []
+    for cands in cands_per_seed:
+        for r in cands:
+            if os.path.isdir(r):
+                v = [x[0] for x in scene_vals(r)]
+                if v: ms.append(np.mean(v))
+                break
+    return (np.mean(ms), np.std(ms, ddof=1), len(ms)) if len(ms) > 1 else (float("nan"),)*2 + (len(ms),)
+
+STAR_DS = {"megadepth": "megadepth", "1dsfm": "1dsfm", "1dsfmhard": "1dsfmhard",
+           "strecha": "strecha", "blendedmvs": "blendedmvs", "olsson": "olssonstar"}
+STAR = {"megadepth": (0.60, 0.18), "1dsfm": (13.24, 0.52), "1dsfmhard": (18.12, 4.35),
+        "strecha": (1.14, 0.45), "blendedmvs": (3.79, 3.51), "olsson": (9.36, 1.28)}
+for ds, (pm, ps) in STAR.items():
+    pre = M if ds == "megadepth" else C
+    cands = [[f"{pre}/esfm_star_af_{STAR_DS[ds]}_eval"]] + \
+            [[f"{pre}/esfm_star_af_s{s}_{STAR_DS[ds]}_eval"] for s in (21, 22, 23, 24)]
+    cm, cs, n = band_roots(cands)
+    if not chk(f"STAR {ds} mean (n={n})", pm, cm, 0.06): bad += 1
+    if not chk(f"STAR {ds} std", ps, cs, 0.12): bad += 1
+
+VAN = {"megadepth": (0.71, 0.11), "1dsfm": (18.42, 0.75), "1dsfmhard": (21.76, 0.80),
+       "strecha": (2.03, 0.14), "blendedmvs": (6.45, 3.75), "olsson": (5.91, 3.32)}
+for ds, (pm, ps) in VAN.items():
+    pre = M if ds == "megadepth" else C
+    cands = [[f"{pre}/esfm_vanilla_{ds}_eval"]] + \
+            [[f"{pre}/esfm_vanilla_s{s}_{ds}_eval", f"{pre}/esfm_vanilla_{ds}_eval_seed{s}"]
+             for s in (21, 22, 23, 24)]
+    cm, cs, n = band_roots(cands)
+    if not chk(f"VANILLA {ds} mean (n={n})", pm, cm, 0.06): bad += 1
+    if not chk(f"VANILLA {ds} std", ps, cs, 0.12): bad += 1
+
+print(f"\nDONE(baseline bands): {bad} total mismatches")

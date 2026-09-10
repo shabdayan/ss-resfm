@@ -64,17 +64,19 @@ by rising contamination: Olsson → Strecha → BMVS → 1DSfM → 1DSfM-hard.
 | — SS weight+TTT | 0.40±0.11 | 8.0±0.3 | 2.00±0.05 | 0.14±0.02 | 15.7±2.1 | 22.2±3.2 |
 | — SS remove | 0.51±0.08 | 3.4±0.6 | 3.20±0.11 | 0.24±0.06 | 9.1±2.2 | 12.4±2.1 |
 | — SS remove+TTT | 0.56±0.07 | 3.6±0.4 | 3.01±0.07 | 0.22±0.10 | 8.9±1.2 | 15.2±1.0 |
-| — SS hybrid (3-band) | 0.45±0.08 | 2.90±0.23 | 3.25±0.45 | 0.14±0.02 | 16.23±2.20 | 22.98±4.02 |
+| — SS hybrid (3-band)⁴ | 0.45±0.08 | 2.90±0.23 | 3.25±0.45 | 0.14±0.02 | 16.23±2.20 | 22.98±4.02 |
 | RESfM (scratch, our ckpt selection)² | **0.37±0.12** | 7.4±2.6 | **0.39±0.72** | 0.35±0.04 | 10.5±1.5 | 19.2±3.4 |
 | RESfM (scratch, authors' selection)² | 0.496 | 8.77 | 0.144 | 0.367 | 9.75 | 17.58 |
 | RESfM (released ckpt) | 0.203 | 9.10 | 0.20 | 0.33 | 10.71 | 15.29 |
 | ESFM (same tracks, no mech.) | 0.71±0.11 | 5.91±3.32 | 2.03±0.14 | 6.45±3.75 | 18.42±0.75 | 21.76±0.80 |
-| ESFM\* (oracle-clean tracks) | 0.60±0.18 | — | 1.14±0.45 | 3.79±3.51 | 13.24±0.52 | 18.12±4.35 |
+| ESFM\* (oracle-clean tracks) | 0.60±0.18 | 9.36±1.28 | 1.14±0.45 | 3.79±3.51 | 13.24±0.52 | 18.12±4.35 |
 | GASFM (released, our BA) | 2.25 | 4.45 | 1.14 | 11.13 | 25.84 | 36.49 |
 | GLOMAP (classical) | 3.33 | 3.17 | **0.047** | 0.339 | 27.21 | 35.42 |
 | COLMAP (incremental) | 0.62±0.03 | 0.20±0.00 | 0.03±0.00 | 0.01±0.00 | 6.29±0.42³ | 20.4±1.1 |
 
 ³ *COLMAP errors are computed over its registered cameras only (a favorable convention; at 43–60% it registers substantially fewer than the learned methods).*
+
+⁴ *The hybrid (3-band) row: on 2 of ~230 scene–seed pairs (MegaDepth 5016 seed 21, Olsson Gustav_Vasa seed 23) the mechanism removes every track and reconstruction fails; those cells average the remaining pairs. An instance of the over-removal failure mode analyzed in the paper.*
 
 ² *The two from-scratch RESfM rows differ only in checkpoint selection. "Our ckpt
 selection" picks the epoch by the same label-free reprojection-error validation

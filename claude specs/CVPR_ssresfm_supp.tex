@@ -551,7 +551,11 @@ the loop at all --- is itself seed-bimodal on BlendedMVS: five training seeds gi
 $[0.00, 0.33, 4.93, 5.64, 8.08]$ ($3.79\pm3.51$). The clean-OOD reliability failure
 therefore lives in the geometric trunk's training dynamics, not in outlier handling or
 label quality, and no amount of label perfection removes it --- only the adaptive
-label-free arms happen to escape it in our grid.
+label-free arms happen to escape it in our grid. The completed Olsson column makes the
+same point without bimodality: ESFM$^{\ast}$ on oracle-cleaned tracks lands at
+$9.36\pm1.28$ --- inside the supervised collapse band ($7.4\pm2.6$) and roughly three
+times the adaptive arms' $\sim\!3.0$ on \emph{contaminated} tracks --- so the
+clean-benchmark collapse survives even ground-truth track cleaning.
 \subsection{Implications for reading the paper's numbers}\label{sec:implications}
 (1)~The published number and ours are draws from a distribution over environments; no
 software matching can force a particular draw. (2)~Differences of $\lesssim\!0.05$ in

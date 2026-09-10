@@ -1,0 +1,118 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs,amsmath,amssymb,enumitem,array}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\usepackage{parskip}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\title{SS-RESfM: Venue Acceptance Chances \& Submission Paths}
+\author{Estimates as of September 10, 2026}
+\date{}
+\begin{document}
+\maketitle
+\vspace{-2.5em}
+
+\section*{1. The distinction that frames everything}
+
+\textbf{3DV is judged on the frozen August 28 version.} Every other venue would receive the
+\emph{strengthened} paper: the causal in-distribution contamination curve, the Olsson
+clean-benchmark collapse figures, the cross-generalization invariance grid, the seed-interaction
+analysis, and the complete 5-seed baseline bands (ESFM\textsuperscript{*}, vanilla-ESFM, COLMAP,
+GLOMAP, GASFM, hybrid). The frozen version predates all of it.
+
+All percentages are one rater's calibration with honest $\pm$10pp error bars. The single biggest
+variable is the Ronen co-authorship question (Section~4).
+
+\section*{2. Venue-by-venue table}
+
+\begin{center}
+\small
+\begin{tabular}{@{}l l l l c@{}}
+\toprule
+\textbf{Venue} & \textbf{Version judged} & \textbf{Submission deadline} & \textbf{Notification} & \textbf{Est.\ accept.} \\
+\midrule
+3DV 2027  & frozen (Aug 28)   & submitted \checkmark            & \textbf{Dec 2, 2026}                  & $\sim$45\% \\
+ICLR 2027 & strengthened      & $\sim$Sep 24--28, 2026          & $\sim$mid-Jan 2027                    & $\sim$35--40\% \\
+CVPR 2027 & strengthened      & Nov 7--12 (abstract $\sim$Nov 3) & reviews $\sim$mid-Jan; final late Feb & $\sim$45\% \\
+ICML 2027 & strengthened      & $\sim$late Jan 2027             & $\sim$early May 2027                  & $\sim$30--35\% \\
+ICCV 2027 & strengthened$++$  & $\sim$Mar 5, 2027               & $\sim$June 2027                       & $\sim$45--50\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Per-venue notes.}
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+\item \textbf{3DV}: lower bar, solid fit; but the frozen version is missing the paper's best
+material. Rebuttal playbook exists (\code{PATHA\_3dv\_rebuttal\_prep.pdf}).
+\item \textbf{ICLR}: RESfM itself is ICLR 2025 --- real home-venue precedent; the master draft is
+already in ICLR format. But the deadline is $\sim$2 weeks away, requires immediate blind 3DV
+withdrawal, and reviews are public. Alive only until $\sim$Sep 24.
+\item \textbf{CVPR}: SfM-literate reviewers, best-informed feedback; requires blind 3DV
+withdrawal; findings-paper / no-SOTA objection is the main risk. Ronen as co-author pushes this
+to $\sim$50\%+.
+\item \textbf{ICML}: private reviews (the political advantage); ML-venue fit lottery for SfM
+content; the only strengthened-paper branch requiring \emph{no} blind withdrawal (3DV answers
+Dec 2 first).
+\item \textbf{ICCV}: home community; by March the paper could add dense-features results and the
+VGPA composition probe --- the strongest version submits here.
+\end{itemize}
+
+\section*{3. Path probabilities (chance that \emph{some} venue accepts)}
+
+Single-venue rates are not the decision --- the fallback \emph{paths} are. Assuming independent
+draws at the per-venue rates above:
+
+\begin{itemize}[leftmargin=1.4em,itemsep=4pt]
+\item \textbf{Keep-3DV path}: 3DV (45\%) $\rightarrow$ if rejected Dec 2, ICML ($\sim$33\%)
+$\rightarrow$ if rejected, ICCV ($\sim$47\%). Chance at least one of the three says yes:
+$1-(0.55\times0.67\times0.53)\approx\mathbf{80\%}$.
+\item \textbf{Withdraw-for-CVPR path}: CVPR (45\%) $\rightarrow$ if rejected, ICCV ($\sim$47\%).
+Chance at least one says yes: $1-(0.55\times0.53)\approx\mathbf{70\%}$.
+\end{itemize}
+
+\textbf{How to read the 80\% vs.\ 70\%.} The keep-3DV path scores higher \emph{only} because it
+contains three draws instead of two --- the pending 3DV submission is a free draw already in
+hand. It is \emph{not} a statement that 3DV is easier than CVPR; per-venue both sit at
+$\sim$45\%.
+
+\textbf{The value asymmetry that cuts the other way.} The 80\% path's most likely acceptance is
+the \emph{frozen August version at 3DV} --- the weakest publishable outcome, which also strands
+the strengthened material in a follow-up paper exposed to ``delta over your own 3DV paper''
+objections. The 70\% path's acceptances are the \emph{full strengthened paper at CVPR or ICCV}
+--- strictly better outcomes. Slightly fewer bites at the apple, but every bite is at a better
+apple.
+
+\section*{4. The Ronen branch (the actual decision tree)}
+
+\begin{itemize}[leftmargin=1.4em,itemsep=4pt]
+\item \textbf{Ronen joins as co-author} $\Rightarrow$ withdraw 3DV, submit CVPR
+($\sim$50\%+ with him; his involvement converts the political exposure into endorsement).
+\item \textbf{Ronen explicitly blesses solo submission} (``submit on your own, acknowledgment is
+enough'') $\Rightarrow$ \emph{still} withdraw and submit CVPR. The political risk came from
+submitting without his knowledge, not from his absence on the byline; an explicit written
+go-ahead removes most of it. Caveats: (a) the blessing fixes the risk, not the rate --- solo
+CVPR stays $\sim$45\%; (b) get the blessing to cover the specific act (withdraw 3DV + solo CVPR
++ acknowledgment), in writing; (c) settle Shai's authorship in the same conversation; (d)
+``I didn't contribute enough'' is often modesty --- make sure the no is considered (the 3-page
+summary exists for exactly this).
+\item \textbf{Ronen unasked / lukewarm / ambiguous} $\Rightarrow$ keep 3DV (low-temperature
+path): let it decide Dec 2, then ICML (private reviews) $\rightarrow$ ICCV. This is the
+$\sim$80\% path, chosen here for risk control, not for expected paper quality.
+\end{itemize}
+
+\textbf{Bottom line}: with either form of explicit Ronen sign-off, take the 70\% path (CVPR) ---
+the value asymmetry wins once the politics are defused. Without an answer from him, stay on the
+80\% path. Every cell of this table gets better or safer once the conversation has happened;
+none of it can be un-submitted afterward.
+
+\section*{5. Mechanics if the CVPR branch fires}
+
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+\item Withdraw 3DV \#524 on OpenReview \emph{before} the CVPR abstract deadline
+($\sim$Nov 3) --- keeps the dual-submission record clean.
+\item CVPR draft re-trim: content is $\sim$0.7pp over the 8-page limit --- moves from ``owed''
+to critical path.
+\item CVPR author registration + paper ID early; OpenReview profile fixes (name, advisor
+declarations, publication import) apply here too.
+\end{itemize}
+
+\end{document}

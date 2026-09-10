@@ -1,0 +1,96 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs,amsmath,amssymb,enumitem}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\usepackage{parskip}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\title{SS-RESfM vs.\ RESfM: Why the Paper Reads as a Critique --- and Why It Isn't One}
+\author{September 10, 2026}
+\date{}
+\begin{document}
+\maketitle
+\vspace{-2.5em}
+
+\section*{1. Intent vs.\ reading}
+
+The paper's \emph{intent} is constructive extension: it uses RESfM's architecture, code
+lineage, and benchmark family throughout, and its best arm is literally RESfM's network with a
+different (self-supervised) training signal. But it contains four empirical findings that, read
+cold --- e.g.\ by an anonymous reviewer, or by the RESfM authors meeting it as a submission
+rather than hearing it first from us --- recalibrate the RESfM paper's claims downward. This is
+the source of the political sensitivity in the venue decision; it is about the findings'
+valence, not the paper's tone.
+
+\section*{2. The four findings that carry critical valence}
+
+\begin{enumerate}[leftmargin=1.6em,itemsep=6pt]
+\item \textbf{The reproduction gap.} RESfM's published MegaDepth number (0.169) is not
+reachable from the released recipe: from-scratch faithful training lands at 0.34--0.39. We
+decomposed the gap into three layers --- eval-environment ($0.169\rightarrow0.209/0.217$ under
+a pinned stack; solver nondeterminism), checkpoint provenance (the released checkpoint is not
+recipe-reproducible), and the training-seed lottery (0.19--0.5 across seeds). Politely stated:
+\emph{the headline number reflects a checkpoint that cannot be regenerated from the paper's
+recipe.}
+
+\item \textbf{The seed lottery.} Five-seed bands show supervised RESfM is bimodal: on
+BlendedMVS, and on Olsson \emph{even in-domain} ($2.03\pm1.86$; good on 3/5 seeds). The
+cross-generalization grid (58 cells) shows the supervised Olsson clean-benchmark collapse is
+training-domain-invariant --- a property of the recipe, not of any training pool. A single-seed
+paper (theirs reports seed 20, one run) sitting on a bimodal distribution invites the reading
+that the published results are the lucky mode.
+
+\item \textbf{The label ceiling.} The COLMAP-derived supervision labels degrade sharply above
+$\sim$15\% contamination (label recall collapses to $\sim$0.3, coverage to $\sim$55\%). At the
+60\% end of the axis, the supervised model does no better than no outlier mechanism at all
+(23.4 vs.\ 23.1). The supervision that gives RESfM its name earns its keep only in the
+$\sim$25--43\% contamination band.
+
+\item \textbf{The chicken-and-egg dependency.} Generating RESfM's training labels requires a
+successful COLMAP reconstruction (4px reprojection cutoff against COLMAP-triangulated 3D) of
+the very scenes the method is meant to make tractable --- a circular dependency our
+unsupervised mechanisms exist to remove.
+\end{enumerate}
+
+\section*{3. The other side: why ``critique'' overstates it}
+
+\begin{itemize}[leftmargin=1.6em,itemsep=4pt]
+\item The paper \textbf{corroborates RESfM's own Table 7} --- our findings extend a limitation
+the original authors themselves reported.
+\item It \textbf{adopts their architecture, benchmark family, and evaluation protocol}
+wholesale; every improvement is built on their design decisions being right.
+\item The strongest arm is \textbf{their network with a different training signal} --- the
+message is ``the architecture is right; the supervision is the fragile part; here is how to fix
+it.'' That is a compliment to the design and a continuation of the lab's research line.
+\item Fadi's own follow-up work already gestures at some of these limits; the findings are a
+natural next chapter, not an ambush.
+\item The reliability findings cut \emph{both} ways: our self-supervised arms are shown with
+the same 5-seed honesty, including where they lose (e.g.\ supervised wins the 25--43\% band;
+Strecha exception).
+\end{itemize}
+
+\section*{4. Why this matters for the venue decision}
+
+Findings 1 and 2 are about \textbf{reproducibility of a specific published result}, and no
+framing fully softens that for the authors of that result. Whether Ronen and Fadi read the
+paper as ``our student strengthened our method and found real limits'' (likely, if they hear it
+from us first, with the 3-page summary) or as something sharper (possible, if they first meet
+it as an anonymous CVPR submission reviewed by their community) is decided by \emph{sequencing},
+not by wording. This is the entire reason the advisor email is the critical path of the
+submission plan (see \code{VENUES\_acceptance\_chances.pdf}, Section 4).
+
+\section*{5. Framing rules already adopted in the drafts}
+
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+\item Findings-first doctrine: the findings \emph{are} the paper, not the delta over RESfM;
+the 5-seed benchmark capability is presented as the contribution.
+\item Table-7 corroboration is cited explicitly, positioning the work as confirming and
+extending the authors' own observation.
+\item Reproduction-gap language is decomposition-based (environment / provenance / seed), never
+insinuating; the seed-lottery discussion includes the ``couldn't one just pick a good seed?''
+rebuttal to preempt the adversarial reading.
+\item Both regimes of ESFM\textsuperscript{*} and the oracle-cleaning ceiling are reported,
+which \emph{strengthens} the parent line's framing (outlier handling matters more than clean
+tracks).
+\end{itemize}
+
+\end{document}
