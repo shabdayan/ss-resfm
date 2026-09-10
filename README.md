@@ -101,6 +101,28 @@ supervision with perfect labels adds nothing over no mechanism at either extreme
 the contamination axis (60% and 0.5%), earning its keep only in the curated 25–43%
 middle band.
 
+### Oracle-clean tracks vs. label-free arms on contaminated tracks
+
+Head-to-head per dataset: the same architecture trained and evaluated on
+ground-truth-cleaned tracks (ESFM\*, no outlier mechanism) vs. the best label-free
+SS-RESfM arm working on the raw contaminated tracks (translation mean, post-BA,
+five-seed bands):
+
+| Dataset (contam.) | ESFM\* (oracle-clean) | Best label-free arm (contaminated) | Verdict |
+|---|---|---|---|
+| MegaDepth (25.4%) | 0.60±0.18 | **0.40±0.11** (weight+TTT) | label-free wins |
+| Olsson (0.5%) | 9.36±1.28 | **2.9±0.3** (weight) | label-free wins ~3× — collapse survives cleaning⁵ |
+| Strecha (1.7%) | **1.14±0.45** | 1.97±0.09 (weight) | **exception**: oracle-clean wins (54-camera benchmark) |
+| BlendedMVS (3.1%) | 3.79±3.51 (bimodal: seeds 0.00–8.08) | **0.14±0.02** (soft) | label-free wins ~27× |
+| 1DSfM (43.3%) | 13.24±0.52 | **8.9±1.2** (remove+TTT) | label-free wins |
+| 1DSfM-hard (60%) | 18.12±4.35 | **12.4±2.1** (remove) | label-free wins, 23/25 seed pairs |
+
+Even with ground-truth track cleaning — an oracle no deployed system has — the clean-track
+recipe loses on five of six datasets, with two distinct failure modes: systematic (Olsson,
+tight band, every seed bad) and bimodal (BlendedMVS, and the wide bands on 1DSfM-hard).
+The one exception, Strecha, is the smallest benchmark and the same dataset where
+supervision wins from every training pool.
+
 ## Architecture & training-pool variants (single seed — preliminary)
 
 *Seed-20 only; our own seed-additivity analysis shows single-seed verdicts can flip, so
