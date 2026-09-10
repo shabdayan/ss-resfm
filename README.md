@@ -69,7 +69,7 @@ by rising contamination: Olsson → Strecha → BMVS → 1DSfM → 1DSfM-hard.
 | RESfM (scratch, authors' selection)² | 0.496 | 8.77 | 0.144 | 0.367 | 9.75 | 17.58 |
 | RESfM (released ckpt) | 0.203 | 9.10 | 0.20 | 0.33 | 10.71 | 15.29 |
 | ESFM (same tracks, no mech.) | 0.71±0.11 | 5.91±3.32 | 2.03±0.14 | 6.45±3.75 | 18.42±0.75 | 21.76±0.80 |
-| ESFM\* (oracle-clean tracks) | 0.60±0.18 | 9.36±1.28 | 1.14±0.45 | 3.79±3.51 | 13.24±0.52 | 18.12±4.35 |
+| ESFM\* (oracle-clean tracks) | 0.60±0.18 | 9.36±1.28⁵ | 1.14±0.45 | 3.79±3.51 | 13.24±0.52 | 18.12±4.35 |
 | GASFM (released, our BA) | 2.25 | 4.45 | 1.14 | 11.13 | 25.84 | 36.49 |
 | GLOMAP (classical) | 3.33 | 3.17 | **0.047** | 0.339 | 27.21 | 35.42 |
 | COLMAP (incremental) | 0.62±0.03 | 0.20±0.00 | 0.03±0.00 | 0.01±0.00 | 6.29±0.42³ | 20.4±1.1 |
@@ -77,6 +77,8 @@ by rising contamination: Olsson → Strecha → BMVS → 1DSfM → 1DSfM-hard.
 ³ *COLMAP errors are computed over its registered cameras only (a favorable convention; at 43–60% it registers substantially fewer than the learned methods).*
 
 ⁴ *The hybrid (3-band) row: on 2 of ~230 scene–seed pairs (MegaDepth 5016 seed 21, Olsson Gustav_Vasa seed 23) the mechanism removes every track and reconstruction fails; those cells average the remaining pairs. An instance of the over-removal failure mode analyzed in the paper.*
+
+⁵ *The clean-benchmark collapse survives ground-truth track cleaning: ESFM\* — the same architecture trained and evaluated on oracle-cleaned tracks, with no outlier mechanism in the loop — still lands at 9.36±1.28 on Olsson (tight across all five seeds, not a bimodal artifact), inside the supervised RESfM collapse band (7.4±2.6) and roughly 3× the adaptive label-free arms' ~3.0 on the contaminated tracks. The failure lives in the geometric trunk's OOD training dynamics, not in outlier handling or label quality.*
 
 ² *The two from-scratch RESfM rows differ only in checkpoint selection. "Our ckpt
 selection" picks the epoch by the same label-free reprojection-error validation
