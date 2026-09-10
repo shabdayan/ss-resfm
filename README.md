@@ -160,6 +160,27 @@ to the 4-scene cells elsewhere. Notable single-seed signals: the contaminated mi
 pool helps SS-mad on 1DSfM too (11.0 → 6.43), and depth+diversity lets the SS soft arm
 close Strecha (0.28) — both awaiting banding before any claim.*
 
+## Cross-generalization: train on each domain, test on the rest
+
+Every recipe trained in-distribution on each domain (supervised with GT-derived
+labels), evaluated on all datasets — 5-seed bands (Strecha-trained: 2 seeds); cells are
+madweight / supervised; * = the held-out in-distribution cell; "leak" = training
+scenes overlap the target.
+
+| Trained on ↓ | MegaDepth | Olsson | Strecha | BMVS | 1DSfM | 1DSfM-hard |
+|---|---|---|---|---|---|---|
+| Olsson | 0.52 / 0.62 | *1.97 / 2.03 | 3.05 / **0.72** | 6.97 / 6.70 | 11.84 / 12.04 | **15.56** / 20.17 |
+| Strecha | 0.53 / 0.54 | **2.69** / 8.62 | *0.01 / 0.01 | 7.29 / 8.08 | 13.94 / **10.22** | 17.06 / 18.97 |
+| BMVS | 0.63 / 0.51 | **2.73** / 6.95 | 2.56 / **1.44** | *0.09 / 0.26 | 11.50 / 10.45 | 19.70 / 18.59 |
+| 1DSfM-easy | 0.53 / 0.56 | **3.27** / 7.20 | 2.94 / **1.92** | 6.48 / 5.81 | *6.37 / 4.97 | **18.31** / 20.12 |
+| 1DSfM-hard | 0.47 / 0.83 | **2.93** / 7.78 | 3.02 / **1.94** | 3.65 / 5.68 | 13.21 / **8.49** | *12.1 / 23.4 |
+| 1DSfM-merged | 0.52 / 0.59 | **3.34** / 4.96 | 2.98 / **2.37** | 7.26 / 6.69 | *6.71 / 5.05 | leak |
+
+The headline: the supervised clean-benchmark collapse is **training-domain-invariant**
+(Olsson column: supervised 4.96–8.62 from every pool; madweight 2.69–3.34 from every
+pool) — and so is the Strecha exception (supervision wins it from everywhere). The
+reliability asymmetry is a property of the recipes, not of any training set.
+
 ## Repository map
 
 | Path | Contents |
