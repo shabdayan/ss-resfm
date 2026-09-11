@@ -582,6 +582,120 @@ environment, and the out-of-distribution margins ($2\times$ and larger) sit far 
 noise floor.
 
 
+\section{The same results through count- and coverage-based lenses}\label{app:lenses}
+Our main tables follow the field's convention (RESfM, ESFM, GASFM): translation/rotation
+means over each method's registered cameras, with $N_r$ reported alongside. That
+convention answers ``how accurate is what you built'' but not ``how much of the scene
+did you solve correctly,'' and it treats a dataset mean as the summary of a
+distribution that, as the dtu106 decomposition shows, can be tail-dominated. This
+appendix re-reads the complete five-seed matrix through three complementary lenses:
+pairwise pose AUC with and without coverage pricing, per-scene win counts, and a
+catastrophic-cell census. The lenses disagree with the means in instructive places;
+we report all of them so no single convention carries a verdict alone.
+
+\paragraph{Metrics and recovery.} For every (method, dataset, seed, scene) cell we
+recover the final post-BA cameras from the saved COLMAP reconstructions, identify each
+camera against the ground truth by its exact intrinsics (falling back to
+track-coordinate voting where a scene shares intrinsics; identification $97$--$100\%$
+per scene, validated against exact-intrinsics-unique cameras), and compute pairwise
+relative-pose errors, which are invariant to each reconstruction's global similarity.
+AUC@$30^{\circ}$ averages $(30-e)^{+}/30$ over registered pairs (pose error $e$ = max
+of relative rotation angle and translation-direction angle); registration-aware
+RA-AUC@$30^{\circ}$ averages over \emph{all} $\binom{N_c}{2}$ pairs, scoring pairs with
+an unregistered camera at $180^{\circ}$ --- the coverage-priced convention of the
+concurrent VGPA work~\cite{vgpa}.
+
+\begin{table}[h]\centering\scriptsize
+\setlength{\tabcolsep}{3pt}
+\caption{\textbf{Pose AUC@$30^{\circ}$, five-seed mean$\pm$std.} Top block: RA-AUC
+(coverage-priced). Bottom block: AUC over registered pairs only. Best per column in
+bold. The two blocks disagree exactly where accuracy is bought with coverage.}
+\label{tab:raauc}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+ & MegaDepth & 1DSfM & 1DSfM-hard & Strecha & BMVS & Olsson\\
+\midrule
+\multicolumn{7}{l}{\emph{RA-AUC@$30^{\circ}$ (all pairs; unregistered $=180^{\circ}$)}}\\[1pt]
+\mad{}       & 0.599$\pm$0.02 & 0.374$\pm$0.01 & 0.067$\pm$0.01 & 0.587$\pm$0.03 & 0.589$\pm$0.07 & 0.568$\pm$0.01\\
+weight       & 0.582$\pm$0.02 & 0.444$\pm$0.02 & 0.092$\pm$0.01 & 0.633$\pm$0.04 & 0.594$\pm$0.02 & 0.626$\pm$0.02\\
+weight+TTT   & 0.580$\pm$0.02 & 0.445$\pm$0.02 & 0.092$\pm$0.01 & 0.635$\pm$0.03 & 0.595$\pm$0.02 & 0.627$\pm$0.03\\
+remove       & 0.442$\pm$0.01 & 0.259$\pm$0.01 & 0.036$\pm$0.01 & 0.612$\pm$0.02 & 0.500$\pm$0.08 & 0.468$\pm$0.02\\
+remove+TTT   & 0.442$\pm$0.01 & 0.262$\pm$0.01 & 0.037$\pm$0.01 & 0.609$\pm$0.02 & 0.501$\pm$0.08 & 0.467$\pm$0.02\\
+hybrid       & 0.559$\pm$0.03 & 0.442$\pm$0.02 & 0.095$\pm$0.01 & 0.438$\pm$0.07 & 0.594$\pm$0.02 & 0.531$\pm$0.02\\
+RESfM-scratch (sup.) & 0.605$\pm$0.01 & 0.408$\pm$0.01 & 0.044$\pm$0.01 & $\mathbf{0.725\pm0.08}$ & 0.600$\pm$0.01 & 0.620$\pm$0.01\\
+ESFM (no mech.) & 0.574$\pm$0.02 & $\mathbf{0.461\pm0.01}$ & $\mathbf{0.099\pm0.01}$ & 0.662$\pm$0.03 & $\mathbf{0.722\pm0.06}$ & $\mathbf{0.645\pm0.01}$\\
+ESFM$^{\ast}$ (clean tracks) & $\mathbf{0.691\pm0.04}$ & $\mathbf{0.461\pm0.02}$ & 0.035$\pm$0.01 & 0.517$\pm$0.03 & 0.652$\pm$0.10 & 0.570$\pm$0.14\\
+\midrule
+\multicolumn{7}{l}{\emph{AUC@$30^{\circ}$ (registered pairs only)}}\\[1pt]
+\mad{}       & 0.778$\pm$0.02 & $\mathbf{0.642\pm0.03}$ & 0.354$\pm$0.06 & 0.601$\pm$0.03 & 0.642$\pm$0.08 & 0.640$\pm$0.02\\
+weight       & 0.777$\pm$0.01 & 0.582$\pm$0.02 & 0.408$\pm$0.04 & 0.648$\pm$0.04 & 0.635$\pm$0.03 & 0.670$\pm$0.02\\
+weight+TTT   & 0.777$\pm$0.01 & 0.578$\pm$0.02 & $\mathbf{0.411\pm0.03}$ & 0.650$\pm$0.04 & 0.637$\pm$0.03 & 0.674$\pm$0.02\\
+remove       & 0.755$\pm$0.00 & 0.623$\pm$0.02 & $\mathbf{0.411\pm0.07}$ & 0.636$\pm$0.06 & 0.577$\pm$0.05 & 0.584$\pm$0.01\\
+remove+TTT   & 0.748$\pm$0.00 & 0.638$\pm$0.02 & 0.388$\pm$0.03 & 0.634$\pm$0.06 & 0.578$\pm$0.05 & 0.581$\pm$0.02\\
+hybrid       & 0.760$\pm$0.01 & 0.573$\pm$0.02 & 0.399$\pm$0.04 & 0.603$\pm$0.05 & 0.637$\pm$0.03 & 0.644$\pm$0.01\\
+RESfM-scratch (sup.) & $\mathbf{0.811\pm0.01}$ & 0.623$\pm$0.03 & 0.329$\pm$0.06 & $\mathbf{0.735\pm0.07}$ & 0.654$\pm$0.02 & 0.653$\pm$0.02\\
+ESFM (no mech.) & 0.756$\pm$0.01 & 0.570$\pm$0.01 & 0.409$\pm$0.04 & 0.677$\pm$0.05 & 0.744$\pm$0.05 & $\mathbf{0.688\pm0.01}$\\
+ESFM$^{\ast}$ (clean tracks) & 0.790$\pm$0.05 & $\mathbf{0.669\pm0.04}$ & 0.330$\pm$0.07 & 0.519$\pm$0.03 & $\mathbf{0.760\pm0.06}$ & 0.607$\pm$0.15\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]\centering\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\caption{\textbf{Per-scene win counts vs.\ the supervised baseline} (matched-seed
+scene$\times$seed cells, translation\,/\,rotation, as \% of cells), and the
+catastrophic-cell census (cells with translation mean $>30$; in parentheses, cells
+$>100$). The adaptive label-free arms have zero $>100$ cells anywhere; every $>100$
+cell in the matrix is an Olsson/dtu106-family failure of an unrescued-trunk recipe.}
+\label{tab:wincount}
+\begin{tabular}{@{}lcccccc|ccc@{}}
+\toprule
+ & \multicolumn{6}{c|}{Win \% vs.\ supervised (trans/rot)} & \multicolumn{3}{c}{Cells $>30$ ($>100$)}\\
+ & MD & 1DSfM & hard & Strecha & BMVS & Olsson & 1DSfM & hard & Olsson\\
+\midrule
+\mad{}       & 42/35 & 44/62 & 48/68 & 0/5   & 50/55 & 42/47 & 4/50 & 7/25 & 0/195\\
+weight       & 31/24 & 36/58 & 48/56 & 15/40 & 55/55 & 45/50 & 6/50 & 8/25 & 0/195\\
+weight+TTT   & 37/29 & 32/52 & 56/60 & 15/45 & 50/50 & 56/52 & 7/50 & 5/25 & 5/195 (5)\\
+remove       & 41/34 & 66/78 & 80/84 & 0/0   & 30/50 & 39/42 & 5/50 & 2/25 & 0/195\\
+remove+TTT   & 37/36 & 70/78 & 72/80 & 0/0   & 55/60 & 36/42 & 5/50 & 5/25 & 0/195\\
+hybrid       & 37/32 & 30/54 & 48/68 & 0/0   & 55/50 & 44/47 & 9/50 & 8/25 & 0/194\\
+RESfM-scratch (sup.) & --- & --- & --- & --- & --- & --- & 5/50 & 6/25 & 4/195 (4)\\
+ESFM (no mech.) & 26/24 & 20/34 & 44/36 & 15/40 & 38/38 & 55/51 & 10/50 & 6/25 & 3/195 (3)\\
+ESFM$^{\ast}$ (clean tracks) & 58/59 & 48/52 & 52/52 & 15/35 & 38/25 & 45/39 & 5/50 & 2/25 & 5/195 (5)\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{The coverage-pricing inversion.} At $60\%$ contamination the two metric
+families give opposite orderings. Plain remove --- the winner on translation means
+($12.4\pm2.1$ vs.\ supervised $19.2\pm3.4$), medians, and win counts ($80/84\%$ of
+cells) --- is \emph{last} under RA-AUC ($0.036$), because its $29\%$ registration
+poisons over $90\%$ of camera pairs; the no-mechanism baseline, which loses every
+raw-error comparison there, tops the RA column ($0.099$) by registering $40\%$.
+AUC over registered pairs shows removal's accuracy is real (tied-best $0.411$): the
+win is genuine \emph{on what it reconstructs}, and is bought with coverage. Neither
+convention is ``the'' answer: raw error over registered cameras rewards aggressive
+removal; coverage-priced AUC rewards registering more cameras at moderate error ---
+the in-distribution analogue of the COLMAP registered-only caveat in our main table.
+Every removal-family claim in this paper should be read with its $N_r$, and we
+report both families so the reader can price coverage either way.
+
+\paragraph{Counts, means, and tails disagree exactly where catastrophes live.}
+ESFM$^{\ast}$ beats the supervised baseline on $58/59\%$ of MegaDepth cells while
+losing the mean ($0.594$ vs.\ $0.365$, medians $0.071$ vs.\ $0.068$) --- clean tracks
+are typically better per scene and blow up occasionally. Symmetrically, the supervised
+baseline wins roughly half of the Olsson cells while losing the mean $2.5\times$, and
+under RA-AUC@$30^{\circ}$ its Olsson score ($0.620$) sits \emph{above} \mad{}
+($0.568$): a $30^{\circ}$-capped pairwise metric dilutes a single catastrophic scene
+to its pair share, so the dtu106 failure that dominates the mean nearly vanishes from
+the AUC. The win-count and AUC lenses are therefore not more honest than means ---
+they are differently blind: means amplify tails, capped counts hide them. The
+catastrophic-cell census (Table~\ref{tab:wincount}, right) is the tail-explicit
+summary: across ${\sim}1{,}300$ scene$\times$seed cells, the adaptive label-free arms
+produce \emph{zero} cells above $100$, while every unrescued-trunk recipe (supervised,
+weight+TTT, no-mechanism, oracle-clean) produces them, all on Olsson. Reliability ---
+the absence of catastrophic cells --- is the one verdict on which all lenses agree.
+
 \section{Per-scene results and configuration}\label{app:perscene}
 \subsection{Per-scene results}\label{sec:perscene}
 \begin{table*}[t]\centering\footnotesize
