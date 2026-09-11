@@ -405,7 +405,22 @@ $0.14\pm0.02$ are $2.5\times$ better; the baseline's rotation failure, $31.7\deg
 averaged over seeds, persists on every one) and by ${\sim}3\times$ on Olsson means against four of five baseline
 seeds ($3.0\pm0.3$ vs.\ $8.2$--$8.9$; one baseline seed escapes the collapse at $2.69$,
 revealing the clean-benchmark failure as basin-dependent rather than universal, its
-frequency $4/5$). Figure~\ref{fig:qualolsson} shows what the collapse looks like:
+frequency $4/5$). A per-scene decomposition sharpens what ``collapse'' means here:
+the deficit is \emph{tail-concentrated}, not uniform. On each of the four collapse
+seeds the baseline fails a single scene catastrophically (dtu106, translation error
+${\sim}240$; the escaping seed is precisely the one without this failure), and
+excluding that scene alone its Olsson means drop to $2.2$--$2.6$ --- comparable to
+\mad{}'s $2.6$--$3.3$ --- while pooled medians essentially tie ($1.12$ vs.\
+$1.14$--$1.17$) and the baseline wins roughly half of the scene$\times$seed cells.
+The tail is recipe-selective: the adaptive label-free arms (\mad{}, weight, remove,
+hybrid) never produce such an outlier scene on any seed, whereas the recipes sharing
+an unrescued trunk do --- supervised on $4/5$ seeds, our own weight+TTT on $5/5$
+(elsewhere its best-in-class: ex-dtu106 means $1.7$--$2.3$), no-mechanism ESFM, and
+ESFM$^{\ast}$ on oracle-clean tracks. The clean-benchmark failure is thus
+unpredictable scene-level catastrophic basin selection rather than across-the-board
+degradation --- exactly the tail behaviour that seed-level reliability analysis
+exists to expose, and that dataset means alone would misattribute.
+Figure~\ref{fig:qualolsson} shows the moderate form of the same failure:
 on an essentially outlier-free scene, the supervised reconstruction degenerates to a
 compressed cluster with $16.5\deg$ mean rotation error, while the label-free arm
 reproduces the ground-truth camera arc nearly exactly. The collapse is not a from-scratch artifact: the authors' released

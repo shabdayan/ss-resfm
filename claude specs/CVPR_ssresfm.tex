@@ -333,8 +333,16 @@ the full baseline band on BlendedMVS ($0.14$--$0.24$ vs.\ $0.35\pm0.04$; soft ar
 $2.5\times$ better, and the baseline's $31.7\deg$ rotation failure persists on every
 seed), and by ${\sim}3\times$ on Olsson against four of five baseline seeds
 ($3.0\pm0.3$ vs.\ $8.2$--$8.9$; one seed escapes at $2.69$ --- the collapse is
-basin-dependent, frequency $4/5$). Figure~\ref{fig:qualolsson} shows what it looks
-like: on an essentially outlier-free scene the supervised reconstruction degenerates to
+basin-dependent, frequency $4/5$). The deficit is \emph{tail-concentrated}: each
+collapse seed fails a single scene catastrophically (dtu106, error ${\sim}240$; the
+escaping seed lacks exactly this failure), ex-dtu106 the baseline's means
+($2.2$--$2.6$) match \mad{}'s ($2.6$--$3.3$) and pooled medians tie --- but the
+adaptive label-free arms never produce such an outlier scene on any seed, while
+weight+TTT, sharing the unrescued trunk, fails it $5/5$ (elsewhere best-in-class,
+ex-dtu106 $1.7$--$2.3$). The failure is unpredictable scene-level catastrophic basin
+selection --- the tail behaviour that seed-level reliability analysis exists to
+expose, and that dataset means alone would misattribute. Figure~\ref{fig:qualolsson}
+shows the moderate form: on an essentially outlier-free scene the supervised reconstruction degenerates to
 a compressed cluster ($16.5\deg$ rotation), while the label-free arm reproduces the
 ground-truth arc nearly exactly. Nor is the collapse a from-scratch artifact: the
 released checkpoint also collapses on Olsson ($9.10$; $9.18$ under the authors' pinned
