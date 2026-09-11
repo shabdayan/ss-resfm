@@ -610,14 +610,18 @@ seeds --- extreme positive scarcity does not preclude learning --- whereas Blend
 never reaches that level on any seed; the BlendedMVS failure is a dataset-specific
 dead zone (its rotation pathology is the leading suspect), not a general
 low-contamination bound. \emph{(iii) In-domain training attenuates but does not cure
-the clean-benchmark unreliability}: the recipe that lands at $7.4$--$9.1$ on Olsson
-MegaDepth-trained improves to $2.03\pm1.86$ trained in-domain --- but bimodally,
-excellent in three seeds ($0.41$--$1.08$) and degraded in two ($3.9$--$4.2$, rotation
-spread $12\pm12\deg$). The OOD collapse is thus mostly the MegaDepth-fit head
-misclassifying on clean scenes (in-domain labels remove the bulk of it), yet the
-seed-reliability asymmetry survives even here: weight+TTT ($1.60\pm0.81$) leads the
-column, \mad{} ($1.97\pm0.94$) matches the supervised mean at half the spread, and no
-label-free arm has a failure seed. Supervision's clean-data advantage is a
+the clean-benchmark unreliability}: the apparent improvement from $7.4$--$9.1$
+(MegaDepth-trained) to $2.03\pm1.86$ (in-domain) conflates scene sets --- the
+in-distribution test split excludes dtu106 (it sits in the training split), the
+single scene driving the OOD means. On the \emph{same} eight test scenes,
+MegaDepth-trained supervision scores $2.72$ (seed range $1.31$--$3.53$) vs.\
+$2.03\pm1.86$ in-domain: a modest gain inside overlapping bands, with the in-domain
+model the \emph{more} bimodal of the two ($0.41$--$1.08$ in three seeds,
+$3.9$--$4.2$ in two, rotation spread $12\pm12\deg$). In-domain labels do not remove
+the collapse (dtu106 itself is untestable here --- it is in training), and the
+seed-reliability asymmetry survives: weight+TTT ($1.60\pm0.81$) leads the column,
+\mad{} ($1.97\pm0.94$) matches the supervised mean at half the spread, and no
+adaptive label-free arm has a failure seed. Supervision's clean-data advantage is a
 three-in-five-seeds advantage, not a dependable one. \emph{(iv) The supervised
 advantage inverts between $43\%$ and $60\%$} ($4.97\pm2.08$ vs.\ \mad{}
 $6.37\pm0.20$ at $43\%$; a $2\times$ loss at $60\%$), and the complementarity

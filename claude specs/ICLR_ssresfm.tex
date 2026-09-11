@@ -391,7 +391,7 @@ use $s$ alone.}
 \label{fig:method}
 \end{figure*}
 
-\section{Results}
+\section{Results}\label{sec:results}
 \subsection{Main comparison}
 Table~\ref{tab:main} is the controlled head-to-head under the RESfM-aligned schedule:
 every row shares tracks, architecture, schedule, robust BA, and seed, so any difference is
@@ -749,14 +749,21 @@ rarer still, supervision trained in-domain reaches $0.41$--$1.08$ in three of fi
 seeds --- extreme positive scarcity does not preclude learning --- whereas BlendedMVS
 never reaches that level on any seed; the BlendedMVS failure is a dataset-specific
 dead zone (its rotation pathology is the leading suspect), not a general
-low-contamination bound. \emph{(iii) In-domain training attenuates but does not cure
-the clean-benchmark unreliability}: the recipe that lands at $7.4$--$9.1$ on Olsson
-MegaDepth-trained improves to $2.03\pm1.86$ trained in-domain --- but bimodally,
-excellent in three seeds ($0.41$--$1.08$) and degraded in two ($3.9$--$4.2$, rotation
-spread $12\pm12\deg$). The OOD collapse is thus mostly the MegaDepth-fit head
-misclassifying on clean scenes (in-domain labels remove the bulk of it), yet the
-seed-reliability asymmetry survives even here: weight+TTT ($1.60\pm0.81$) leads the
-column, \mad{} ($1.97\pm0.94$) matches the supervised mean at half the spread, and no
+low-contamination bound. \emph{(iii) In-domain training helps far less than raw means
+suggest}: the recipe that lands at $7.4$--$9.1$ on Olsson MegaDepth-trained appears to
+improve to $2.03\pm1.86$ trained in-domain, but that contrast conflates scene sets ---
+the in-distribution test split excludes dtu106 (it sits in the training split), the
+single scene that drives the OOD means (the tail decomposition of
+\S\ref{sec:results}). Restricted to the \emph{same} eight test scenes,
+MegaDepth-trained supervision scores $2.72$ (seed range $1.31$--$3.53$) vs.\
+$2.03\pm1.86$ in-domain: a modest mean improvement inside heavily overlapping bands,
+and the in-domain model is the \emph{more} bimodal of the two (excellent in three
+seeds at $0.41$--$1.08$, degraded in two at $3.9$--$4.2$, rotation spread
+$12\pm12\deg$, versus the OOD model's tighter $1.31$--$3.53$). In-domain labels
+therefore do not remove the collapse; whether they would rescue dtu106 itself is
+untestable in this split (the scene is in training). The seed-reliability asymmetry
+survives unchanged: weight+TTT ($1.60\pm0.81$) leads the column, \mad{}
+($1.97\pm0.94$) matches the supervised mean at half the spread, and no adaptive
 label-free arm has a failure seed. Supervision's clean-data advantage is a
 three-in-five-seeds advantage, not a dependable one. \emph{(iv) The supervised advantage inverts between $43\%$ and $60\%$}: at $43\%$
 supervision retains an overlapping edge ($4.97\pm2.08$ vs.\ \mad{} $6.37\pm0.20$;
@@ -1575,10 +1582,17 @@ BMVS & 0.63\,/\,0.51 & \textbf{2.73}\,/\,6.95 & 2.56\,/\,\textbf{1.44} & *0.09\,
 \end{table*}
 
 Three findings generalize beyond MegaDepth training. \emph{(i) The clean-benchmark
-collapse is training-domain-invariant}: the supervised recipe degrades on Olsson OOD
-from \emph{every} training domain ($4.96$--$8.62$ across five pools, seed-volatile up
-to $\pm4.25$), while \mad{} lands in a tight $2.69$--$3.34$ band from every pool ---
-the reliability asymmetry is a property of the recipes, not of MegaDepth. \emph{(ii)
+collapse is training-domain-invariant --- and so is its tail structure}: the
+supervised recipe degrades on Olsson OOD from \emph{every} training domain
+($4.96$--$8.62$ across five pools, seed-volatile up to $\pm4.25$), while \mad{} lands
+in a tight $2.69$--$3.34$ band from every pool. The tail decomposition of
+\S\ref{sec:results} holds pool-by-pool: the supervised dtu106 catastrophic failure
+fires from every training domain (on $1$--$5$ of $5$ seeds per pool, errors
+${\sim}230$--$360$ vs.\ ${\sim}1$ on the escaping seeds --- a pure basin lottery),
+whereas \mad{} stays at ${\le}7$ on that scene in all $27$ cells; excluding dtu106, a
+modest supervised deficit persists in four of five pools ($3.4$--$4.3$ vs.\
+$2.7$--$3.3$). The reliability asymmetry --- both the lottery and the residual gap ---
+is a property of the recipes, not of MegaDepth. \emph{(ii)
 The Strecha exception is likewise invariant}: supervision wins Strecha from every
 training domain ($0.72$--$2.37$ vs.\ $2.56$--$3.05$). \emph{(iii) At the extreme
 ($60\%$ target), \mad{} from any domain beats supervision from any domain} (best

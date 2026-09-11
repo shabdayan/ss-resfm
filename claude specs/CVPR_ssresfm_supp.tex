@@ -821,10 +821,17 @@ BMVS & 0.63\,/\,0.51 & \textbf{2.73}\,/\,6.95 & 2.56\,/\,\textbf{1.44} & *0.09\,
 \end{table*}
 
 Three findings generalize beyond MegaDepth training. \emph{(i) The clean-benchmark
-collapse is training-domain-invariant}: the supervised recipe degrades on Olsson OOD
-from \emph{every} training domain ($4.96$--$8.62$ across five pools, seed-volatile up
-to $\pm4.25$), while \mad{} lands in a tight $2.69$--$3.34$ band from every pool ---
-the reliability asymmetry is a property of the recipes, not of MegaDepth. \emph{(ii)
+collapse is training-domain-invariant --- and so is its tail structure}: the
+supervised recipe degrades on Olsson OOD from \emph{every} training domain
+($4.96$--$8.62$ across five pools, seed-volatile up to $\pm4.25$), while \mad{} lands
+in a tight $2.69$--$3.34$ band from every pool. The tail decomposition of the main
+paper holds pool-by-pool: the supervised dtu106 catastrophic failure fires from every
+training domain (on $1$--$5$ of $5$ seeds per pool, errors ${\sim}230$--$360$ vs.\
+${\sim}1$ on the escaping seeds --- a pure basin lottery), whereas \mad{} stays at
+${\le}7$ on that scene in all $27$ cells; excluding dtu106, a modest supervised
+deficit persists in four of five pools ($3.4$--$4.3$ vs.\ $2.7$--$3.3$). The
+reliability asymmetry --- both the lottery and the residual gap --- is a property of
+the recipes, not of MegaDepth. \emph{(ii)
 The Strecha exception is likewise invariant}: supervision wins Strecha from every
 training domain ($0.72$--$2.37$ vs.\ $2.56$--$3.05$). \emph{(iii) At the extreme
 ($60\%$ target), \mad{} from any domain beats supervision from any domain} (best
