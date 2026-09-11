@@ -1,0 +1,211 @@
+\documentclass[10pt]{article}
+\usepackage[margin=2cm]{geometry}
+\usepackage{booktabs,enumitem,parskip}
+\usepackage[colorlinks=true,linkcolor=blue]{hyperref}
+\title{SS-RESfM Results Through VGPA's Five Lenses}
+\author{Per-scene wins / mean vs.\ median with blow-up attribution / registration coverage / rotation\\(RA-AUC pending pose-recovery program) --- September 12, 2026}
+\date{}
+\begin{document}\maketitle
+\section*{Reading guide}
+The five lenses VGPA uses against RESfM, applied to our full 5-seed matrix.
+\textbf{Per-scene wins} are matched-seed scene$\times$seed cells vs.\ RESfM-scratch.
+\textbf{Trans med} is pooled over all scene$\times$seed cells. Errors are computed
+over each method's own registered set (the same convention as VGPA Tables 1--2),
+so low-coverage methods are flattered on raw error --- Nr\% is the corrective
+context, and RA-AUC (which prices coverage in) is being added by the
+pose-recovery program.
+
+\section*{megadepth  (Nc=13126)}
+\begin{tabular}{@{}lccccc@{}}\toprule
+Method & Trans mean±std & Trans med (pooled) & Rot mean & Nr\% & seeds\\ \midrule
+SS madweight & 0.512±0.08 & 0.151 & 3.70 & 81\% & 5\\
+SS weight & 0.512±0.09 & 0.188 & 3.28 & 79\% & 5\\
+SS weight+TTT & 0.398±0.11 & 0.175 & 2.88 & 77\% & 5\\
+SS remove & 0.512±0.08 & 0.117 & 4.04 & 72\% & 5\\
+SS remove+TTT & 0.561±0.07 & 0.143 & 4.22 & 71\% & 5\\
+SS hybrid & 0.455±0.09 & 0.179 & 3.06 & 77\% & 5\\
+RESfM-scratch (sup.) & 0.365±0.12 & 0.068 & 1.89 & 85\% & 5\\
+ESFM (no mech.) & 0.714±0.11 & 0.297 & 6.03 & 77\% & 5\\
+ESFM* (clean tracks) & 0.594±0.18 & 0.071 & 6.18 & 90\% & 5\\
+\bottomrule\end{tabular}
+\paragraph{Per-scene wins vs RESfM-scratch (matched seed, scene x seed cells)}
+\indent SS madweight: trans 75/180 (42\%), rot 63/180 (35\%)\\
+\indent SS weight: trans 55/180 (31\%), rot 44/180 (24\%)\\
+\indent SS weight+TTT: trans 66/180 (37\%), rot 53/180 (29\%)\\
+\indent SS remove: trans 73/180 (41\%), rot 62/180 (34\%)\\
+\indent SS remove+TTT: trans 67/180 (37\%), rot 65/180 (36\%)\\
+\indent SS hybrid: trans 66/179 (37\%), rot 57/179 (32\%)\\
+\indent ESFM (no mech.): trans 47/180 (26\%), rot 44/180 (24\%)\\
+\indent ESFM* (clean tracks): trans 105/180 (58\%), rot 107/180 (59\%)\\
+\paragraph{Mean-driving scenes (seed-20, top 3 by scene mean)}
+\indent SS madweight (med 0.14): 0265 3.26, 0147 2.99, 0130 1.60\\
+\indent SS weight (med 0.18): 0099 3.52, 0265 2.34, 0083 1.56\\
+\indent SS weight+TTT (med 0.19): 0455 1.60, 0147 1.20, 0024 1.13\\
+\indent SS remove (med 0.19): 0265 3.04, 0076 3.04, 0147 2.96\\
+\indent SS remove+TTT (med 0.13): 5016 3.10, 0147 3.02, 0060 2.52\\
+\indent SS hybrid (med 0.20): 0265 2.43, 0083 1.79, 0197 1.34\\
+\indent RESfM-scratch (sup.) (med 0.07): 0147 3.22, 0265 3.09, 0024 1.09\\
+\indent ESFM (no mech.) (med 0.31): 0265 3.01, 0046 2.90, 0102 2.28\\
+\indent ESFM* (clean tracks) (med 0.06): 0147 4.18, 0102 3.40, 0265 3.16\\
+\section*{1dsfm  (Nc=4563)}
+\begin{tabular}{@{}lccccc@{}}\toprule
+Method & Trans mean±std & Trans med (pooled) & Rot mean & Nr\% & seeds\\ \midrule
+SS madweight & 11.041±1.68 & 3.956 & 7.74 & 70\% & 5\\
+SS weight & 14.349±2.97 & 11.102 & 8.24 & 79\% & 5\\
+SS weight+TTT & 15.719±2.10 & 11.205 & 10.09 & 81\% & 5\\
+SS remove & 9.125±2.17 & 1.615 & 6.94 & 58\% & 5\\
+SS remove+TTT & 8.925±1.20 & 1.749 & 6.90 & 58\% & 5\\
+SS hybrid & 16.232±2.20 & 10.181 & 7.89 & 80\% & 5\\
+RESfM-scratch (sup.) & 10.498±1.45 & 2.558 & 9.62 & 77\% & 5\\
+ESFM (no mech.) & 18.415±0.75 & 13.409 & 14.53 & 84\% & 5\\
+ESFM* (clean tracks) & 13.236±0.52 & 2.951 & 13.29 & 80\% & 5\\
+\bottomrule\end{tabular}
+\paragraph{Per-scene wins vs RESfM-scratch (matched seed, scene x seed cells)}
+\indent SS madweight: trans 22/50 (44\%), rot 31/50 (62\%)\\
+\indent SS weight: trans 18/50 (36\%), rot 29/50 (58\%)\\
+\indent SS weight+TTT: trans 16/50 (32\%), rot 26/50 (52\%)\\
+\indent SS remove: trans 33/50 (66\%), rot 39/50 (78\%)\\
+\indent SS remove+TTT: trans 35/50 (70\%), rot 39/50 (78\%)\\
+\indent SS hybrid: trans 15/50 (30\%), rot 27/50 (54\%)\\
+\indent ESFM (no mech.): trans 10/50 (20\%), rot 17/50 (34\%)\\
+\indent ESFM* (clean tracks): trans 24/50 (48\%), rot 26/50 (52\%)\\
+\paragraph{Mean-driving scenes (seed-20, top 3 by scene mean)}
+\indent SS madweight (med 4.37): Tower\_of\_London 76.34, Ellis\_Island 17.59, Madrid\_Metropolis 9.63\\
+\indent SS weight (med 11.01): Yorkminster 30.87, Tower\_of\_London 28.29, Vienna\_Cathedral 22.71\\
+\indent SS weight+TTT (med 7.16): Tower\_of\_London 72.61, Vienna\_Cathedral 33.57, Ellis\_Island 17.11\\
+\indent SS remove (med 1.78): Tower\_of\_London 36.99, Yorkminster 16.98, Ellis\_Island 16.95\\
+\indent SS remove+TTT (med 3.42): Tower\_of\_London 36.59, Ellis\_Island 15.72, Yorkminster 10.25\\
+\indent SS hybrid (med 4.25): Tower\_of\_London 71.81, Yorkminster 30.45, Ellis\_Island 17.12\\
+\indent RESfM-scratch (sup.) (med 2.93): Tower\_of\_London 67.95, Ellis\_Island 16.02, Yorkminster 8.77\\
+\indent ESFM (no mech.) (med 14.37): Tower\_of\_London 59.13, Madrid\_Metropolis 35.77, Ellis\_Island 25.12\\
+\indent ESFM* (clean tracks) (med 4.29): Tower\_of\_London 69.64, Yorkminster 22.41, Vienna\_Cathedral 17.23\\
+\section*{1dsfmhard  (Nc=1497)}
+\begin{tabular}{@{}lccccc@{}}\toprule
+Method & Trans mean±std & Trans med (pooled) & Rot mean & Nr\% & seeds\\ \midrule
+SS madweight & 18.918±4.05 & 13.552 & 27.65 & 43\% & 5\\
+SS weight & 22.924±2.79 & 13.134 & 27.95 & 40\% & 5\\
+SS weight+TTT & 22.242±3.17 & 13.305 & 30.60 & 41\% & 5\\
+SS remove & 12.419±2.05 & 11.853 & 12.27 & 29\% & 5\\
+SS remove+TTT & 15.150±0.98 & 11.299 & 16.40 & 32\% & 5\\
+SS hybrid & 22.983±4.02 & 13.150 & 28.21 & 41\% & 5\\
+RESfM-scratch (sup.) & 19.158±3.42 & 13.714 & 27.30 & 34\% & 5\\
+ESFM (no mech.) & 21.758±0.80 & 24.280 & 32.01 & 40\% & 5\\
+ESFM* (clean tracks) & 18.121±4.35 & 15.248 & 21.55 & 36\% & 5\\
+\bottomrule\end{tabular}
+\paragraph{Per-scene wins vs RESfM-scratch (matched seed, scene x seed cells)}
+\indent SS madweight: trans 12/25 (48\%), rot 17/25 (68\%)\\
+\indent SS weight: trans 12/25 (48\%), rot 14/25 (56\%)\\
+\indent SS weight+TTT: trans 14/25 (56\%), rot 15/25 (60\%)\\
+\indent SS remove: trans 20/25 (80\%), rot 21/25 (84\%)\\
+\indent SS remove+TTT: trans 18/25 (72\%), rot 20/25 (80\%)\\
+\indent SS hybrid: trans 12/25 (48\%), rot 17/25 (68\%)\\
+\indent ESFM (no mech.): trans 11/25 (44\%), rot 9/25 (36\%)\\
+\indent ESFM* (clean tracks): trans 13/25 (52\%), rot 13/25 (52\%)\\
+\paragraph{Mean-driving scenes (seed-20, top 3 by scene mean)}
+\indent SS madweight (med 8.82): Gendarmenmarkt 31.17, Union\_Square 13.55, Roman\_Forum 8.82\\
+\indent SS weight (med 13.13): Roman\_Forum 40.77, Gendarmenmarkt 33.15, Union\_Square 13.13\\
+\indent SS weight+TTT (med 17.67): Roman\_Forum 64.97, Gendarmenmarkt 29.30, Trafalgar 17.67\\
+\indent SS remove (med 11.31): Roman\_Forum 21.09, Gendarmenmarkt 15.51, Union\_Square 11.31\\
+\indent SS remove+TTT (med 11.30): Gendarmenmarkt 31.05, Roman\_Forum 28.77, Union\_Square 11.30\\
+\indent SS hybrid (med 13.15): Roman\_Forum 64.16, Gendarmenmarkt 32.27, Union\_Square 13.15\\
+\indent RESfM-scratch (sup.) (med 13.08): Gendarmenmarkt 33.20, Union\_Square 13.35, Roman\_Forum 13.08\\
+\indent ESFM (no mech.) (med 24.57): Gendarmenmarkt 31.79, Roman\_Forum 29.57, Trafalgar 24.57\\
+\indent ESFM* (clean tracks) (med 16.23): Gendarmenmarkt 22.71, Trafalgar 17.07, Roman\_Forum 16.23\\
+\section*{strecha  (Nc=54)}
+\begin{tabular}{@{}lccccc@{}}\toprule
+Method & Trans mean±std & Trans med (pooled) & Rot mean & Nr\% & seeds\\ \midrule
+SS madweight & 2.650±0.25 & 0.938 & 12.80 & 91\% & 5\\
+SS weight & 1.969±0.09 & 0.006 & 7.61 & 98\% & 5\\
+SS weight+TTT & 2.000±0.05 & 0.006 & 7.95 & 99\% & 5\\
+SS remove & 3.201±0.11 & 2.034 & 14.39 & 97\% & 5\\
+SS remove+TTT & 3.008±0.07 & 1.796 & 13.23 & 96\% & 5\\
+SS hybrid & 3.254±0.45 & 2.704 & 15.15 & 71\% & 5\\
+RESfM-scratch (sup.) & 0.388±0.72 & 0.005 & 1.56 & 99\% & 5\\
+ESFM (no mech.) & 2.034±0.14 & 0.005 & 7.61 & 100\% & 5\\
+ESFM* (clean tracks) & 1.139±0.45 & 0.007 & 11.13 & 99\% & 5\\
+\bottomrule\end{tabular}
+\paragraph{Per-scene wins vs RESfM-scratch (matched seed, scene x seed cells)}
+\indent SS madweight: trans 0/20 (0\%), rot 1/20 (5\%)\\
+\indent SS weight: trans 3/20 (15\%), rot 8/20 (40\%)\\
+\indent SS weight+TTT: trans 3/20 (15\%), rot 9/20 (45\%)\\
+\indent SS remove: trans 0/20 (0\%), rot 0/20 (0\%)\\
+\indent SS remove+TTT: trans 0/20 (0\%), rot 0/20 (0\%)\\
+\indent SS hybrid: trans 0/20 (0\%), rot 0/20 (0\%)\\
+\indent ESFM (no mech.): trans 3/20 (15\%), rot 8/20 (40\%)\\
+\indent ESFM* (clean tracks): trans 3/20 (15\%), rot 7/20 (35\%)\\
+\paragraph{Mean-driving scenes (seed-20, top 3 by scene mean)}
+\indent SS madweight (med 0.97): entry-P10 8.04, fountain-P11 1.57, Herz-Jesu-P25 0.37\\
+\indent SS weight (med 0.03): entry-P10 7.96, Herz-Jesu-P25 0.05, Herz-Jesu-P8 0.01\\
+\indent SS weight+TTT (med 0.01): entry-P10 7.89, Herz-Jesu-P25 0.01, Herz-Jesu-P8 0.01\\
+\indent SS remove (med 1.68): entry-P10 8.72, Herz-Jesu-P25 1.79, fountain-P11 1.56\\
+\indent SS remove+TTT (med 1.56): entry-P10 8.75, fountain-P11 1.92, Herz-Jesu-P25 1.20\\
+\indent SS hybrid (med 1.39): entry-P10 8.02, fountain-P11 2.75, Herz-Jesu-P25 0.03\\
+\indent RESfM-scratch (sup.) (med 0.01): entry-P10 0.01, Herz-Jesu-P25 0.01, fountain-P11 0.01\\
+\indent ESFM (no mech.) (med 0.01): entry-P10 7.84, Herz-Jesu-P25 0.01, Herz-Jesu-P8 0.01\\
+\indent ESFM* (clean tracks) (med 0.95): fountain-P11 2.72, entry-P10 1.90, Herz-Jesu-P25 0.01\\
+\section*{blendedmvs  (Nc=225)}
+\begin{tabular}{@{}lccccc@{}}\toprule
+Method & Trans mean±std & Trans med (pooled) & Rot mean & Nr\% & seeds\\ \midrule
+SS madweight & 0.140±0.02 & 0.004 & 9.01 & 92\% & 5\\
+SS weight & 0.144±0.03 & 0.015 & 9.17 & 94\% & 5\\
+SS weight+TTT & 0.137±0.02 & 0.002 & 8.30 & 94\% & 5\\
+SS remove & 0.240±0.06 & 0.160 & 16.04 & 88\% & 5\\
+SS remove+TTT & 0.219±0.10 & 0.211 & 13.19 & 90\% & 5\\
+SS hybrid & 0.140±0.02 & 0.004 & 9.01 & 93\% & 5\\
+RESfM-scratch (sup.) & 0.353±0.04 & 0.260 & 31.66 & 92\% & 5\\
+ESFM (no mech.) & 6.449±3.75 & 0.000 & 12.80 & 96\% & 5\\
+ESFM* (clean tracks) & 3.795±3.51 & 0.000 & 10.62 & 94\% & 5\\
+\bottomrule\end{tabular}
+\paragraph{Per-scene wins vs RESfM-scratch (matched seed, scene x seed cells)}
+\indent SS madweight: trans 10/20 (50\%), rot 11/20 (55\%)\\
+\indent SS weight: trans 11/20 (55\%), rot 11/20 (55\%)\\
+\indent SS weight+TTT: trans 10/20 (50\%), rot 10/20 (50\%)\\
+\indent SS remove: trans 6/20 (30\%), rot 10/20 (50\%)\\
+\indent SS remove+TTT: trans 11/20 (55\%), rot 12/20 (60\%)\\
+\indent SS hybrid: trans 11/20 (55\%), rot 10/20 (50\%)\\
+\indent ESFM (no mech.): trans 3/8 (38\%), rot 3/8 (38\%)\\
+\indent ESFM* (clean tracks): trans 3/8 (38\%), rot 2/8 (25\%)\\
+\paragraph{Mean-driving scenes (seed-20, top 3 by scene mean)}
+\indent SS madweight (med 0.00): 5b950c71608de421b1e7318f 0.58, 5acf8ca0f3d8a750097e4b15 0.01, 5a48ba95c7dab83a7d7b44ed 0.00\\
+\indent SS weight (med 0.04): 5b950c71608de421b1e7318f 0.33, 5a48ba95c7dab83a7d7b44ed 0.05, 5acf8ca0f3d8a750097e4b15 0.02\\
+\indent SS weight+TTT (med 0.01): 5b950c71608de421b1e7318f 0.52, 5acf8ca0f3d8a750097e4b15 0.02, 5a48ba95c7dab83a7d7b44ed 0.00\\
+\indent SS remove (med 0.19): 5a48ba95c7dab83a7d7b44ed 0.72, 5b950c71608de421b1e7318f 0.33, 5acf8ca0f3d8a750097e4b15 0.05\\
+\indent SS remove+TTT (med 0.07): 5a48ba95c7dab83a7d7b44ed 0.62, 5b950c71608de421b1e7318f 0.13, 5acf8ca0f3d8a750097e4b15 0.00\\
+\indent SS hybrid (med 0.03): 5b950c71608de421b1e7318f 0.37, 5acf8ca0f3d8a750097e4b15 0.03, 5a48ba95c7dab83a7d7b44ed 0.02\\
+\indent RESfM-scratch (sup.) (med 0.35): 5b950c71608de421b1e7318f 0.82, 5a48ba95c7dab83a7d7b44ed 0.69, 5acf8ca0f3d8a750097e4b15 0.00\\
+\indent ESFM (no mech.) (med 0.22): 5b950c71608de421b1e7318f 0.47, 5a48ba95c7dab83a7d7b44ed 0.44, 5acf8ca0f3d8a750097e4b15 0.00\\
+\indent ESFM* (clean tracks) (med 0.27): 5b950c71608de421b1e7318f 0.76, 5a48ba95c7dab83a7d7b44ed 0.54, 5acf8ca0f3d8a750097e4b15 0.00\\
+\section*{olsson  (Nc=3858)}
+\begin{tabular}{@{}lccccc@{}}\toprule
+Method & Trans mean±std & Trans med (pooled) & Rot mean & Nr\% & seeds\\ \midrule
+SS madweight & 3.010±0.34 & 1.169 & 14.44 & 86\% & 5\\
+SS weight & 2.906±0.33 & 1.139 & 13.24 & 90\% & 5\\
+SS weight+TTT & 8.033±0.30 & 0.433 & 11.60 & 90\% & 5\\
+SS remove & 3.413±0.57 & 1.619 & 13.89 & 78\% & 5\\
+SS remove+TTT & 3.626±0.35 & 1.913 & 14.53 & 78\% & 5\\
+SS hybrid & 2.905±0.23 & 1.559 & 13.35 & 88\% & 5\\
+RESfM-scratch (sup.) & 7.374±2.63 & 1.123 & 12.62 & 89\% & 5\\
+ESFM (no mech.) & 5.914±3.32 & 0.558 & 13.03 & 90\% & 5\\
+ESFM* (clean tracks) & 9.363±1.28 & 1.459 & 18.95 & 90\% & 5\\
+\bottomrule\end{tabular}
+\paragraph{Per-scene wins vs RESfM-scratch (matched seed, scene x seed cells)}
+\indent SS madweight: trans 81/195 (42\%), rot 92/195 (47\%)\\
+\indent SS weight: trans 87/195 (45\%), rot 98/195 (50\%)\\
+\indent SS weight+TTT: trans 110/195 (56\%), rot 102/195 (52\%)\\
+\indent SS remove: trans 76/195 (39\%), rot 82/195 (42\%)\\
+\indent SS remove+TTT: trans 71/195 (36\%), rot 81/195 (42\%)\\
+\indent SS hybrid: trans 85/194 (44\%), rot 92/194 (47\%)\\
+\indent ESFM (no mech.): trans 107/195 (55\%), rot 99/195 (51\%)\\
+\indent ESFM* (clean tracks): trans 88/195 (45\%), rot 77/195 (39\%)\\
+\paragraph{Mean-driving scenes (seed-20, top 3 by scene mean)}
+\indent SS madweight (med 1.15): Lund\_University\_Sphinx 14.42, Jonas\_Ahlstromer 10.89, Tsar\_Nikolai\_I 10.50\\
+\indent SS weight (med 1.22): Urban\_II 12.88, GustavIIAdolf 10.10, Lund\_University\_Sphinx 9.96\\
+\indent SS weight+TTT (med 0.18): dtu106 236.90, Urban\_II 12.25, Porta\_San\_Donato\_Bologna 7.28\\
+\indent SS remove (med 1.39): Tsar\_Nikolai\_I 10.55, Urban\_II 9.26, Lund\_University\_Sphinx 8.84\\
+\indent SS remove+TTT (med 2.26): Statue\_Of\_Liberty 20.74, Tsar\_Nikolai\_I 15.24, Urban\_II 13.68\\
+\indent SS hybrid (med 1.34): Urban\_II 14.01, Lund\_University\_Sphinx 9.43, Park\_Gate\_Clermont\_Ferrand 9.06\\
+\indent RESfM-scratch (sup.) (med 0.17): dtu106 239.16, Lund\_University\_Sphinx 11.51, Tsar\_Nikolai\_I 10.75\\
+\indent ESFM (no mech.) (med 0.13): dtu106 236.32, Statue\_Of\_Liberty 11.98, Urban\_II 11.66\\
+\indent ESFM* (clean tracks) (med 0.28): dtu106 238.99, Tsar\_Nikolai\_I 16.31, Statue\_Of\_Liberty 15.69\\
+(RA-AUC/AUC: pending the Final\_recon pose-recovery program.)
+\end{document}
