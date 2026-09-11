@@ -1307,10 +1307,13 @@ should not be read as method differences, by any paper. (3)~Consequently, meanin
 comparisons must be \emph{environment-controlled}: every number in the main paper
 (all arms, RESfM-from-scratch, and the released checkpoint) is produced in a single
 environment, and the out-of-distribution margins ($2\times$ and larger) sit far above this
-noise floor. Third-party corroboration: the VGPA appendix~\citep{vgpa} reports that
-re-running RESfM under their own protocol shifts its numbers because ``the final
-bundle-adjustment stage is not fully deterministic'' --- the same environment-noise
-layer measured here, observed independently by the original authors' group.
+noise floor. Third-party corroboration of this noise floor: the VGPA
+appendix~\citep{vgpa} reports that re-running RESfM under their own protocol shifts its
+numbers because ``the final bundle-adjustment stage is not fully deterministic'' ---
+the same environment-noise layer measured here, observed independently by the original
+authors' group. This corroborates the floor only: the reproduction gap itself is an
+order of magnitude larger and traces to \emph{training} (checkpoint provenance and
+training-seed variance), not to bundle adjustment.
 
 
 \section{Per-scene results and configuration}\label{app:perscene}
