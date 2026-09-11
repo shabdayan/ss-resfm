@@ -696,6 +696,19 @@ produce \emph{zero} cells above $100$, while every unrescued-trunk recipe (super
 weight+TTT, no-mechanism, oracle-clean) produces them, all on Olsson. Reliability ---
 the absence of catastrophic cells --- is the one verdict on which all lenses agree.
 
+\paragraph{The contamination axis under coverage pricing.} Re-scoring the
+in-distribution matrix (the main paper's in-distribution section) with RA-AUC@$30^{\circ}$ (five seeds
+each): at $60\%$, supervision with best-case labels is \emph{last on both metric
+families} --- worst-tier translation mean ($23.4\pm7.8$) and worst RA-AUC
+($0.012\pm0.01$, from registering only ${\sim}106$ of $600$ cameras) --- so the
+causal label-ceiling verdict, unlike the OOD removal ordering, is robust to how
+coverage is priced (label-free soft arms lead at $0.088$--$0.090$). At low and
+moderate contamination the no-mechanism baseline's coverage advantage makes it the
+RA-AUC leader in-domain ($0.782/0.759/0.472$ at $0.5/3.1/43\%$, vs.\ supervised
+$0.664\pm0.27$ --- the wide band is its in-domain bimodality); the mechanisms'
+value under this lens, in distribution, is concentrated exactly where labels
+fail.
+
 \section{Per-scene results and configuration}\label{app:perscene}
 \subsection{Per-scene results}\label{sec:perscene}
 \begin{table*}[t]\centering\footnotesize

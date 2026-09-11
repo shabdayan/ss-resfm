@@ -183,3 +183,72 @@ for ds, (pm, ps) in VAN.items():
     if not chk(f"VANILLA {ds} std", ps, cs, 0.12): bad += 1
 
 print(f"\nDONE(baseline bands): {bad} total mismatches")
+
+
+# ---- app:lenses tables (RA-AUC/AUC bands, win counts, in-dist RA) ----
+import json as _json
+
+def _lens_band(arm, ds, kind):
+    vals = []
+    for s in ["", 21, 22, 23, 24]:
+        for r in roots(arm, ds) if False else _lens_roots(arm, ds, s):
+            j = os.path.join(r, "vgpa_metrics.json")
+            if os.path.exists(j):
+                m = _json.load(open(j))
+                if m:
+                    vals.append(np.mean([e[kind]["pose"]["30.0"] for e in m.values()]))
+                break
+    return (np.mean(vals), np.std(vals, ddof=1)) if len(vals) > 1 else (float("nan"),)*2
+
+def _lens_roots(arm, ds, s):
+    tag = f"uesfm_finelr{'' if s == '' else f'_s{s}'}"
+    if arm == "RESfM":
+        return [f"{M}/resfm_finelr{'' if s == '' else f'_s{s}'}_megadepth_eval"] if ds == "megadepth" \
+            else [f"{C}/resfm_finelr{'' if s == '' else f'_s{s}'}_{ds}_eval"]
+    if arm == "vanilla":
+        pre = M if ds == "megadepth" else C
+        return [f"{pre}/esfm_vanilla_{ds}_eval"] if s == "" else \
+            [f"{pre}/esfm_vanilla_s{s}_{ds}_eval", f"{pre}/esfm_vanilla_{ds}_eval_seed{s}"]
+    if arm == "star":
+        sd = {"olsson": "olssonstar"}.get(ds, ds)
+        pre = M if ds == "megadepth" else C
+        return [f"{pre}/esfm_star_af_{sd}_eval"] if s == "" else [f"{pre}/esfm_star_af_s{s}_{sd}_eval"]
+    if arm == "hybrid":
+        return [f"{M}/{tag}_hybrid_megadepth_eval"] if ds == "megadepth" else [f"{C}/{tag}_rf_hybrid_{ds}_eval"]
+    if ds == "megadepth":
+        return [f"{M}/{tag}_{n}_megadepth_eval" for n in ([arm] + (["wttt"] if arm == "weight_ttt" else []))]
+    return [f"{C}/{tag}_rf_{arm}_{ds}_eval"]
+
+RAAUC = {  # arm -> ds -> (ra, auc) printed pose@30 means
+ "madweight": {"megadepth": (0.599, 0.778), "1dsfm": (0.374, 0.642), "1dsfmhard": (0.067, 0.354),
+               "strecha": (0.587, 0.601), "blendedmvs": (0.589, 0.642), "olsson": (0.568, 0.640)},
+ "remove":    {"megadepth": (0.442, 0.755), "1dsfm": (0.259, 0.623), "1dsfmhard": (0.036, 0.411),
+               "strecha": (0.612, 0.636), "blendedmvs": (0.500, 0.577), "olsson": (0.468, 0.584)},
+ "RESfM":     {"megadepth": (0.605, 0.811), "1dsfm": (0.408, 0.623), "1dsfmhard": (0.044, 0.329),
+               "strecha": (0.725, 0.735), "blendedmvs": (0.600, 0.654), "olsson": (0.620, 0.653)},
+ "vanilla":   {"megadepth": (0.574, 0.756), "1dsfm": (0.461, 0.570), "1dsfmhard": (0.099, 0.409),
+               "strecha": (0.662, 0.677), "blendedmvs": (0.722, 0.744), "olsson": (0.645, 0.688)},
+}
+for arm, cells in RAAUC.items():
+    for ds, (pra, pauc) in cells.items():
+        cra, _ = _lens_band(arm, ds, "ra_auc")
+        cau, _ = _lens_band(arm, ds, "auc")
+        if not chk(f"RAAUC {arm}/{ds} ra", pra, cra, 0.006): bad += 1
+        if not chk(f"RAAUC {arm}/{ds} auc", pauc, cau, 0.006): bad += 1
+
+INDRA = {  # recipe pattern -> pool -> printed RA-pose@30
+ "resfm_{p}_s{s}_ind_eval": {"olssonid": 0.664, "bmvsid": 0.524, "1donly": 0.387, "hardonly": 0.012},
+ "uesfm_{p}_s{s}_ind_weight_ttt_eval": {"olssonid": 0.701, "bmvsid": 0.523, "1donly": 0.401, "hardonly": 0.090},
+ "esfm_vanilla_{p}_s{s}_ind_eval": {"olssonid": 0.782, "bmvsid": 0.759, "1donly": 0.472, "hardonly": 0.050},
+}
+for pat, cells in INDRA.items():
+    for pool, pv in cells.items():
+        vals = []
+        for s in range(20, 25):
+            j = f"{C}/{pat.format(p=pool, s=s)}/vgpa_metrics.json"
+            if os.path.exists(j):
+                m = _json.load(open(j))
+                if m: vals.append(np.mean([e["ra_auc"]["pose"]["30.0"] for e in m.values()]))
+        if not chk(f"INDRA {pat.split('_')[0]}/{pool}", pv, np.mean(vals) if vals else float("nan"), 0.006): bad += 1
+
+print(f"\nDONE(lenses): {bad} total mismatches")
