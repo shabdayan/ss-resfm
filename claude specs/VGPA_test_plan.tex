@@ -1,0 +1,88 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs,enumitem,parskip}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\title{VGPA Test Plan: What We Run the Day Their Code Drops}
+\author{Prepared September 12, 2026 --- VGPA = Khatib, Galun, Basri, ECCV 2026 (arXiv:2609.09491)\\
+Code status: project page (\url{vgpa-sfm.github.io}) shows a placeholder link; polled every results cycle}
+\date{}
+\begin{document}\maketitle
+
+\section*{Why these tests}
+VGPA is label-free view-graph pose averaging from the same lab: it beats RESfM on most
+scenes under its own lenses, but every one of its numbers is a single run, in the
+published-RESfM environment (its main-table RESfM column is the paper's 0.169 draw ---
+verified by recomputing their column means), on its own track preprocessing, and never
+under heavy contamination, never on Olsson, never at 60\%. Each test below closes one of
+those gaps. Ordered by cost and by decision value; every analysis lands in the
+already-built five-lens machinery (\code{compute\_vgpa\_metrics.py} +
+\code{analyze\_vgpa\_style.py}, \code{FIVELENS\_readout.pdf}).
+
+\section*{Tier 1 --- cheap, immediately publishable (days)}
+\begin{enumerate}[leftmargin=1.6em,itemsep=4pt]
+\item \textbf{Released checkpoint, our environment, repeated runs.} Their pipeline
+includes test-time fine-tuning and robust BA --- both nondeterminism sources we have
+quantified for our own arms (TTT $\sim$0.14 mean-level; BA floor $\mathcal{O}(0.05)$).
+Three-plus repeats of their released model on their benchmarks measures \emph{their}
+run-to-run variance. Their appendix already concedes BA nondeterminism; this puts a
+number on it. \emph{Decision value: extends the environment-noise finding to a second
+method; rebuttal ammunition regardless of outcome.}
+\item \textbf{Five-lens readout of their released model on their tracks.} Per-scene
+wins, mean-vs-median with blow-up attribution (their MegaDepth mean is carried by four
+scenes: 0265, 1001, 0024, 0104), coverage, AUC/RA-AUC recomputed under one protocol.
+Costless once (1) runs.
+\end{enumerate}
+
+\section*{Tier 2 --- the decisive test (weeks)}
+\begin{enumerate}[leftmargin=1.6em,itemsep=4pt,resume]
+\item \textbf{Five-seed retrain with their recipe.} Training is self-supervised on
+MegaDepth --- no label infrastructure needed. Tests whether the two phenomena we
+document for RESfM generalize: (a) the \emph{checkpoint-provenance gap} (released vs.\
+recipe-reproducible); (b) the \emph{training-seed lottery} (bands, bimodality,
+catastrophic scene cells). \emph{Decision value: if either appears, the paper's
+reliability methodology upgrades from ``about RESfM'' to ``about deep SfM training'' ---
+the strongest possible answer to a ``VGPA supersedes this'' review. If neither appears,
+VGPA earns a genuine robustness credit and the composition case strengthens.}
+\item \textbf{VGPA on OUR track suite} (same npz benchmarks as every row of our tables):
+MegaDepth, 1DSfM at 43\%, 1DSfM-hard at 60\%, Strecha, BlendedMVS, Olsson. Requires
+adapting their view-graph construction to consume our tracks or rebuilding their
+front-end on our scenes --- scope known only after reading their code. Two questions
+their paper cannot answer: \emph{does the view-graph modality escape the Olsson
+collapse} (and specifically the dtu106 basin --- our tail decomposition shows that one
+scene is the collapse), and \emph{does their two-view front-end survive 60\%
+contamination}, where pairwise geometry estimation itself degrades --- the label-ceiling
+band where our label-free removal is the only working recipe.
+\end{enumerate}
+
+\section*{Tier 3 --- composition (after Tiers 1--2)}
+\begin{enumerate}[leftmargin=1.6em,itemsep=4pt,resume]
+\item \textbf{VGPA-init for the collapse basin.} Use VGPA's global poses to initialize
+or anchor the joint reconstruction on the catastrophic cells (dtu106; the Olsson
+collapse seeds; BMVS bimodal seeds). \emph{Caution: Fadi reports VGPA+RESfM composition
+underperformed --- get the configuration details from him first (which coupling, which
+datasets, worse than what). Our probe differs on both axes he presumably tested:
+targeted at basin-failure cells rather than benchmark-wide, and composed with the
+self-supervised arms rather than supervised RESfM.}
+\item \textbf{End-to-end label-free pipeline.} VGPA poses + our track-level adaptive
+cleaning + robust BA: both stages self-supervised --- the composition both papers'
+future-work sections gesture at. Report under both metric families (raw error over
+registered + RA-AUC), since our lens-4 results show the two can invert verdicts.
+\item \textbf{Retrieval-graph stress test.} Their MegaLoc@30 sparse-graph variant on
+contaminated scenes: sparse graphs amplify the cost of bad edges; our contamination
+axis is the natural stressor their Table 5 never meets.
+\end{enumerate}
+
+\section*{Venue timing}
+Code before $\sim$Oct 20: Tier 1 (+ Tier 2a if fast) can enter the CVPR submission.
+Code before $\sim$mid-Jan: Tiers 1--2 are rebuttal material. Later: Tiers 2--3 seed
+paper \#2 (with the VGPA composition conversation as the collaboration on-ramp with
+Fadi/Ronen).
+
+\section*{Standing infrastructure (ready today)}
+Five-lens machinery validated on our full matrix; RA-AUC/AUC pipeline recovers poses
+from COLMAP models without re-evaluation; 1DSfM images downloaded (14 scenes);
+MegaDepth undistorted substrate built (68 scenes); the with-seeds protocol, verify
+scripts, and the paper's environment-noise decomposition give every number above a
+place to land.
+\end{document}
