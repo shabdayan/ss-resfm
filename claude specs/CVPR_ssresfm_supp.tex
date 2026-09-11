@@ -392,15 +392,20 @@ Evaluating the RESfM authors' \emph{released checkpoint} in our harness on the 3
 test scenes yields a post-BA mean translation error of $0.209$ vs.\ the published $0.169$
 (rotation $1.89\deg$ vs.\ $1.29\deg$). Since our controlled comparisons hinge on baseline
 fidelity, we traced this discrepancy to its source. The finding is of independent
-interest: \textbf{post-BA means on internet-photo benchmarks carry a practical
-environment-noise floor of $\mathcal{O}(0.05)$}, produced by chaotic basin selection in
-robust bundle adjustment. Third-party corroboration of this noise floor: the VGPA
-appendix~\cite{vgpa} reports that re-running RESfM under their own protocol shifts its
-numbers because ``the final bundle-adjustment stage is not fully deterministic'' ---
-the same environment-noise layer, observed independently by the original authors'
-group. This corroborates the floor only: the reproduction gap itself is an order of
-magnitude larger and traces to \emph{training} (checkpoint provenance and
-training-seed variance), not to bundle adjustment.
+interest: \textbf{dataset-level post-BA means on MegaDepth-scale benchmarks carry a
+practical environment-noise floor of $\mathcal{O}(0.05)$ for non-TTT evaluations},
+produced by chaotic basin selection in robust bundle adjustment --- and the floor is
+larger elsewhere: per-scene values flip by up to $\pm0.37$ (released checkpoint:
+$0.043\!\to\!0.892$ on scene 0046), TTT-based cells carry $\sim\!0.14$ mean-level
+run-to-run variance (\S\ref{sec:ttt}), and on high-error benchmarks the floor scales
+with the error (released checkpoint on 1DSfM: $\pm0.27$ across runs). Third-party
+corroboration: the VGPA appendix~\cite{vgpa} reports that re-running RESfM under their
+own protocol shifts its numbers because ``the final bundle-adjustment stage is not
+fully deterministic'' --- the same environment-noise layer, observed independently by
+the original authors' group. This corroborates the noise floor only: the reproduction
+gap itself ($0.169$ vs.\ $0.34$--$0.39$, roughly $4\times$ the floor) traces to
+\emph{training} (checkpoint provenance and training-seed variance), not to bundle
+adjustment.
 
 \begin{table}[h]\centering\footnotesize
 \caption{Released RESfM checkpoint, MegaDepth 36-scene post-BA means, under three

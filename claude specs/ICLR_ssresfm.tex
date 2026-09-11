@@ -1302,18 +1302,23 @@ nowhere that the collapse or the bimodality lives.
 \subsection{Implications for reading the paper's numbers}\label{sec:implications}
 (1)~The published number and ours are draws from a distribution over environments; no
 software matching can force a particular draw. (2)~Differences of $\lesssim\!0.05$ in
-post-BA translation means on these benchmarks are \textbf{within environment noise} and
-should not be read as method differences, by any paper. (3)~Consequently, meaningful
+\emph{dataset-level} post-BA translation means on MegaDepth-scale benchmarks are
+\textbf{within environment noise} for non-TTT evaluations and should not be read as
+method differences, by any paper --- and the floor is larger elsewhere: per-scene
+values flip by up to $\pm0.37$ (released checkpoint: $0.043\!\to\!0.892$ on scene 0046),
+TTT-based cells carry $\sim\!0.14$ mean-level run-to-run variance
+(\S\ref{sec:ttt}), and on high-error benchmarks the floor scales with the error
+(released checkpoint on 1DSfM: $\pm0.27$ across runs). (3)~Consequently, meaningful
 comparisons must be \emph{environment-controlled}: every number in the main paper
 (all arms, RESfM-from-scratch, and the released checkpoint) is produced in a single
-environment, and the out-of-distribution margins ($2\times$ and larger) sit far above this
-noise floor. Third-party corroboration of this noise floor: the VGPA
-appendix~\citep{vgpa} reports that re-running RESfM under their own protocol shifts its
-numbers because ``the final bundle-adjustment stage is not fully deterministic'' ---
-the same environment-noise layer measured here, observed independently by the original
-authors' group. This corroborates the floor only: the reproduction gap itself is an
-order of magnitude larger and traces to \emph{training} (checkpoint provenance and
-training-seed variance), not to bundle adjustment.
+environment, and the out-of-distribution margins ($2\times$ and larger) sit far above
+these noise floors. Third-party corroboration: the VGPA appendix~\citep{vgpa} reports
+that re-running RESfM under their own protocol shifts its numbers because ``the final
+bundle-adjustment stage is not fully deterministic'' --- the same environment-noise
+layer measured here, observed independently by the original authors' group. This
+corroborates the noise floor only: the reproduction gap itself ($0.169$ vs.\
+$0.34$--$0.39$, roughly $4\times$ the floor) traces to \emph{training} (checkpoint
+provenance and training-seed variance), not to bundle adjustment.
 
 
 \section{Per-scene results and configuration}\label{app:perscene}
