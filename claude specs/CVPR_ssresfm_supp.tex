@@ -394,7 +394,10 @@ test scenes yields a post-BA mean translation error of $0.209$ vs.\ the publishe
 fidelity, we traced this discrepancy to its source. The finding is of independent
 interest: \textbf{post-BA means on internet-photo benchmarks carry a practical
 environment-noise floor of $\mathcal{O}(0.05)$}, produced by chaotic basin selection in
-robust bundle adjustment.
+robust bundle adjustment. Third-party corroboration: the VGPA appendix~\cite{vgpa}
+reports that re-running RESfM under their own protocol shifts its numbers because
+``the final bundle-adjustment stage is not fully deterministic'' --- the same
+environment-noise layer, observed independently by the original authors' group.
 
 \begin{table}[h]\centering\footnotesize
 \caption{Released RESfM checkpoint, MegaDepth 36-scene post-BA means, under three
