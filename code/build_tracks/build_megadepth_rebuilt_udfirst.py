@@ -81,11 +81,14 @@ def main():
         sys.exit(f"[{args.scene}] coverage {100*cov:.1f}% < 90% -- skipping")
 
     keep = np.asarray(keep)
-    fields = build_scene(paths, np.asarray(Ps), np.asarray(Ks),
-                         ref["namesList"][keep])
-    fields["covered_frac"] = np.float64(cov)
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    ck = os.path.join(os.path.dirname(out_path), f".ck_{args.scene}.pkl")
+    fields = build_scene(paths, np.asarray(Ps), np.asarray(Ks),
+                         ref["namesList"][keep], checkpoint_path=ck)
+    fields["covered_frac"] = np.float64(cov)
     np.savez(out_path, **fields)
+    if os.path.exists(ck):
+        os.remove(ck)
     print(f"[{args.scene}] DONE outlier_pct={float(fields['outlier_pct']):.2f}",
           flush=True)
 

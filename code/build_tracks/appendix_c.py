@@ -15,6 +15,7 @@ matrix RANSAC threshold RANSAC_PX pixels.
 
 import numpy as np
 import cv2
+import os
 
 MAX_FEATURES = 8192          # COLMAP's default cap
 RATIO_THR = 0.8              # Lowe's ratio test
@@ -181,7 +182,7 @@ def label_outliers(M, Ps_gt):
     return outliers, observed
 
 
-def build_scene(image_paths, Ps_gt, Ks, names, verbose=True):
+def build_scene(image_paths, Ps_gt, Ks, names, verbose=True, checkpoint_path=None):
     """Full Appendix C pipeline for one scene.
 
     Returns dict of npz fields: M, Ns, Ps_gt, outliers2, outlier_pct, namesList.
@@ -195,8 +196,18 @@ def build_scene(image_paths, Ps_gt, Ks, names, verbose=True):
         dict(algorithm=1, trees=4), dict(checks=64))
     pair_matches = {}
     total_pairs = m * (m - 1) // 2
-    done = 0
-    for i in range(m):
+    start_i = 0
+    if checkpoint_path and os.path.exists(checkpoint_path):
+        # row-granular resume across queue run limits (25-row atomic dumps)
+        import pickle
+        with open(checkpoint_path, "rb") as f:
+            ck = pickle.load(f)
+        pair_matches, start_i = ck["pair_matches"], ck["next_i"]
+        if verbose:
+            print(f"  resuming matching at row {start_i}/{m} "
+                  f"({len(pair_matches)} pairs kept)", flush=True)
+    done = start_i * (m - 1) - start_i * (start_i - 1) // 2
+    for i in range(start_i, m):
         for j in range(i + 1, m):
             inl = match_pair(kps_all[i], desc_all[i], kps_all[j], desc_all[j],
                              matcher)
@@ -205,6 +216,13 @@ def build_scene(image_paths, Ps_gt, Ks, names, verbose=True):
             done += 1
             if verbose and done % 200 == 0:
                 print(f"  matched {done}/{total_pairs} pairs", flush=True)
+        if checkpoint_path and (i % 25 == 24 or i == m - 1):
+            import pickle
+            tmp = checkpoint_path + ".tmp"
+            with open(tmp, "wb") as f:
+                pickle.dump({"pair_matches": pair_matches, "next_i": i + 1}, f,
+                            protocol=4)
+            os.replace(tmp, checkpoint_path)
 
     M = chain_tracks(m, pair_matches, kps_all)
     if verbose:
