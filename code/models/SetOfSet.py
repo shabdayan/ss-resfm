@@ -135,7 +135,7 @@ class DeepSetOfSetOutliersNet(BaseNet):
         # Output dimensions
         n_d_out = 3  # 3D points output dimension
         m_d_out = self.out_channels  # Camera parameters output dimension
-        d_in = 2  # Input dimension (2D observations)
+        d_in = 2 + conf.get_int('model.obs_feat_dim', 0)  # 2D obs (+ optional per-obs feature channels)
         
         # Input embedding layer with optional positional encoding
         self.embed = EmbeddingLayer(multires, d_in)
@@ -318,7 +318,7 @@ class SetOfSetOutliersNet(BaseNet):
 
         n_d_out = 3
         m_d_out = self.out_channels
-        d_in = 2
+        d_in = 2 + conf.get_int('model.obs_feat_dim', 0)
 
         self.embed = EmbeddingLayer(multires, d_in)
 
@@ -394,7 +394,7 @@ class SetOfSetNet(BaseNet):
 
         n_d_out = 3
         m_d_out = self.out_channels
-        d_in = 2
+        d_in = 2 + conf.get_int('model.obs_feat_dim', 0)
 
         self.embed = EmbeddingLayer(multires, d_in)
 
@@ -447,7 +447,7 @@ class DeepSetOfSetNet(BaseNet):
         
         n_d_out = 3
         m_d_out = self.out_channels
-        d_in = 2
+        d_in = 2 + conf.get_int('model.obs_feat_dim', 0)
         
         # Input embedding
         self.embed = EmbeddingLayer(multires, d_in)

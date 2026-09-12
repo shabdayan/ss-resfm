@@ -20,7 +20,9 @@ import cv2
 CODE = os.path.dirname(os.path.abspath(__file__))
 
 
-def resolve_images(scene, names, raw, dataset):
+def resolve_images(scene, names, raw, dataset, K_gt=None):
+    """Return (paths, scales): scales rescale each image into the npz coordinate
+    frame before sampling (1.0 where frames already agree)."""
     if dataset.startswith("1dsfm"):
         # namesList entries are global camera indices ("%06d") into the scene's
         # list.txt (one line per image, first token = relative image path).
@@ -32,11 +34,31 @@ def resolve_images(scene, names, raw, dataset):
             c = int(n.strip())
             p = os.path.join(scene_dir, lines[c]) if c < len(lines) else None
             out.append(p if p and os.path.exists(p) else None)
-        return out
+        return out, [1.0] * len(out)
+    # megadepth: our COLMAP-undistorted images; the npz frame is the same
+    # undistortion up to a per-camera isotropic resize, recovered exactly as
+    # s_i = fx_gt / fx_ud (see dense-features program notes).
+    import pycolmap
+    ud = os.path.join(raw, "undistorted", scene)
     pool = {}
-    for p in glob.glob(os.path.join(raw, "MegaDepth_SfM", scene, "*")):
-        pool[os.path.basename(p)] = p
-    return [pool.get(os.path.basename(n.strip())) for n in names]
+    for k in sorted(os.listdir(ud)):
+        sp = os.path.join(ud, k, "sparse")
+        if not os.path.isdir(sp):
+            continue
+        rec = pycolmap.Reconstruction(sp)
+        for im in rec.images.values():
+            p = os.path.join(ud, k, "images", im.name)
+            if im.name not in pool and os.path.exists(p):
+                pool[im.name] = (p, float(rec.cameras[im.camera_id].params[0]))
+    paths, scales = [], []
+    for i, n in enumerate(names):
+        hit = pool.get(os.path.basename(n.strip()))
+        if hit is None:
+            paths.append(None); scales.append(1.0)
+        else:
+            paths.append(hit[0])
+            scales.append(float(K_gt[i][0, 0]) / hit[1])
+    return paths, scales
 
 
 def main():
@@ -62,7 +84,7 @@ def main():
                 allow_pickle=True)
     M = d["M"]; K = d["K_gt"]; names = [str(n) for n in d["namesList"]]
     m = M.shape[0] // 2
-    paths = resolve_images(args.scene, names, args.raw, args.dataset)
+    paths, scales = resolve_images(args.scene, names, args.raw, args.dataset, K_gt=K)
 
     sift = cv2.SIFT_create()
     obs_cam, obs_pt, feats = [], [], []
@@ -76,6 +98,10 @@ def main():
         img = cv2.imread(paths[i], cv2.IMREAD_GRAYSCALE)
         if img is None:
             continue
+        if abs(scales[i] - 1.0) > 1e-3:   # bring image into the npz frame
+            img = cv2.resize(img, None, fx=scales[i], fy=scales[i],
+                             interpolation=cv2.INTER_AREA if scales[i] < 1
+                             else cv2.INTER_CUBIC)
         h, w = img.shape[:2]
         cx, cy = K[i][0, 2], K[i][1, 2]
         frame_errs.append(max(abs(2 * cx - w) / w, abs(2 * cy - h) / h))
