@@ -6,6 +6,33 @@ import networkx as nx
 
 
 
+def inject_outliers(M, rate):
+    """Training-time outlier-injection augmentation for OOD robustness.
+    Corrupt `rate` fraction of each camera's observed 2D keypoints into
+    realistic 'wrong matches' by reassigning them the coordinates of another
+    observed keypoint in the SAME camera. Self-supervised (reprojection-
+    percentile) head sees these as high-error outliers -> learns robustness.
+    M: (2m, n) tensor, 0 = unobserved. Returns a corrupted copy (GT poses
+    unchanged)."""
+    if rate <= 0:
+        return M
+    m = M.shape[0] // 2
+    n = M.shape[1]
+    X = M.reshape(m, 2, n).clone()
+    vis = (X[:, 0, :] != 0) | (X[:, 1, :] != 0)     # (m, n)
+    for c in range(m):
+        obs = torch.nonzero(vis[c], as_tuple=False).flatten()
+        if obs.numel() < 2:
+            continue
+        k = int(rate * obs.numel())
+        if k == 0:
+            continue
+        sel = obs[torch.randperm(obs.numel())[:k]]           # points to corrupt
+        src = obs[torch.randint(obs.numel(), (k,))]          # random other observed kpts
+        X[c, :, sel] = X[c, :, src]                          # wrong-match corruption
+    return X.reshape(2 * m, n)
+
+
 def is_valid_sample(data, min_pts_per_cam=10, phase=Phases.TRAINING):
     if phase is Phases.TRAINING:
         return data.x.pts_per_cam.min().item() >= min_pts_per_cam
@@ -134,8 +161,28 @@ def M2sparse(M, normalize=False, Ns=None, M_original=None, features=None):
     else:
         mat_vals = M.reshape(n_cams, 2, n_pts).transpose(1, 2)[mat_indices[0], mat_indices[1], :]
 
-    mat_shape = (n_cams, n_pts, 2)
-    
+    d_extra = 0
+    if features is not None:
+        # features = (obs_cam [K], obs_pt [K], F [K, D]) aligned by explicit
+        # (camera, point) join; observations without a feature get zeros.
+        obs_cam, obs_pt, F = features
+        obs_cam = torch.as_tensor(np.asarray(obs_cam), dtype=torch.long)
+        obs_pt = torch.as_tensor(np.asarray(obs_pt), dtype=torch.long)
+        F = torch.as_tensor(np.asarray(F), dtype=mat_vals.dtype)
+        d_extra = F.shape[1]
+        key = obs_cam * n_pts + obs_pt
+        order = torch.argsort(key)
+        key_sorted = key[order]
+        want = mat_indices[0] * n_pts + mat_indices[1]
+        pos = torch.searchsorted(key_sorted, want)
+        pos_c = pos.clamp(max=len(key_sorted) - 1)
+        hit = key_sorted[pos_c] == want
+        feat_vals = torch.zeros(mat_vals.shape[0], d_extra, dtype=mat_vals.dtype)
+        feat_vals[hit] = F[order[pos_c[hit]]]
+        mat_vals = torch.cat([mat_vals, feat_vals], dim=1)
+
+    mat_shape = (n_cams, n_pts, 2 + d_extra)
+
     return sparse_utils.SparseMat(mat_vals, mat_indices, cam_per_pts, pts_per_cam, mat_shape)
 
 

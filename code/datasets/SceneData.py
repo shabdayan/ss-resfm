@@ -11,7 +11,7 @@ import warnings
 
 
 class SceneData:
-    def __init__(self, M, Ns, Ps_gt, scan_name, dilute_M=False, outliers=None, dict_info=None, nameslist=None, M_original=None, reprojection_errs=None):
+    def __init__(self, M, Ns, Ps_gt, scan_name, dilute_M=False, outliers=None, dict_info=None, nameslist=None, M_original=None, reprojection_errs=None, obs_features=None):
 
         if M_original is None:
             M_original = M.detach().clone()
@@ -32,7 +32,8 @@ class SceneData:
         self.outlier_indices = outliers
 
         # M to sparse matrix
-        self.x = dataset_utils.M2sparse(M, normalize=True, Ns=Ns, M_original=M_original)
+        self.obs_features = obs_features
+        self.x = dataset_utils.M2sparse(M, normalize=True, Ns=Ns, M_original=M_original, features=obs_features)
         # print('self.x', self.x.shape)
         # exit()
         # Get image list
@@ -77,11 +78,40 @@ def create_scene_data(conf, phase=None, stage=1):
 
     if calibrated:
         M, Ns, Ps_gt, outliers, dict_info, namesList, M_original, reprojection_errs = Euclidean.get_raw_data(conf, scan, phase, stage=stage)
-        return SceneData(M, Ns, Ps_gt, scan, dilute_M, outliers=outliers, dict_info=dict_info, nameslist=namesList, M_original=M_original, reprojection_errs=reprojection_errs )
+        obs_features = None
+        feats_source = conf.get_string('dataset.obs_features_source', default='')
+        if feats_source:
+            import numpy as _np, os as _os
+            from utils import path_utils as _pu
+            _ds = conf.get_string('dataset.dataset', default="megadepth")
+            _fp = _os.path.join(_os.path.dirname(_pu.path_to_datasets(_ds)),
+                                f"{_ds}_feats_{feats_source}", f"{scan}.npz")
+            _f = _np.load(_fp)
+            obs_features = (_f["obs_cam"], _f["obs_pt"], _f["F"].astype(_np.float32))
+            print(f"Loaded obs features: {_fp} D={obs_features[2].shape[1]}")
+        return SceneData(M, Ns, Ps_gt, scan, dilute_M, outliers=outliers, dict_info=dict_info, nameslist=namesList, M_original=M_original, reprojection_errs=reprojection_errs, obs_features=obs_features )
     else:
         raise ValueError("The code doesn't support the uncalibrated case")
   
-def sample_data(data, num_samples, adjacent=True):
+def _subset_obs_features(feats, cam_indices, kept_cols, n_cams_total):
+    """Remap per-observation features (obs_cam, obs_pt, F) through a camera
+    subset and the kept-columns renumbering; observations outside either are
+    dropped. Injected-outlier observations keep their original-pixel features."""
+    if feats is None:
+        return None
+    obs_cam, obs_pt, F = feats
+    obs_cam = np.asarray(obs_cam); obs_pt = np.asarray(obs_pt)
+    cam_indices = np.asarray(cam_indices).reshape(-1)
+    kept_cols = np.asarray(kept_cols, dtype=bool)
+    cam_pos = -np.ones(n_cams_total, dtype=np.int64)
+    cam_pos[cam_indices] = np.arange(len(cam_indices))
+    col_map = -np.ones(len(kept_cols), dtype=np.int64)
+    col_map[kept_cols] = np.arange(int(kept_cols.sum()))
+    mask = (cam_pos[obs_cam] >= 0) & kept_cols[obs_pt]
+    return (cam_pos[obs_cam[mask]], col_map[obs_pt[mask]], np.asarray(F)[mask])
+
+
+def sample_data(data, num_samples, adjacent=True, outlier_injection_rate=0.0):
     """For a given scene, randomly sample num_samples cameras (rows), adjacent or not.
     Note: when the requested num_samples is more than available cameras, all cameras will be returned"""
 
@@ -96,13 +126,19 @@ def sample_data(data, num_samples, adjacent=True):
     y, Ns = data.y[indices], data.Ns[indices]
     M = data.M[M_indices]
     outlier_indices = data.outlier_indices[indices]
-    outlier_indices = outlier_indices[:, (M > 0).sum(dim=0) > 2]
+    kept_cols = (M > 0).sum(dim=0) > 2
+    outlier_indices = outlier_indices[:, kept_cols]
 
-    M = M[:, (M > 0).sum(dim=0) > 2]
+    M = M[:, kept_cols]
 
+    # Training-time outlier-injection augmentation (OOD robustness); GT poses unchanged.
+    if outlier_injection_rate and outlier_injection_rate > 0:
+        M = dataset_utils.inject_outliers(M, outlier_injection_rate)
 
-
-    sampled_data = SceneData(M, Ns, y, data.scan_name,outliers=outlier_indices, nameslist=data.img_list[indices])
+    sub_feats = _subset_obs_features(getattr(data, 'obs_features', None),
+                                     indices.numpy() if torch.is_tensor(indices) else indices,
+                                     kept_cols.numpy(), len(data.y))
+    sampled_data = SceneData(M, Ns, y, data.scan_name,outliers=outlier_indices, nameslist=data.img_list[indices], obs_features=sub_feats)
     if (sampled_data.x.pts_per_cam == 0).any():
         warnings.warn('Cameras with no points for dataset '+ data.scan_name)
 
