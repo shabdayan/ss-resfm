@@ -42,10 +42,14 @@ Headline findings (details and exact numbers in the paper drafts under `claude s
    (12.4±2.1 vs. ESFM\* 18.12±4.35; 23 of 25 seed pairs): deleting 60% of
    observations — even correctly — starves the constraint structure. How labels are
    used matters as much as having them.
-5. **A reusable robustness benchmark** — rebuilt track suites for five OOD datasets
-   (0.5–61% measured contamination) with GT-derived labels and per-domain splits, plus
-   5-seed bands for every baseline in RESfM's comparison set (ESFM, ESFM*, GASFM,
-   GLOMAP, COLMAP).
+5. **RUC-SfM — a paradigm-agnostic robustness-under-contamination benchmark**
+   (working name; see `benchmark/`) — standardized track suites for five public OOD
+   datasets plus matched training pools spanning a measured 0.5–61% contamination
+   axis, a pose-level evaluation contract open to any SfM paradigm (tracks, images,
+   view graphs, or pointmaps in — cameras out), a five-seed reliability protocol
+   reporting both metric families plus a catastrophic-cell census, and a
+   machine-verified reference grid for nine methods (`benchmark/reference_results.json`,
+   evaluator `benchmark/evaluate.py`).
 
 ## Headline numbers
 

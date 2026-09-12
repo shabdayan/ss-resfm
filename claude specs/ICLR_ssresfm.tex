@@ -151,10 +151,14 @@ environment-noise floor for post-BA means, and per-seed-pairing claim verificati
 practices absent from this benchmark family, where prior work fixes a single seed, and
 which surface findings (bimodal clean-OOD failures, basin-dependent escapes) that
 mean$\pm$std alone would hide.
-(5)~\textbf{A reusable robustness benchmark}: rebuilt Appendix-C-protocol track suites
-for five OOD datasets with measured contamination ($0.5$--$61\%$), GT-derived outlier
-labels, per-domain train/test splits, and the label-quality benchmark --- released with
-code and configurations.
+(5)~\textbf{RUC-SfM, a paradigm-agnostic robustness-under-contamination benchmark}:
+standardized track suites for five public OOD datasets plus matched in-distribution
+training pools spanning a \emph{measured} $0.5$--$61\%$ contamination axis with
+GT-derived labels; a pose-level evaluation contract open to any SfM paradigm (tracks,
+images, view graphs, or pointmaps in --- cameras out); a five-seed reliability
+protocol reporting both metric families (error-over-registered and coverage-priced
+RA-AUC) plus a catastrophic-cell census; and a machine-verified reference grid for
+nine methods --- released with builders, evaluator, and configurations.
 
 \section{Related Work}
 \textbf{Deep equivariant SfM.} Learning-based SfM regresses cameras from point tracks with
@@ -243,6 +247,19 @@ We evaluate on six datasets spanning a wide contamination range. Alongside the R
 paper's quoted outlier fractions we report the contamination \emph{measured on our own
 tracks} (robust ground-truth-pose triangulation with the standard $4$px cutoff, applied
 uniformly to every dataset); see Table~\ref{tab:datasets}.
+
+\paragraph{The RUC-SfM benchmark release.} These suites, splits, and labels are
+released as a standing benchmark defined at the \emph{scene + contamination +
+protocol} level rather than the input-format level: a participant may consume our
+track tensors, the underlying public images (builder scripts included), view graphs,
+or pointmaps, and submits per-scene camera poses with a declared registered set, five
+times from independent training runs. The evaluator scores both metric families ---
+error over registered cameras (the field's convention) and coverage-priced pairwise
+RA-AUC (Appendix~\ref{app:lenses}) --- together with seed bands and the
+catastrophic-cell census, so that neither accuracy-by-omission nor tail failures can
+hide. All reference numbers in this paper (nine methods, five seeds) ship as the
+initial leaderboard, machine-verified against the raw evaluation outputs. Data
+carries per-dataset attribution; a DOI accompanies publication.
 \begin{table}[t]\centering\footnotesize
 \caption{\textbf{Datasets}: outlier rates (RESfM-reported vs.\ measured on our tracks) and regime.}
 \label{tab:datasets}

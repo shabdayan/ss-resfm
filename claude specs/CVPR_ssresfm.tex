@@ -121,10 +121,13 @@ environment-noise floor for post-BA means, and per-seed-pairing claim verificati
 practices absent from this benchmark family, where prior work fixes a single seed, and
 which surface findings (bimodal clean-OOD failures, basin-dependent escapes) that
 mean$\pm$std alone would hide.
-(5)~\textbf{A reusable robustness benchmark}: rebuilt Appendix-C-protocol track suites
-for five OOD datasets with measured contamination ($0.5$--$61\%$), GT-derived outlier
-labels, per-domain train/test splits, and the label-quality benchmark --- released with
-code and configurations.
+(5)~\textbf{RUC-SfM, a paradigm-agnostic robustness-under-contamination benchmark}:
+standardized track suites for five public OOD datasets plus matched training pools
+spanning a \emph{measured} $0.5$--$61\%$ contamination axis; a pose-level evaluation
+contract open to any SfM paradigm (tracks, images, view graphs, or pointmaps in ---
+cameras out); a five-seed protocol reporting both metric families plus a
+catastrophic-cell census; and a machine-verified nine-method reference grid ---
+released with builders, evaluator, and configurations.
 
 \section{Related Work}
 \textbf{Deep equivariant SfM.} Learning-based SfM regresses cameras from point tracks with
@@ -203,7 +206,13 @@ across all arms; only the mechanism block changes.
 We evaluate on six datasets spanning a wide contamination range. Alongside the RESfM
 paper's quoted outlier fractions we report the contamination \emph{measured on our own
 tracks} (robust ground-truth-pose triangulation with the standard $4$px cutoff, applied
-uniformly to every dataset); see Table~\ref{tab:datasets}.
+uniformly to every dataset); see Table~\ref{tab:datasets}. The suites, splits, and
+labels are released as \textbf{RUC-SfM}, a standing benchmark defined at the scene +
+contamination + protocol level, not the input-format level: any paradigm may consume
+tracks, images, view graphs, or pointmaps and submit per-scene poses with a declared
+registered set, five times from independent training runs; the evaluator reports both
+metric families, seed bands, and the catastrophic-cell census (supplementary), with
+the paper's nine-method five-seed grid as the initial, machine-verified leaderboard.
 \begin{table}[t]\centering\footnotesize
 \caption{\textbf{Datasets}: outlier rates (RESfM-reported vs.\ measured on our tracks) and regime.}
 \label{tab:datasets}
