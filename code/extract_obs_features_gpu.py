@@ -18,18 +18,24 @@ import numpy as np
 
 CODE = os.path.dirname(os.path.abspath(__file__))
 DENSE = os.path.join(CODE, "..", "tools", "dense")
-# croco's `models` package must be importable (dust3r's dpt_head does
-# `from models.dpt_block import ...`); keep CODE last so our own `models/`
-# package does not shadow it.
+# croco's `models` is a namespace package (no __init__.py); our own code/models
+# has one, so putting CODE on sys.path at all makes it win the `models` name
+# regardless of order and breaks dust3r's `from models.dpt_block import ...`.
+# Keep CODE off sys.path and load the one helper we need by file path.
 sys.path.insert(0, os.path.join(DENSE, "mast3r"))
 sys.path.insert(0, os.path.join(DENSE, "mast3r", "dust3r"))
 sys.path.insert(0, os.path.join(DENSE, "mast3r", "dust3r", "croco"))
-sys.path.append(CODE)
 
 import torch
 import cv2
 from mast3r.model import AsymmetricMASt3R
-from extract_obs_features import resolve_images
+
+import importlib.util as _ilu
+_spec = _ilu.spec_from_file_location(
+    "_obsfeat", os.path.join(CODE, "extract_obs_features.py"))
+_obsfeat = _ilu.module_from_spec(_spec)
+_spec.loader.exec_module(_obsfeat)
+resolve_images = _obsfeat.resolve_images
 
 CKPT = os.path.join(DENSE, "MASt3R_ViTLarge_BaseDecoder_512_catmlpdpt_metric.pth")
 IMAGENET_MEAN = np.array([0.5, 0.5, 0.5], np.float32)   # dust3r ImgNorm
