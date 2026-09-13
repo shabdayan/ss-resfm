@@ -19,9 +19,12 @@ import numpy as np
 CODE = os.path.dirname(os.path.abspath(__file__))
 DENSE = os.path.join(CODE, "..", "tools", "dense")
 # croco's `models` is a namespace package (no __init__.py); our own code/models
-# has one, so putting CODE on sys.path at all makes it win the `models` name
-# regardless of order and breaks dust3r's `from models.dpt_block import ...`.
-# Keep CODE off sys.path and load the one helper we need by file path.
+# has one, so any sys.path entry pointing at CODE -- including the script dir
+# and cwd that Python inserts automatically -- wins the `models` name and breaks
+# dust3r's `from models.dpt_block import ...`. Purge them, then load the one
+# helper we need by file path.
+sys.path[:] = [p for p in sys.path
+               if p not in ("", ".", CODE) and os.path.abspath(p or ".") != CODE]
 sys.path.insert(0, os.path.join(DENSE, "mast3r"))
 sys.path.insert(0, os.path.join(DENSE, "mast3r", "dust3r"))
 sys.path.insert(0, os.path.join(DENSE, "mast3r", "dust3r", "croco"))
