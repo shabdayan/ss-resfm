@@ -86,9 +86,17 @@ def create_scene_data(conf, phase=None, stage=1):
             _ds = conf.get_string('dataset.dataset', default="megadepth")
             _fp = _os.path.join(_os.path.dirname(_pu.path_to_datasets(_ds)),
                                 f"{_ds}_feats_{feats_source}", f"{scan}.npz")
-            _f = _np.load(_fp)
-            obs_features = (_f["obs_cam"], _f["obs_pt"], _f["F"].astype(_np.float32))
-            print(f"Loaded obs features: {_fp} D={obs_features[2].shape[1]}")
+            if _os.path.exists(_fp):
+                _f = _np.load(_fp)
+                obs_features = (_f["obs_cam"], _f["obs_pt"], _f["F"].astype(_np.float32))
+                print(f"Loaded obs features: {_fp} D={obs_features[2].shape[1]}")
+            else:
+                # Scenes without a sidecar (e.g. no public images) train with
+                # zero feature channels; M2sparse zero-fills uncovered entries.
+                _d = conf.get_int('model.obs_feat_dim', 0)
+                obs_features = (_np.zeros(0, _np.int32), _np.zeros(0, _np.int32),
+                                _np.zeros((0, _d), _np.float32))
+                print(f"No obs features for {scan} ({_fp}); using zeros D={_d}")
         return SceneData(M, Ns, Ps_gt, scan, dilute_M, outliers=outliers, dict_info=dict_info, nameslist=namesList, M_original=M_original, reprojection_errs=reprojection_errs, obs_features=obs_features )
     else:
         raise ValueError("The code doesn't support the uncalibrated case")

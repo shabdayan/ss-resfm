@@ -170,6 +170,12 @@ def M2sparse(M, normalize=False, Ns=None, M_original=None, features=None):
         obs_pt = torch.as_tensor(np.asarray(obs_pt), dtype=torch.long)
         F = torch.as_tensor(np.asarray(F), dtype=mat_vals.dtype)
         d_extra = F.shape[1]
+        if len(obs_cam) == 0:      # scene without a sidecar: all-zero channels
+            mat_vals = torch.cat(
+                [mat_vals, torch.zeros(mat_vals.shape[0], d_extra, dtype=mat_vals.dtype)],
+                dim=1)
+            return sparse_utils.SparseMat(mat_vals, mat_indices, cam_per_pts,
+                                          pts_per_cam, (n_cams, n_pts, 2 + d_extra))
         key = obs_cam * n_pts + obs_pt
         order = torch.argsort(key)
         key_sorted = key[order]
