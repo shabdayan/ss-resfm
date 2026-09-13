@@ -18,9 +18,13 @@ import numpy as np
 
 CODE = os.path.dirname(os.path.abspath(__file__))
 DENSE = os.path.join(CODE, "..", "tools", "dense")
+# croco's `models` package must be importable (dust3r's dpt_head does
+# `from models.dpt_block import ...`); keep CODE last so our own `models/`
+# package does not shadow it.
 sys.path.insert(0, os.path.join(DENSE, "mast3r"))
 sys.path.insert(0, os.path.join(DENSE, "mast3r", "dust3r"))
-sys.path.insert(0, CODE)
+sys.path.insert(0, os.path.join(DENSE, "mast3r", "dust3r", "croco"))
+sys.path.append(CODE)
 
 import torch
 import cv2
