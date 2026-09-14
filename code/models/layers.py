@@ -105,11 +105,14 @@ class IdentityLayer(Module):
 
 
 class EmbeddingLayer(Module):
-    def __init__(self, multires, in_dim, split_feat_dim=0):
-        """split_feat_dim > 0: positionally encode only the leading
-        (in_dim - split_feat_dim) coordinate channels and pass the trailing
-        feature channels through a learned linear projection instead (the
-        integration ablation); 0 keeps the original all-channel encoding."""
+    def __init__(self, multires, in_dim, split_feat_dim=0, feat_proj_dim=0):
+        """split_feat_dim > 0: treat the trailing split_feat_dim channels as
+        per-observation features -- positionally encode only the leading
+        coordinate channels and pass the features through a learned linear
+        projection to feat_proj_dim (default: same width as the encoded
+        coordinates) before concatenating. This keeps the coordinate signal
+        from being numerically swamped by many raw feature channels. 0 keeps
+        the original behaviour (all channels through one path)."""
         super(EmbeddingLayer, self).__init__()
         self.split_feat_dim = split_feat_dim
         coord_dim = in_dim - split_feat_dim
@@ -118,8 +121,9 @@ class EmbeddingLayer(Module):
         else:
             self.embed, d_coord = (Identity(), coord_dim)
         if split_feat_dim > 0:
-            self.feat_proj = torch.nn.Linear(split_feat_dim, d_coord)
-            self.d_out = d_coord * 2
+            d_feat = feat_proj_dim if feat_proj_dim > 0 else d_coord
+            self.feat_proj = torch.nn.Linear(split_feat_dim, d_feat)
+            self.d_out = d_coord + d_feat
         else:
             self.d_out = d_coord
 
