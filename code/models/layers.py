@@ -105,15 +105,31 @@ class IdentityLayer(Module):
 
 
 class EmbeddingLayer(Module):
-    def __init__(self, multires, in_dim):
+    def __init__(self, multires, in_dim, split_feat_dim=0):
+        """split_feat_dim > 0: positionally encode only the leading
+        (in_dim - split_feat_dim) coordinate channels and pass the trailing
+        feature channels through a learned linear projection instead (the
+        integration ablation); 0 keeps the original all-channel encoding."""
         super(EmbeddingLayer, self).__init__()
+        self.split_feat_dim = split_feat_dim
+        coord_dim = in_dim - split_feat_dim
         if multires > 0:
-            self.embed, self.d_out = get_embedder(multires, in_dim)
+            self.embed, d_coord = get_embedder(multires, coord_dim)
         else:
-            self.embed, self.d_out = (Identity(), in_dim)
+            self.embed, d_coord = (Identity(), coord_dim)
+        if split_feat_dim > 0:
+            self.feat_proj = torch.nn.Linear(split_feat_dim, d_coord)
+            self.d_out = d_coord * 2
+        else:
+            self.d_out = d_coord
 
     def forward(self, x):
-        embeded_features = self.embed(x.values)
+        if self.split_feat_dim > 0:
+            k = x.values.shape[1] - self.split_feat_dim
+            embeded_features = torch.cat(
+                [self.embed(x.values[:, :k]), self.feat_proj(x.values[:, k:])], dim=1)
+        else:
+            embeded_features = self.embed(x.values)
         new_shape = (x.shape[0], x.shape[1], embeded_features.shape[1])
         return SparseMat(embeded_features, x.indices, x.cam_per_pts, x.pts_per_cam, new_shape)
 

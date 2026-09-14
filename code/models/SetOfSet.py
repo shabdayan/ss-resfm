@@ -138,7 +138,8 @@ class DeepSetOfSetOutliersNet(BaseNet):
         d_in = 2 + conf.get_int('model.obs_feat_dim', 0)  # 2D obs (+ optional per-obs feature channels)
         
         # Input embedding layer with optional positional encoding
-        self.embed = EmbeddingLayer(multires, d_in)
+        self.embed = EmbeddingLayer(multires, d_in,
+                                    split_feat_dim=conf.get_int('model.obs_feat_split', 0))
         
         # Create equivariant blocks for permutation-invariant processing
         self.equivariant_blocks = torch.nn.ModuleList()
@@ -320,7 +321,8 @@ class SetOfSetOutliersNet(BaseNet):
         m_d_out = self.out_channels
         d_in = 2 + conf.get_int('model.obs_feat_dim', 0)
 
-        self.embed = EmbeddingLayer(multires, d_in)
+        self.embed = EmbeddingLayer(multires, d_in,
+                                    split_feat_dim=conf.get_int('model.obs_feat_split', 0))
 
         self.equivariant_blocks = torch.nn.ModuleList([SetOfSetBlock(self.embed.d_out, num_feats, conf)])
         for i in range(num_blocks - 1):
@@ -396,7 +398,8 @@ class SetOfSetNet(BaseNet):
         m_d_out = self.out_channels
         d_in = 2 + conf.get_int('model.obs_feat_dim', 0)
 
-        self.embed = EmbeddingLayer(multires, d_in)
+        self.embed = EmbeddingLayer(multires, d_in,
+                                    split_feat_dim=conf.get_int('model.obs_feat_split', 0))
 
         self.equivariant_blocks = torch.nn.ModuleList([SetOfSetBlock(self.embed.d_out, num_feats, conf)])
         for i in range(num_blocks - 1):
@@ -450,7 +453,8 @@ class DeepSetOfSetNet(BaseNet):
         d_in = 2 + conf.get_int('model.obs_feat_dim', 0)
         
         # Input embedding
-        self.embed = EmbeddingLayer(multires, d_in)
+        self.embed = EmbeddingLayer(multires, d_in,
+                                    split_feat_dim=conf.get_int('model.obs_feat_split', 0))
         
         # Create equivariant blocks
         self.equivariant_blocks = torch.nn.ModuleList()
