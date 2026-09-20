@@ -50,9 +50,11 @@ class KeypointRegistry:
 
 
 def load_model(device="cuda", indoor=False):
+    # use_custom_corr=False: the packaged `local_corr` CUDA extension is not
+    # built in this env; the pure-PyTorch correlation path is equivalent.
     from romatch import roma_indoor, roma_outdoor
-    model = (roma_indoor if indoor else roma_outdoor)(device=device)
-    model.upsample_preds = False      # keep memory bounded on large scenes
+    model = (roma_indoor if indoor else roma_outdoor)(
+        device=device, use_custom_corr=False, upsample_preds=False)
     return model
 
 
