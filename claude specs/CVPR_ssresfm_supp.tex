@@ -582,6 +582,20 @@ environment, and the out-of-distribution margins ($2\times$ and larger) sit far 
 noise floor.
 
 
+\begin{figure*}[t]\centering
+\includegraphics[width=0.88\textwidth]{fig_contamcurve.pdf}
+\caption{\textbf{The in-distribution contamination curve.} Post-BA mean translation
+(log scale) when training and test share the domain, versus measured contamination;
+supervision uses best-case labels. Each label-free arm is its own line: soft weighting
+($\pm$TTT) leads at low contamination, robust removal at high --- the mechanism flip,
+replicated in-distribution. Supervision wins at $25\%$ and narrowly at $43\%$, is
+seed-bimodal at $0.5\%$, and loses at $3.1\%$ (dead zone) and $60\%$ (label ceiling):
+two distinct failure modes, not a smooth function of contamination. The rotation panel
+makes the BlendedMVS dead zone starker ($20.7\pm12.2\deg$ vs.\ $4$--$13\deg$).
+Bands: $\pm$std over five seeds.}
+\label{fig:contamcurve}
+\end{figure*}
+
 \section{The same results through count- and coverage-based lenses}\label{app:lenses}
 Our main tables follow the field's convention (RESfM, ESFM, GASFM): translation/rotation
 means over each method's registered cameras, with $N_r$ reported alongside. That
