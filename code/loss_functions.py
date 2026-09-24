@@ -632,3 +632,48 @@ class CombinedLossSupervised(nn.Module):
 
         return loss
 
+
+
+class CombinedLossDualSupervision(nn.Module):
+    """
+    Dual-supervision combined loss: the RESfM supervised recipe and the
+    SS-RESfM self-supervised recipe carrying their classification targets
+    TOGETHER rather than as alternatives.
+
+        loss = alpha * outlier-weighted reprojection
+             + beta  * BCE(pred_outliers, GT labels)            [supervised]
+             + gamma * adaptive confident-pseudo-label loss      [self-supervised]
+
+    beta and gamma split the SAME classification budget the single-target
+    recipes use (loss.classification_loss_weight), so a run differs from the
+    supervised baseline only in WHICH targets the classification term follows,
+    not in how much classification is applied. The split is set by
+    loss.gt_label_fraction in [0, 1]:
+        beta  = classification_loss_weight * gt_label_fraction
+        gamma = classification_loss_weight * (1 - gt_label_fraction)
+    """
+    def __init__(self, conf):
+        super().__init__()
+        self.outliers_loss = OutliersLoss(conf)
+        self.adaptive_loss = AdaptiveConfidenceWeightedOutliersLoss(conf)
+        self.weighted_ESFM_loss = ESFMLoss_weighted(conf)
+        self.alpha = conf.get_float('loss.reproj_loss_weight')
+        cls_weight = conf.get_float('loss.classification_loss_weight')
+        gt_fraction = conf.get_float('loss.gt_label_fraction', default=0.5)
+        self.beta = cls_weight * gt_fraction
+        self.gamma = cls_weight * (1.0 - gt_fraction)
+
+    def forward(self, pred_cam, pred_outliers, data, epoch=None):
+        device = pred_outliers.device
+        reproj_loss = torch.tensor([0.0], device=device)
+        gt_loss = torch.tensor([0.0], device=device)
+        ss_loss = torch.tensor([0.0], device=device)
+
+        if self.alpha:
+            reproj_loss = self.weighted_ESFM_loss(pred_cam, pred_outliers, data)
+        if self.beta:
+            gt_loss = self.outliers_loss(pred_outliers, data)
+        if self.gamma:
+            ss_loss = self.adaptive_loss(pred_cam, pred_outliers, data, epoch)
+
+        return self.alpha * reproj_loss + self.beta * gt_loss + self.gamma * ss_loss
