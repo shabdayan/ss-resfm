@@ -79,7 +79,10 @@ def OutliersMetrics(pred_outliers, data):
     img_ids, pt_ids = data.x.indices.T[:, 0], data.x.indices.T[:, 1]
     gt_outliers = data.outlier_indices[img_ids, pt_ids]
 
-    # Compute classification metrics
+    # Compute classification metrics. With model.predict_obs_scale the head emits
+    # [nnz, 2] = (outlier score, log-scale); only channel 0 is a classification.
+    if pred_outliers.dim() > 1 and pred_outliers.shape[-1] > 1:
+        pred_outliers = pred_outliers[:, :1]
     metrics = classificationMetrics(pred_outliers.squeeze(), gt_outliers.float())
 
     return metrics

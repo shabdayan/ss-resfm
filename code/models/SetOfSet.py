@@ -213,6 +213,15 @@ class DeepSetOfSetOutliersNet(BaseNet):
         # keeps its sigmoid outlier-score meaning so every existing mechanism and
         # checkpoint path is unchanged when the flag is off.
         self.predict_obs_scale = conf.get_bool('model.predict_obs_scale', default=False)
+        # irls_steps > 0 adds unrolled robust re-estimation passes (design 5); the
+        # extra pass consumes one additional input channel (the IRLS weight), so it
+        # needs its own embedding layer. 0 = original single-pass behaviour.
+        self.irls_steps = conf.get_int('model.irls_steps', default=0)
+        if self.irls_steps > 0:
+            # the refinement pass carries one extra channel (the IRLS weight) but
+            # must hand the blocks the SAME width the first pass does, so it uses a
+            # learned projection to self.embed.d_out rather than a second encoder.
+            self.embed_irls = torch.nn.Linear(d_in + 1, self.embed.d_out)
         
         # Set training mode based on phase
         if phase is Phases.FINE_TUNE:
@@ -314,6 +323,41 @@ class DeepSetOfSetOutliersNet(BaseNet):
             
             # Extract final camera parameters from network outputs
             pred_cam = self.extract_model_outputs(m_out, n_out, data)
+
+            # model.irls_steps: unrolled robust re-estimation (design 5). RESfM's
+            # own appendix credits much of its accuracy to the robust BA that runs
+            # AFTER the network; this folds that idea inside. Each step recomputes
+            # per-observation reprojection residuals from the current prediction,
+            # turns them into IRLS weights (Cauchy: w = 1/(1+(r/c)^2), c = the
+            # residual median -- scale-free and label-free), appends them as an
+            # extra input channel and re-runs the blocks + heads. Weights are
+            # detached so a step refines the estimate rather than back-propagating
+            # through its own residuals.
+            for _ in range(getattr(self, 'irls_steps', 0)):
+                with torch.no_grad():
+                    Ps = pred_cam["Ps_norm"]
+                    p2d = Ps @ pred_cam["pts3D"]
+                    z = p2d[:, 2, :].clamp(min=1e-6)
+                    proj = p2d[:, 0:2, :] / z.unsqueeze(1)
+                    res = (proj - data.norm_M.reshape(Ps.shape[0], 2, -1)).norm(dim=1)
+                    r = res[data.x.indices[0], data.x.indices[1]]
+                    c = torch.clamp(r.median(), min=1e-6)
+                    w = 1.0 / (1.0 + (r / c) ** 2)
+                x2 = SparseMat(torch.cat([data.x.values, w.unsqueeze(1)], dim=1),
+                               data.x.indices, data.x.cam_per_pts, data.x.pts_per_cam,
+                               (data.x.shape[0], data.x.shape[1], data.x.shape[2] + 1))
+                x2 = SparseMat(self.embed_irls(x2.values), x2.indices,
+                               x2.cam_per_pts, x2.pts_per_cam,
+                               (x2.shape[0], x2.shape[1], self.embed.d_out))
+                for i in range(active_blocks):
+                    x2 = self.equivariant_blocks[i](x2)
+                m_out = self.m_net(x2.mean(dim=1))
+                n_out = self.n_net(x2.mean(dim=0)).T
+                pred_cam = self.extract_model_outputs(m_out, n_out, data)
+                if self.mode != 1:
+                    o = self.outlier_net(x2.values)
+                    outliers_out = torch.cat([torch.sigmoid(o[:, :1]), o[:, 1:]], dim=1) \
+                        if getattr(self, 'predict_obs_scale', False) else torch.sigmoid(o)
         else:
             pred_cam = None
         

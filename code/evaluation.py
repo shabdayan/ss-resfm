@@ -152,6 +152,10 @@ def prepare_outliers_predictions(data, pred_outliers, conf):
     # selector study derives from M (vis + counts), at ~1/1000 the size.
     outputs['valid_mask'] = valid_mask.cpu().numpy()
     predicted_outlier_mask = torch.zeros_like(valid_mask, dtype=data.M.dtype)
+    # model.predict_obs_scale heads emit [nnz, 2] = (score, log-scale); the
+    # downstream mechanisms consume the score channel only.
+    if pred_outliers.dim() > 1 and pred_outliers.shape[-1] > 1:
+        pred_outliers = pred_outliers[:, :1]
     predicted_outlier_mask[valid_mask] = pred_outliers.squeeze()
 
     outputs['outliers_pred__'] = pred_outliers.cpu().numpy()  # raw prediction vector

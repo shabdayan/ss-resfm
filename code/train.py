@@ -260,7 +260,8 @@ def epoch_train(conf, train_data, model, loss_func, optimizer, scheduler, epoch,
 
             if pred_outliers is not None and pred_cam is None:
                 pred_weights_M = torch.zeros(curr_data.x.shape[0], curr_data.x.shape[1], device=curr_data.x.device)
-                pred_weights_M[curr_data.x.indices[0, :], curr_data.x.indices[1, :]] = pred_outliers.squeeze(dim=-1)
+                _po = pred_outliers[:, :1] if (pred_outliers.dim() > 1 and pred_outliers.shape[-1] > 1) else pred_outliers
+                pred_weights_M[curr_data.x.indices[0, :], curr_data.x.indices[1, :]] = _po.squeeze(dim=-1)
                 loss = loss_func(pred_outliers, pred_weights_M, curr_data, epoch)
 
 
