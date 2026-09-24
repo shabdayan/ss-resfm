@@ -206,8 +206,13 @@ class DeepSetOfSetOutliersNet(BaseNet):
             Linear(num_feats, num_feats // 2),
             ReLU(),
             self.dropout,
-            Linear(num_feats // 2, 1)
+            Linear(num_feats // 2, 1 + int(conf.get_bool('model.predict_obs_scale', default=False)))
         )
+        # predict_obs_scale: the head emits a second channel = log-scale of a
+        # heavy-tailed residual model (used by CombinedLossRobustScale). Channel 0
+        # keeps its sigmoid outlier-score meaning so every existing mechanism and
+        # checkpoint path is unchanged when the flag is off.
+        self.predict_obs_scale = conf.get_bool('model.predict_obs_scale', default=False)
         
         # Set training mode based on phase
         if phase is Phases.FINE_TUNE:
@@ -286,8 +291,14 @@ class DeepSetOfSetOutliersNet(BaseNet):
         if self.mode != 1:
             # Apply outlier network to all feature vectors
             outliers_out = self.outlier_net(x.values)
-            # Apply sigmoid for probability output
-            outliers_out = torch.sigmoid(outliers_out)
+            if getattr(self, 'predict_obs_scale', False):
+                # channel 0: outlier score (sigmoid, unchanged); channel 1: raw
+                # log-scale, consumed by the robust NLL and ignored elsewhere.
+                outliers_out = torch.cat(
+                    [torch.sigmoid(outliers_out[:, :1]), outliers_out[:, 1:]], dim=1)
+            else:
+                # Apply sigmoid for probability output
+                outliers_out = torch.sigmoid(outliers_out)
         else:
             outliers_out = None
         

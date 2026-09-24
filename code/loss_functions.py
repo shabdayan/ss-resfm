@@ -677,3 +677,76 @@ class CombinedLossDualSupervision(nn.Module):
             ss_loss = self.adaptive_loss(pred_cam, pred_outliers, data, epoch)
 
         return self.alpha * reproj_loss + self.beta * gt_loss + self.gamma * ss_loss
+
+
+class RobustScaleReprojLoss(nn.Module):
+    """
+    Learned heavy-tailed reprojection loss (design idea 1).
+
+    The head emits a per-observation log-scale s (model.predict_obs_scale);
+    residuals are scored under a Cauchy negative log-likelihood
+
+        NLL = log(s) + log(1 + (r/s)^2)
+
+    so the network *learns* how much each observation should be trusted instead
+    of having a removal/reweighting mechanism chosen per dataset: large learned
+    s downweights an observation smoothly (the soft-weighting limit) and very
+    large s makes its gradient vanish (the removal limit). log(s) is the
+    penalty that stops the trivial "everything is uncertain" solution.
+    Geometry (Ps, pts3D, hinge handling) is computed exactly as in
+    ESFMLoss_weighted so the two are directly comparable.
+    """
+    def __init__(self, conf):
+        super().__init__()
+        self.infinity_pts_margin = conf.get_float("loss.infinity_pts_margin")
+        self.normalize_grad = conf.get_bool("loss.normalize_grad")
+        self.hinge_loss = conf.get_bool("loss.hinge_loss")
+        self.hinge_loss_weight = conf.get_float("loss.hinge_loss_weight") if self.hinge_loss else 0
+        # scale is parameterised as s = softplus(raw) + min_scale, keeping s > 0
+        self.min_scale = conf.get_float('loss.robust_min_scale', default=1e-3)
+
+    def forward(self, pred_cam, pred_outliers, data, epoch=None):
+        Ps = pred_cam["Ps_norm"]
+        pts_2d = Ps @ pred_cam["pts3D"]
+        if self.normalize_grad:
+            pts_2d.register_hook(lambda grad: F.normalize(grad, dim=1) / data.valid_pts.sum())
+        if self.hinge_loss:
+            projected_points = geo_utils.get_positive_projected_pts_mask(pts_2d, self.infinity_pts_margin)
+        else:
+            projected_points = geo_utils.get_projected_pts_mask(pts_2d, self.infinity_pts_margin)
+        hinge_loss = (self.infinity_pts_margin - pts_2d[:, 2, :]) * self.hinge_loss_weight
+        pts_2d = (pts_2d / torch.where(projected_points, pts_2d[:, 2, :],
+                                       torch.ones_like(projected_points).float()).unsqueeze(dim=1))
+        reproj_err = (pts_2d[:, 0:2, :] - data.norm_M.reshape(Ps.shape[0], 2, -1)).norm(dim=1)
+        projected_points = projected_points[data.valid_pts]
+        reproj_err = reproj_err[data.valid_pts]
+        hinge_loss = hinge_loss[data.valid_pts]
+
+        # pred_outliers: [nnz, 2] = (outlier score, raw log-scale)
+        raw_scale = pred_outliers[:, 1] if pred_outliers.dim() > 1 and pred_outliers.shape[1] > 1 \
+            else torch.zeros_like(reproj_err)
+        scale = F.softplus(raw_scale) + self.min_scale
+        nll = torch.log(scale) + torch.log1p((reproj_err / scale) ** 2)
+        robust = torch.where(projected_points, nll, hinge_loss)
+        return robust.mean()
+
+
+class CombinedLossRobustScale(nn.Module):
+    """
+    Self-supervised recipe with the learned robust reprojection loss in place of
+    the outlier-weighted one: alpha * RobustScaleReprojLoss + beta * adaptive
+    confident-pseudo-label loss (the pseudo-label term keeps the score channel
+    meaningful so the existing test-time mechanisms still apply).
+    """
+    def __init__(self, conf):
+        super().__init__()
+        self.robust_loss = RobustScaleReprojLoss(conf)
+        self.adaptive_loss = AdaptiveConfidenceWeightedOutliersLoss(conf)
+        self.alpha = conf.get_float('loss.reproj_loss_weight')
+        self.beta = conf.get_float('loss.classification_loss_weight')
+
+    def forward(self, pred_cam, pred_outliers, data, epoch=None):
+        reproj = self.robust_loss(pred_cam, pred_outliers, data, epoch)
+        cls = self.adaptive_loss(pred_cam, pred_outliers[:, :1], data, epoch) if self.beta \
+            else torch.tensor([0.0], device=pred_outliers.device)
+        return self.alpha * reproj + self.beta * cls

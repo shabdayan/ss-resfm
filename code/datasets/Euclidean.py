@@ -238,6 +238,31 @@ def get_raw_data(conf, scan, phase, stage=1):
     if remove_outliers_gt or remove_outliers_pred:
         outliers_mask = outliers_mask > 0  # ensure boolean mask
 
+        # test.min_tracks_per_cam: connectivity-constrained removal. Hard removal
+        # can strip a camera below the observations it needs to stay registered
+        # (measured: 29% registration at 60% contamination, and two scenes where
+        # every track was removed). When set, a camera that would drop below the
+        # floor keeps its most-confident observations: we un-remove the lowest
+        # scoring flagged entries of that camera until it holds `min_tracks_per_cam`.
+        min_tracks_per_cam = conf.get_int('test.min_tracks_per_cam', default=0)
+        if min_tracks_per_cam > 0:
+            vis_all = (M[0::2] != 0) | (M[1::2] != 0)             # [m, n]
+            kept = vis_all & (~outliers_mask)
+            scores = torch.from_numpy(outliers_mask_np).float() \
+                if 'outliers_mask_np' in dir() else None
+            for cam in torch.where(kept.sum(dim=1) < min_tracks_per_cam)[0]:
+                need = int(min_tracks_per_cam - kept[cam].sum())
+                cand = torch.where(vis_all[cam] & outliers_mask[cam])[0]
+                if len(cand) == 0:
+                    continue
+                if scores is not None and scores.shape == outliers_mask.shape:
+                    order = torch.argsort(scores[cam][cand])          # least outlier-like first
+                    cand = cand[order]
+                outliers_mask[cam, cand[:need]] = False               # keep them
+            print(f"[connectivity] floor {min_tracks_per_cam}: "
+                  f"{int((vis_all & ~outliers_mask).sum())} observations kept "
+                  f"(was {int(kept.sum())})", flush=True)
+
         # Convert shape [2m, n] → [n, m, 2] → [m, n, 2]
         M = M.transpose(0, 1).reshape(-1, M.shape[0] // 2, 2).transpose(0, 1)
         M[outliers_mask] = 0
