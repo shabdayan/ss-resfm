@@ -564,6 +564,23 @@ $2$--$3\%$, the two tie in distribution, and removal dominates from $43\%$ upwar
 $12.4\pm2.1$ vs.\ $\sim\!23$ at $60\%$). This mechanism-level flip, the answer to our central
 question, is stable across schedules and seeds.
 
+\paragraph{Two mechanisms, two regimes.} The label-free arms' advantage is not one
+effect but two, and they separate along the same axis. On clean data the winning arms
+are the \emph{continuous} ones: soft reweighting keeps every observation and scales its
+influence, which is what a near-outlier-free scene needs --- there is little to remove,
+and a hard classifier that misfires deletes usable geometry. At high contamination the
+winning arm is \emph{hard} removal, and its advantage cannot be a continuity effect: at
+$60\%$ the label-free removal arm beats a supervised classifier trained in-domain on
+best-case GT labels by $2\times$ (\S\ref{sec:indist}), a hard-vs-hard comparison in
+which only the label \emph{source} differs. What changes there is label quality --- the
+self-supervised thresholds are recomputed per scene from the model's own residual
+distribution and need no prior reconstruction, while COLMAP-derived supervision has
+already passed its ceiling (recall $0.82\!\to\!\sim\!0.3$, \S\ref{sec:whyremoval}).
+Continuity buys the clean-data advantage; adaptive, reconstruction-free label quality
+buys the high-contamination advantage. That they are distinct mechanisms operating in
+different regimes is the complementarity finding restated at the level of
+\emph{why}, and it predicts the flip rather than merely recording it.
+
 \noindent\emph{Baseline learning-rate robustness, the full mechanism matrix, the
 MAD/STD/Huber ablation, per-scene selection, and qualitative results:
 Apps.~\ref{app:lrgrid}--\ref{app:qual}.}
@@ -1844,7 +1861,22 @@ authors-faithful retrains (seeds $20$--$24$, the authors' validation metric and 
 reproduce the scratch baseline's band on every dataset --- including the
 one-bad-Strecha-seed pattern and the four-of-five Olsson collapse ($8.66$--$9.02$ with a
 single $2.32$ escape, mirroring the scratch $2.69$) --- so these failure modes belong to
-the supervised recipe, not to our retraining of it. The same signature
+the supervised recipe, not to our retraining of it.
+
+\paragraph{The two checkpoint-selection rules are statistically indistinguishable.}
+Because both rules were run on the same five seeds, they admit a paired comparison.
+On MegaDepth the authors' Accuracy-based selection gives
+$[0.496, 0.260, 0.300, 0.310, 0.223]$ (mean $0.318\pm0.106$) and our label-free
+reprojection-based selection gives $[0.344, 0.189, 0.423, 0.529, 0.340]$
+($0.365\pm0.125$). The per-seed differences are
+$[-0.152, -0.071, +0.123, +0.219, +0.117]$: our rule is better on two of five seeds and
+worse on three, and the paired mean difference of $+0.047\pm0.153$ gives
+$t(4)=0.69$, far short of the $2.78$ required at $p<0.05$. The selection rule is
+therefore not a confound in either direction --- the seed lottery is three times larger
+than the effect --- and the single-run pair quoted in the reference rows
+($0.496$ vs.\ $0.37$) is seed $20$, the most extreme of the five and the one most
+favourable to our rule; on the other four seeds the authors' rule wins three times.
+This is the reason we state only that our deviation does not advantage us. The same signature
 appears in-distribution at smaller amplitude --- individual MegaDepth scenes swing
 $3$--$4\times$ across seeds (0060: $1.0$--$3.3$; 0231: $0.5$--$2.2$) while opposite-signed
 swings cancel in the dataset mean, and the baseline's median per-scene std is about twice

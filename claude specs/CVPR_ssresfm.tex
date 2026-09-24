@@ -426,6 +426,17 @@ weighting best at $2$--$3\%$, a tie in distribution, removal dominant from $43\%
 ($12.4\pm2.1$ vs.\ $\sim\!23$ at $60\%$). This mechanism-level flip --- our central
 question's answer --- is stable across schedules and seeds.
 
+\paragraph{Two mechanisms, two regimes.} The advantage is not one effect but two. On
+clean data the winners are the \emph{continuous} arms: little is there to remove, and a
+misfiring hard classifier deletes usable geometry. At high contamination the winner is
+\emph{hard} removal, which cannot be a continuity effect --- at $60\%$ label-free removal
+beats a supervised classifier trained in-domain on best-case labels by $2\times$
+(\S\ref{sec:indist}), a hard-vs-hard comparison where only the label \emph{source}
+differs and COLMAP supervision has passed its ceiling. Continuity buys the clean-data
+advantage; adaptive, reconstruction-free label quality buys the high-contamination one:
+distinct mechanisms in different regimes, which is the complementarity finding restated
+as \emph{why} rather than \emph{that}.
+
 \noindent\emph{Learning-rate robustness, the full mechanism matrix, the MAD/STD/Huber
 ablation, per-scene selection, and qualitative results: supplementary.}
 
@@ -584,14 +595,13 @@ shadowing the whole axis.
 (Table~\ref{tab:main}) requires knowing the contamination level. This studies the
 phenomenon, not a turnkey method; an unsupervised selector is future work, as is
 anchoring with \emph{label-free pose averaging} (cf.~\citealt{vgpa}).
-(2)~Supervised RESfM retains in-distribution MegaDepth (self-supervised arms come within
-$\sim\!38\%$) and the clean Strecha mean, and RESfM-released is stronger on MegaDepth:
-we claim no SOTA. (3)~\mad{} matches rather than beats supervision at moderate/extreme
+(2)~Supervised RESfM retains in-distribution MegaDepth (arms within $\sim\!38\%$) and the
+clean Strecha mean, and RESfM-released is stronger there: we claim no SOTA. (3)~\mad{} matches rather than beats supervision at moderate/extreme
 contamination; plain remove leads every baseline seed at $\sim\!60\%$ but over a reduced
 registered set (\S\ref{sec:protocol}), and the \emph{magnitude} of the supervised deficit
 is learning-rate-dependent (supplementary) --- the Olsson collapse and the mechanism flip
-are not. (4)~OOD tracks are self-constructed (not comparable to RESfM's published OOD numbers);
-(5)~two symmetric-structure scenes fail for all methods~\citep{resfm}.
+are not. (4)~OOD tracks are self-constructed; (5)~two symmetric-structure scenes fail for all
+methods~\citep{resfm}.
 
 \section{Conclusion}
 SS-RESfM makes deep SfM outlier handling \emph{entirely self-supervised}: within
