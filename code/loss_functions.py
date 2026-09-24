@@ -493,6 +493,10 @@ class AdaptiveConfidenceWeightedOutliersLoss(nn.Module):
         
         # Safety parameters.
         self.min_confident_samples = conf.get_int('loss.min_confident_samples', default=10)
+        # soft_pseudo_labels: continuous targets across the confident band instead
+        # of hard 0/1 on the band only (Ronen's continuous-vs-hard hypothesis).
+        self.soft_pseudo_labels = conf.get_bool('loss.soft_pseudo_labels', default=False)
+        self.soft_label_temp = conf.get_float('loss.soft_label_temp', default=1.0)
         # Minimum gap between the inlier/outlier thresholds, to keep pseudo-labels
         # confident when the error distribution is peaked. This MUST be scale-aware:
         # reprojection errors here live in NORMALIZED image coordinates (~0.01-0.2),
@@ -577,12 +581,23 @@ class AdaptiveConfidenceWeightedOutliersLoss(nn.Module):
         pseudo_labels = torch.zeros_like(errors_flat)
         pseudo_labels[confident_outliers] = 1.0  # Outlier label
         pseudo_labels[confident_inliers] = 0.0   # Inlier label
-        
-        # Compute loss (only on confident samples)
-        loss = F.binary_cross_entropy(
-            pred_outliers.squeeze()[confident_mask],
-            pseudo_labels[confident_mask]
-        )
+
+        if self.soft_pseudo_labels:
+            # loss.soft_pseudo_labels: keep the residual's CONTINUOUS information in
+            # the target instead of binarising it. The target ramps smoothly across
+            # the band, t = sigmoid((r - mid) / (temp * halfwidth)), so an
+            # observation just past the outlier threshold is a weak positive rather
+            # than a full one, and every observation gets a target (no dead zone).
+            mid = (high_threshold + low_threshold) / 2.0
+            half = torch.clamp((high_threshold - low_threshold) / 2.0, min=1e-6)
+            soft_targets = torch.sigmoid((errors_flat - mid) / (self.soft_label_temp * half))
+            loss = F.binary_cross_entropy(pred_outliers.squeeze(), soft_targets)
+        else:
+            # Compute loss (only on confident samples)
+            loss = F.binary_cross_entropy(
+                pred_outliers.squeeze()[confident_mask],
+                pseudo_labels[confident_mask]
+            )
 
         # Diagnostics for the TTT collapse-check figure (SPEC_cvpr_experiments R2.2)
         with torch.no_grad():
