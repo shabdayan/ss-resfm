@@ -6,13 +6,14 @@ import numpy as np
 
 
 class ScenesDataSet:
-    def __init__(self, data_list, return_all, min_sample_size=10, max_sample_size=30, phase=None):
+    def __init__(self, data_list, return_all, min_sample_size=10, max_sample_size=30, phase=None, outlier_injection_rate=0.0):
         super().__init__()
         self.data_list = data_list
         self.return_all = return_all
         self.min_sample_size = min_sample_size
         self.max_sample_size = max_sample_size
         self.phase = phase
+        self.outlier_injection_rate = outlier_injection_rate  # training-time OOD-robustness aug
 
     def __getitem__(self, item):
         current_data = self.data_list[item]
@@ -37,7 +38,7 @@ class ScenesDataSet:
 
             counter = 0
             while 1:
-                data = SceneData.sample_data(current_data, sample_fraction)
+                data = SceneData.sample_data(current_data, sample_fraction, outlier_injection_rate=self.outlier_injection_rate)
                 if dataset_utils.is_valid_sample(data, min_pts_per_cam=3, phase=self.phase) or counter > 0:
                     return data
                 counter += 1

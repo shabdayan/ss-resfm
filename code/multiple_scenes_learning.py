@@ -80,7 +80,8 @@ def main():
         validation_scenes = SceneData.create_scene_data_from_list(conf.get_list('dataset.validation_set'), conf)
         train_scenes = SceneData.create_scene_data_from_list(conf.get_list('dataset.train_set'), conf)
 
-        train_set = ScenesDataSet(train_scenes, return_all=False, min_sample_size=min_sample_size, max_sample_size=max_sample_size, phase=Phases.TRAINING)
+        outlier_injection_rate = conf.get_float('train.outlier_injection_rate', default=0.0)  # 0.0 => off (existing confs unaffected)
+        train_set = ScenesDataSet(train_scenes, return_all=False, min_sample_size=min_sample_size, max_sample_size=max_sample_size, phase=Phases.TRAINING, outlier_injection_rate=outlier_injection_rate)
         validation_set = ScenesDataSet(validation_scenes, return_all=True)
         test_set = ScenesDataSet(test_scenes, return_all=True)
 

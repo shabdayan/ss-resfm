@@ -152,7 +152,7 @@ def check_bundle_selfconsistency(cams, points, feats, meta, sample=8000):
     return med, frac4
 
 
-def build_scene_1dsfm(scene_dir):
+def build_scene_1dsfm(scene_dir, max_cams=None, seed=20):
     feats, meta = parse_coords(scene_dir / "coords.txt")
     tracks = parse_tracks(scene_dir / "tracks.txt")
     cams, member, points = parse_gt_bundle(scene_dir / "gt_bundle.out")
@@ -164,6 +164,15 @@ def build_scene_1dsfm(scene_dir):
     # coords.txt (some list.txt images have no extracted features and thus
     # no principal point; they can never contribute observations).
     cam_ids = sorted(c for c in cams if c in meta and feats.get(c))
+    # Optional RESfM-style camera subsampling for very large scenes: randomly
+    # keep `max_cams` cameras (seeded) BEFORE building M, so the giant scenes
+    # (e.g. Trafalgar 5058 cams) never materialize a multi-GB track matrix.
+    if max_cams is not None and len(cam_ids) > max_cams:
+        rng = np.random.default_rng(seed)
+        cam_ids = sorted(int(c) for c in
+                         rng.choice(cam_ids, size=max_cams, replace=False))
+        print(f"  subsampled cameras -> {len(cam_ids)} (seed {seed})",
+              flush=True)
     cam_row = {c: i for i, c in enumerate(cam_ids)}
     m = len(cam_ids)
 
@@ -242,12 +251,16 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--scenes", nargs="+", default=SCENES)
     ap.add_argument("--out", type=Path, default=OUT_DEFAULT)
+    ap.add_argument("--max_cams", type=int, default=None,
+                    help="cap cameras per scene (RESfM-style subsample)")
+    ap.add_argument("--seed", type=int, default=20)
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
 
     for scene in args.scenes:
         print(f"[1dsfm] {scene}", flush=True)
-        data, m, n = build_scene_1dsfm(RAW / scene)
+        data, m, n = build_scene_1dsfm(RAW / scene, max_cams=args.max_cams,
+                                       seed=args.seed)
         out = args.out / f"{scene}.npz"
         np.savez(out, **data)
         print(f"  wrote {out}: {m} cams, {n} tracks, "

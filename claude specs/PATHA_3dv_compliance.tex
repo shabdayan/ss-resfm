@@ -1,0 +1,40 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs,array,xcolor,amssymb,enumitem}
+\usepackage[colorlinks]{hyperref}
+\newcommand{\ok}{\textcolor{green!55!black}{\checkmark}}
+\newcommand{\bad}{\textcolor{red!75!black}{$\times$}}
+\title{3DV 2027 Submission --- Compliance Status vs.\ Guidelines + FAQ}
+\author{Path A paper: ``When to Remove and When to Reweight''}
+\date{August 27, 2026}
+\begin{document}
+\maketitle
+
+\section*{Compliance table}
+\renewcommand{\arraystretch}{1.35}
+\noindent\begin{tabular}{@{}c p{4.6cm} p{9.2cm}@{}}
+\toprule
+ & \textbf{Requirement} & \textbf{Status}\\
+\midrule
+\ok & $\le$8 content pages (refs extra) & Content ends p.~8, p.~9 refs-only --- but \textbf{zero slack}; any addition must be offset.\\
+\ok & Abstract $\le$4000 chars & $\sim$2060.\\
+\ok & PDF $\le$50\,MB & 260\,KB.\\
+\ok & Double-blind (no names / links / acks) & Clean scan.\\
+\ok & Citation accuracy (LLM policy) & Fixed this pass --- all 9 entries repo-verified (RESfM: Khatib, Kasten, Moran, Galun, Basri, ICLR~2025; ESFM full author list; GASFM corrected to CVPR~2024 with real title; full dataset paper titles).\\
+\ok & Code statement, no links (FAQ) & Added: ``Code, configurations, and the rebuilt OOD tracks will be made publicly available upon publication.''\\
+\ok & No prompt injection & --- \\
+\ok & Supp-material rules & Nothing violating (no post-deadline results promised in supp).\\
+\bad & \textbf{Official 3DV 2027 Author Kit template} & \textbf{The one open blocker} --- currently compiled with the public CVPR sty; the kit must come from the 3DV site / Overleaf (login-gated, so this is an author step).\\
+\bottomrule
+\end{tabular}
+
+\section*{Author checklist before Aug 28, 23:59 AoE}
+\begin{enumerate}[leftmargin=1.4em,itemsep=2pt]
+\item \textbf{OpenReview}: create/update profiles for \emph{all} authors (Weizmann email $\rightarrow$ instant activation; DBLP import; do not remove old emails/positions), declare conflicts, and nominate the author-reviewer the form requires.
+\item \textbf{Author Kit}: download from the 3DV 2027 site or open the Overleaf template, drop the body of the paper \texttt{.tex} into it (the preamble comment marks exactly what to swap), keep \texttt{[review]} mode.
+\item Create the submission $\rightarrow$ get the \textbf{paper ID} $\rightarrow$ replace \verb|\paperID{*****}| $\rightarrow$ recompile $\rightarrow$ upload.
+\item Optional by \textbf{Sep 2}: supplementary zip (anonymized code + the median tables / extra ablations that did not fit).
+\end{enumerate}
+
+\paragraph{Page-count note.} An earlier report of ``7 pages'' came from a stale build log; the true current count is \textbf{9 pages total / 8 content pages}, exactly at the limit.
+\end{document}

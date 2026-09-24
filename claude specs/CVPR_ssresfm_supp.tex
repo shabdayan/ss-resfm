@@ -1077,7 +1077,45 @@ authors-faithful retrains (seeds $20$--$24$, the authors' validation metric and 
 reproduce the scratch baseline's band on every dataset --- including the
 one-bad-Strecha-seed pattern and the four-of-five Olsson collapse ($8.66$--$9.02$ with a
 single $2.32$ escape, mirroring the scratch $2.69$) --- so these failure modes belong to
-the supervised recipe, not to our retraining of it. The same signature
+the supervised recipe,  not to our retraining of it.
+
+\paragraph{The two checkpoint-selection rules are statistically indistinguishable.}
+Both rules ran the same five seeds, so they admit a paired comparison. On MegaDepth the
+authors' Accuracy-based selection gives $[0.496, 0.260, 0.300, 0.310, 0.223]$ (mean
+$0.318\pm0.106$) and our label-free reprojection-based selection $[0.344, 0.189, 0.423,
+0.529, 0.340]$ ($0.365\pm0.125$); per-seed differences $[-0.152, -0.071, +0.123,
++0.219, +0.117]$, paired mean $+0.047\pm0.153$, $t(4)=0.69$ (vs.\ $2.78$ for
+$p<0.05$). Our rule wins two of five seeds. The single-run pair in the reference rows
+($0.496$ vs.\ $0.37$) is seed $20$, the most extreme of the five and the one most
+favourable to our rule --- hence we claim only that the deviation does not advantage
+us.
+
+\begin{table}[h]\centering\footnotesize
+\caption{\textbf{Checkpoint selection, all six datasets}: from-scratch RESfM under our
+label-free reprojection rule vs.\ the authors' Accuracy rule (identical recipe, identical
+tracks, same five seeds). Paired $t(4)$ needs $|t|>2.78$ for $p<0.05$; no dataset
+approaches it, and the sign of the difference flips across datasets.}
+\label{tab:selrules}
+\setlength{\tabcolsep}{4pt}%
+\begin{tabular}{lccccc}
+\toprule
+Dataset & ours (repro.) & authors' (Acc.) & diff & $t(4)$ & ours better\\
+\midrule
+MegaDepth & 0.365$\pm$0.125 & 0.318$\pm$0.106 & +0.047 & +0.69 & 2/5\\
+Olsson & 7.374$\pm$2.628 & 7.532$\pm$2.916 & -0.158 & -0.08 & 3/5\\
+Strecha & 0.388$\pm$0.724 & 0.383$\pm$0.662 & +0.005 & +0.07 & 3/5\\
+BMVS & 0.353$\pm$0.043 & 0.348$\pm$0.032 & +0.005 & +0.24 & 2/5\\
+1DSfM & 10.498$\pm$1.447 & 11.120$\pm$1.538 & -0.622 & -0.53 & 2/5\\
+1DSfM-hard & 19.158$\pm$3.423 & 17.929$\pm$3.639 & +1.229 & +1.26 & 1/5\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two failure modes survive the change of rule intact: the Olsson collapse appears in four
+of five seeds under \emph{both} rules (with different escaping seeds --- s24 for ours,
+s22 for the authors'), and the one-bad-Strecha-seed pattern appears in both (s23:
+$1.674$ vs.\ $1.556$, the other four seeds at $0.005$--$0.222$). They are properties of
+the supervised recipe, not of how the epoch was chosen. The same signature
 appears in-distribution at smaller amplitude --- individual MegaDepth scenes swing
 $3$--$4\times$ across seeds (0060: $1.0$--$3.3$; 0231: $0.5$--$2.2$) while opposite-signed
 swings cancel in the dataset mean, and the baseline's median per-scene std is about twice

@@ -7,7 +7,7 @@
 set -u
 REPO="$(cd "$(dirname "$0")" && pwd)"; cd "$REPO"
 PY="$REPO/../.venv38-resfm/bin/python"
-QUEUE="waic-risk"   # policy 2026-09-02: ALL jobs (evals and trainings) -> waic-risk; evals still take priority over trainings
+QUEUE="waic-risk"   # policy 2026-09-06: ALL jobs -> waic-risk (user directive; supersedes the Sep-5 medium episodes)
 QNAMES=$(bjobs -w 2>/dev/null | awk '{print $7}')
 # Congestion guard: under heavy load bjobs can return nothing even though jobs
 # exist; treating that as "empty queue" caused mass duplicate resubmission
