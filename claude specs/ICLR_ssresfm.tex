@@ -1716,6 +1716,84 @@ removal or reweighting machinery only discards signal. The practical reading mat
 the main paper: mechanism choice must adapt to contamination, and ``none'' is the
 correct mechanism at the clean extreme of the axis.
 
+
+\section{Alternative designs we tested}\label{app:altdesigns}
+The complementarity finding says the best outlier mechanism depends on contamination,
+which invites an obvious question: can a better \emph{design} remove the dependence?
+We tested eleven alternatives spanning the loss, the head, the input representation and
+the supervision signal, each trained with the same recipe, tracks and schedule as the
+arms it is compared against, on the $43\%$-contamination in-distribution pool
+(\S\ref{sec:indist}), with \textbf{five training seeds each} ($44$ trainings).
+
+\begin{table}[h]\centering\footnotesize
+\caption{\textbf{Alternative designs}, post-BA translation on the held-out test scenes of
+the $43\%$ pool, mean$\pm$std over five training seeds, sorted by mean. ``Base'' is the
+recipe each variant modifies, and therefore the control it must beat: supervised
+$4.97\pm2.08$, self-supervised \mad{} $6.37\pm0.20$. The last column is the seed-$20$
+value alone --- what a single-run screen would have reported.}
+\label{tab:altdesigns}
+\setlength{\tabcolsep}{4pt}%
+\begin{tabular}{llccc}
+\toprule
+Variant & Base & mean$\pm$std & range & seed $20$ only\\
+\midrule
+GT$+$SS loss, $0.25/0.75$ & supervised & 5.59$\pm$0.51 & 5.03--6.03 & 5.04\\
+GT$+$SS loss, $0.50/0.50$ & supervised & 5.80$\pm$0.64 & 5.20--6.75 & 6.17\\
+GT$+$SS loss, $0.75/0.25$ & supervised & 5.83$\pm$0.59 & 5.15--6.75 & 5.15\\
+unrolled IRLS refinement & self-supervised & 6.58$\pm$0.47 & 5.93--7.19 & 6.43\\
+SS$+$GT loss, $0.25/0.75$ & self-supervised & 6.73$\pm$0.33 & 6.39--7.16 & 6.76\\
+soft pseudo-labels ($\tau{=}1$) & self-supervised & 6.78$\pm$0.37 & 6.23--7.20 & 6.72\\
+soft pseudo-labels ($\tau{=}2$) & self-supervised & 6.89$\pm$0.23 & 6.55--7.09 & 7.09\\
+learned robust loss (Cauchy NLL) & self-supervised & 6.98$\pm$1.70 & 5.90--9.97 & 6.13\\
+SS$+$GT loss, $0.75/0.25$ & self-supervised & 7.68$\pm$1.62 & 6.60--10.48 & 6.66\\
+track-statistic input channels & self-supervised & 7.73$\pm$1.75 & 6.46--10.77 & 7.56\\
+SS$+$GT loss, $0.50/0.50$ & self-supervised & 7.75$\pm$1.68 & 6.43--10.48 & 10.48\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{What the variants are.} \emph{GT$+$SS loss} adds the self-supervised
+confident-pseudo-label term to the supervised classification loss (and vice versa for
+\emph{SS$+$GT}), splitting the same classification budget in the stated ratio, so the
+variant differs from its base only in \emph{which} targets the classification term
+follows. \emph{Learned robust loss} replaces the score-weighted reprojection term with a
+Cauchy negative log-likelihood $\log s + \log(1+(r/s)^2)$ over a per-observation scale
+$s$ emitted by a second head channel: soft weighting and removal become two limits of
+one \emph{learned} mechanism rather than a choice made per dataset. \emph{Unrolled IRLS}
+recomputes residuals from the current prediction, converts them to Cauchy weights and
+re-runs the blocks, folding the robust re-estimation that bundle adjustment performs
+afterwards into the network. \emph{Track-statistic channels} append eight label-free
+geometric features per observation (track length, camera degree, co-visibility of the
+supporting cameras, coordinate spread). \emph{Soft pseudo-labels} replace the hard
+$0/1$ confident-band target with a continuous ramp across the band, removing the
+unlabelled dead zone.
+
+\paragraph{None improves on its base.} The three supervised-side dual-loss variants land
+\emph{inside} the supervised band ($5.59$--$5.83$ vs.\ $4.97\pm2.08$): mixing a
+self-supervised term into label supervision is neutral, neither the rescue one might
+hope for at $43\%$ contamination nor a harm. Every self-supervised-side variant is worse
+than plain \mad{} ($6.37\pm0.20$), including the two that are conceptually most
+appealing --- the learned robust loss ($6.98\pm1.70$) and unrolled IRLS
+($6.58\pm0.47$). The design space around this architecture is, in our hands, flat.
+
+\paragraph{Single-seed screens would have reported four of these wrong.} Each variant
+was first run at seed $20$ only, as a screen. Comparing that column with the bands,
+\textbf{four of eleven screens invert}: the learned robust loss scored $6.13$ at seed
+$20$ --- below \emph{every} seed of its control --- yet bands at $6.98\pm1.70$; the
+SS-side $0.50/0.50$ variant scored $10.48$, its \emph{worst} seed, and bands at
+$7.75\pm1.68$; the SS-side $0.75/0.25$ variant scored its \emph{best} seed; and the
+supervised $0.50/0.50$ variant read as a clear loss at $6.17$ but bands inside the
+control at $5.80\pm0.64$. The four variants with the widest bands ($\pm1.6$--$1.75$) are
+exactly the four whose screens misled. This is the paper's seed-reliability argument
+turned on our own experiments: in this family a single-run architecture comparison is
+not evidence, in either direction.
+
+\paragraph{Scope.} These are single-pool results ($43\%$ contamination, three held-out
+test scenes, fixed evaluation seed). A variant that fails here could still help at a
+different contamination level, and we did not extend the grid; what the table supports
+is the narrower claim that none of these designs is a drop-in improvement where we
+tested it.
+
 \section{Cross-generalization: every training domain, every test domain}\label{app:crossgen}
 We train both recipes on each of the six domains (in-distribution protocol of
 \S\ref{sec:indist}: GT-derived labels for the supervised arm) and evaluate every model
